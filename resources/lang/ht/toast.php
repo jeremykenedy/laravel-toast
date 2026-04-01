@@ -1,9 +1,9 @@
 <?php
 
 return [
-    'success' => 'Success',
-    'error'   => 'Error',
-    'warning' => 'Warning',
-    'info'    => 'Info',
-    'dismiss' => 'Dismiss',
+  'success' => 'Siksè',
+  'error' => 'Erè',
+  'warning' => 'Avètisman',
+  'info' => 'Enfòmasyon',
+  'dismiss' => 'Fèmen',
 ];

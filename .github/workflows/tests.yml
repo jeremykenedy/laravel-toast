@@ -1,10 +1,6 @@
 name: Tests
 
-on:
-  push:
-    branches: [main, master, develop]
-  pull_request:
-    branches: [main, master, develop]
+on: ['push', 'pull_request']
 
 jobs:
   tests:
@@ -15,64 +11,67 @@ jobs:
       matrix:
         php: ['8.2', '8.3', '8.4']
         laravel: ['12.*', '13.*']
+        exclude:
+          - php: '8.2'
+            laravel: '13.*'
         include:
           - laravel: '12.*'
             testbench: '10.*'
           - laravel: '13.*'
-            testbench: '10.*'
+            testbench: '11.*'
 
     name: PHP ${{ matrix.php }} / Laravel ${{ matrix.laravel }}
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: ${{ matrix.php }}
           extensions: mbstring, pdo, pdo_sqlite
+          tools: composer:v2
           coverage: none
 
       - name: Install dependencies
         run: |
           composer config allow-plugins.pestphp/pest-plugin true
-          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update
+          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update --dev
           composer update --prefer-dist --no-interaction
 
-      - name: Run Pest tests
-        run: vendor/bin/pest
+      - name: Tests
+        run: ./vendor/bin/pest --ci
 
   lint:
     runs-on: ubuntu-latest
     name: Pint
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.4'
+          tools: composer:v2
 
       - name: Install dependencies
         run: |
           composer config allow-plugins.pestphp/pest-plugin true
           composer install --prefer-dist --no-interaction
 
-      - name: Run Pint
-        run: vendor/bin/pint --test
+      - name: Pint
+        run: ./vendor/bin/pint --test
 
   js-check:
     runs-on: ubuntu-latest
     name: Frontend components
 
     steps:
-      - uses: actions/checkout@v4
-
-      - name: Setup Node
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20'
+      - name: Checkout
+        uses: actions/checkout@v4
 
       - name: Verify Vue component
         run: test -f resources/js/vue/pages/ToastContainer.vue
@@ -83,19 +82,19 @@ jobs:
       - name: Verify Svelte component
         run: test -f resources/js/svelte/pages/ToastContainer.svelte
 
-      - name: Check Vue for all props
+      - name: Check all props in Vue
         run: |
           for prop in dir show_border show_close progress_position enter_animation exit_animation pause_on_hover opacity auto_dismiss; do
             grep -q "$prop" resources/js/vue/pages/ToastContainer.vue || (echo "Vue missing: $prop" && exit 1)
           done
 
-      - name: Check React for all props
+      - name: Check all props in React
         run: |
           for prop in dir show_border show_close progress_position enter_animation exit_animation pause_on_hover opacity auto_dismiss; do
             grep -q "$prop" resources/js/react/pages/ToastContainer.jsx || (echo "React missing: $prop" && exit 1)
           done
 
-      - name: Check Svelte for all props
+      - name: Check all props in Svelte
         run: |
           for prop in dir show_border show_close progress_position enter_animation exit_animation pause_on_hover opacity auto_dismiss; do
             grep -q "$prop" resources/js/svelte/pages/ToastContainer.svelte || (echo "Svelte missing: $prop" && exit 1)

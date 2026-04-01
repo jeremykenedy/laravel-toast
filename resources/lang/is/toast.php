@@ -1,9 +1,9 @@
 <?php
 
 return [
-    'success' => 'Success',
-    'error'   => 'Error',
-    'warning' => 'Warning',
-    'info'    => 'Info',
-    'dismiss' => 'Dismiss',
+  'success' => 'Árangur',
+  'error' => 'Villa',
+  'warning' => 'Viðvörun',
+  'info' => 'Upplýsingar',
+  'dismiss' => 'Loka',
 ];

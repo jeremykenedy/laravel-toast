@@ -6,10 +6,10 @@ namespace Jeremykenedy\LaravelToast\Providers;
 
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
-use Jeremykenedy\LaravelToast\Services\ToastManager;
 use Jeremykenedy\LaravelToast\Console\InstallCommand;
 use Jeremykenedy\LaravelToast\Console\SwitchCommand;
 use Jeremykenedy\LaravelToast\Livewire\ToastContainer;
+use Jeremykenedy\LaravelToast\Services\ToastManager;
 use Livewire\Livewire;
 
 class ToastServiceProvider extends ServiceProvider

@@ -107,8 +107,7 @@ it('HasToasts trait has all expected methods', function () {
 });
 
 it('HasToasts trait toast() returns ToastManager', function () {
-    $obj = new class()
-    {
+    $obj = new class() {
         use HasToasts;
 
         public function getToast(): ToastManager
@@ -121,8 +120,7 @@ it('HasToasts trait toast() returns ToastManager', function () {
 });
 
 it('HasToasts trait toastSuccess creates success toast', function () {
-    $obj = new class()
-    {
+    $obj = new class() {
         use HasToasts;
 
         public function doIt(): static
@@ -140,8 +138,7 @@ it('HasToasts trait toastSuccess creates success toast', function () {
 });
 
 it('HasToasts trait toastError creates error toast', function () {
-    $obj = new class()
-    {
+    $obj = new class() {
         use HasToasts;
 
         public function doIt(): static
@@ -155,8 +152,7 @@ it('HasToasts trait toastError creates error toast', function () {
 });
 
 it('HasToasts trait toastWarning creates warning toast', function () {
-    $obj = new class()
-    {
+    $obj = new class() {
         use HasToasts;
 
         public function doIt(): static
@@ -170,8 +166,7 @@ it('HasToasts trait toastWarning creates warning toast', function () {
 });
 
 it('HasToasts trait toastInfo creates info toast', function () {
-    $obj = new class()
-    {
+    $obj = new class() {
         use HasToasts;
 
         public function doIt(): static

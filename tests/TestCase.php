@@ -4,9 +4,9 @@ declare(strict_types=1);
 
 namespace Jeremykenedy\LaravelToast\Tests;
 
+use Jeremykenedy\LaravelToast\Facades\Toast;
 use Jeremykenedy\LaravelToast\Providers\ToastServiceProvider;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
-use Jeremykenedy\LaravelToast\Facades\Toast;
 
 abstract class TestCase extends OrchestraTestCase
 {

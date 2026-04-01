@@ -1,0 +1,120 @@
+@php
+    $toastManager = app(\Jeremykenedy\LaravelToast\Services\ToastManager::class);
+    if (config('toast.convert_flash', true)) { $toastManager->convertFlashMessages(); }
+    $toasts = $toastManager->get();
+    $globalPosition = $toastManager->position();
+    $stack = config('toast.stack', true);
+    $positionMap = [
+        'top-left' => 'top:0.5rem;left:0.5rem;', 'top-center' => 'top:0.5rem;left:50%;transform:translateX(-50%);',
+        'top-right' => 'top:0.5rem;right:0.5rem;', 'bottom-right' => 'bottom:0.5rem;right:0.5rem;',
+        'bottom-left' => 'bottom:0.5rem;left:0.5rem;', 'bottom-center' => 'bottom:0.5rem;left:50%;transform:translateX(-50%);',
+    ];
+    $grouped = [];
+    $displayToasts = $stack ? $toasts : (count($toasts) ? [end($toasts)] : []);
+    foreach ($displayToasts as $t) {
+        $pos = $t['position'] ?? $globalPosition;
+        if (!isset($positionMap[$pos])) $pos = 'top-right';
+        $grouped[$pos][] = $t;
+    }
+    $typeMap = ['success'=>'success','error'=>'danger','warning'=>'warning','info'=>'info'];
+    $iconMap = [
+        'success'=>'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/></svg>',
+        'error'=>'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/></svg>',
+        'warning'=>'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/></svg>',
+        'info'=>'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.399l-.254.013-.134.008-.011-.08.79-.164C7.891 7.34 8.142 7.181 8.267 6.588z"/><path d="M8 5.5a1 1 0 1 0 0-2 1 1 0 0 0 0 2z"/></svg>',
+    ];
+@endphp
+@if(count($displayToasts) > 0)
+{!! '<style>' !!}
+{!! "@keyframes toast-slide-left{0%{transform:translateX(0);opacity:1}100%{transform:translateX(-120%);opacity:0}} @keyframes toast-slide-right{0%{transform:translateX(0);opacity:1}100%{transform:translateX(120%);opacity:0}} @keyframes toast-slide-top{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-120%);opacity:0}} @keyframes toast-slide-bottom{0%{transform:translateY(0);opacity:1}100%{transform:translateY(120%);opacity:0}} @keyframes toast-bounce-left{0%{transform:translateX(0);opacity:1}30%{transform:translateX(8%)}100%{transform:translateX(-120%);opacity:0}} @keyframes toast-bounce-right{0%{transform:translateX(0);opacity:1}30%{transform:translateX(-8%)}100%{transform:translateX(120%);opacity:0}} @keyframes toast-bounce-top{0%{transform:translateY(0);opacity:1}30%{transform:translateY(15%)}100%{transform:translateY(-120%);opacity:0}} @keyframes toast-bounce-bottom{0%{transform:translateY(0);opacity:1}30%{transform:translateY(-15%)}100%{transform:translateY(120%);opacity:0}} @keyframes toast-fade{0%{opacity:1}100%{opacity:0}} @keyframes toast-shrink-left{0%{transform:scaleX(1);transform-origin:right;opacity:1}100%{transform:scaleX(0);transform-origin:right;opacity:0}} @keyframes toast-shrink-right{0%{transform:scaleX(1);transform-origin:left;opacity:1}100%{transform:scaleX(0);transform-origin:left;opacity:0}} @keyframes toast-shrink-top{0%{transform:scaleY(1);transform-origin:bottom;opacity:1}100%{transform:scaleY(0);transform-origin:bottom;opacity:0}} @keyframes toast-shrink-bottom{0%{transform:scaleY(1);transform-origin:top;opacity:1}100%{transform:scaleY(0);transform-origin:top;opacity:0}} @keyframes toast-enter-slide-left{0%{transform:translateX(-120%);opacity:0}100%{transform:translateX(0);opacity:1}} @keyframes toast-enter-slide-right{0%{transform:translateX(120%);opacity:0}100%{transform:translateX(0);opacity:1}} @keyframes toast-enter-slide-top{0%{transform:translateY(-120%);opacity:0}100%{transform:translateY(0);opacity:1}} @keyframes toast-enter-slide-bottom{0%{transform:translateY(120%);opacity:0}100%{transform:translateY(0);opacity:1}} @keyframes toast-enter-bounce-left{0%{transform:translateX(-120%);opacity:0}70%{transform:translateX(5%);opacity:1}100%{transform:translateX(0)}} @keyframes toast-enter-bounce-right{0%{transform:translateX(120%);opacity:0}70%{transform:translateX(-5%);opacity:1}100%{transform:translateX(0)}} @keyframes toast-enter-bounce-top{0%{transform:translateY(-120%);opacity:0}70%{transform:translateY(10%);opacity:1}100%{transform:translateY(0)}} @keyframes toast-enter-bounce-bottom{0%{transform:translateY(120%);opacity:0}70%{transform:translateY(-10%);opacity:1}100%{transform:translateY(0)}} @keyframes toast-enter-fade{0%{opacity:0}100%{opacity:1}} @keyframes toast-enter-shrink-left{0%{transform:scaleX(0);transform-origin:right;opacity:0}100%{transform:scaleX(1);opacity:1}} @keyframes toast-enter-shrink-right{0%{transform:scaleX(0);transform-origin:left;opacity:0}100%{transform:scaleX(1);opacity:1}} @keyframes toast-enter-shrink-top{0%{transform:scaleY(0);transform-origin:bottom;opacity:0}100%{transform:scaleY(1);opacity:1}} @keyframes toast-enter-shrink-bottom{0%{transform:scaleY(0);transform-origin:top;opacity:0}100%{transform:scaleY(1);opacity:1}} @keyframes toast-flip-left{0%{transform:perspective(600px) rotateY(0);opacity:1}100%{transform:perspective(600px) rotateY(-90deg);opacity:0}} @keyframes toast-flip-right{0%{transform:perspective(600px) rotateY(0);opacity:1}100%{transform:perspective(600px) rotateY(90deg);opacity:0}} @keyframes toast-flip-top{0%{transform:perspective(600px) rotateX(0);opacity:1}100%{transform:perspective(600px) rotateX(90deg);opacity:0}} @keyframes toast-flip-bottom{0%{transform:perspective(600px) rotateX(0);opacity:1}100%{transform:perspective(600px) rotateX(-90deg);opacity:0}} @keyframes toast-enter-flip-left{0%{transform:perspective(600px) rotateY(90deg);opacity:0}100%{transform:perspective(600px) rotateY(0);opacity:1}} @keyframes toast-enter-flip-right{0%{transform:perspective(600px) rotateY(-90deg);opacity:0}100%{transform:perspective(600px) rotateY(0);opacity:1}} @keyframes toast-enter-flip-top{0%{transform:perspective(600px) rotateX(-90deg);opacity:0}100%{transform:perspective(600px) rotateX(0);opacity:1}} @keyframes toast-enter-flip-bottom{0%{transform:perspective(600px) rotateX(90deg);opacity:0}100%{transform:perspective(600px) rotateX(0);opacity:1}} @keyframes toast-flip-center{0%{transform:perspective(600px) rotateY(0);opacity:1}100%{transform:perspective(600px) rotateY(180deg);opacity:0}} @keyframes toast-enter-flip-center{0%{transform:perspective(600px) rotateY(180deg);opacity:0}100%{transform:perspective(600px) rotateY(0);opacity:1}} @keyframes toast-spin-left{0%{transform:rotate(0) translateX(0);opacity:1}100%{transform:rotate(-360deg) translateX(-120%);opacity:0}} @keyframes toast-spin-right{0%{transform:rotate(0) translateX(0);opacity:1}100%{transform:rotate(360deg) translateX(120%);opacity:0}} @keyframes toast-spin-top{0%{transform:rotate(0) translateY(0);opacity:1}100%{transform:rotate(-360deg) translateY(-120%);opacity:0}} @keyframes toast-spin-bottom{0%{transform:rotate(0) translateY(0);opacity:1}100%{transform:rotate(360deg) translateY(120%);opacity:0}} @keyframes toast-spin-center{0%{transform:rotate(0) scale(1);opacity:1}100%{transform:rotate(360deg) scale(0);opacity:0}} @keyframes toast-enter-spin-left{0%{transform:rotate(360deg) translateX(-120%);opacity:0}100%{transform:rotate(0) translateX(0);opacity:1}} @keyframes toast-enter-spin-right{0%{transform:rotate(-360deg) translateX(120%);opacity:0}100%{transform:rotate(0) translateX(0);opacity:1}} @keyframes toast-enter-spin-top{0%{transform:rotate(360deg) translateY(-120%);opacity:0}100%{transform:rotate(0) translateY(0);opacity:1}} @keyframes toast-enter-spin-bottom{0%{transform:rotate(-360deg) translateY(120%);opacity:0}100%{transform:rotate(0) translateY(0);opacity:1}} @keyframes toast-enter-spin-center{0%{transform:rotate(-360deg) scale(0);opacity:0}100%{transform:rotate(0) scale(1);opacity:1}} @keyframes toast-grow-left{0%{transform:scale(1);transform-origin:right center;opacity:1}100%{transform:scale(0);transform-origin:right center;opacity:0}} @keyframes toast-grow-right{0%{transform:scale(1);transform-origin:left center;opacity:1}100%{transform:scale(0);transform-origin:left center;opacity:0}} @keyframes toast-grow-top{0%{transform:scale(1);transform-origin:center bottom;opacity:1}100%{transform:scale(0);transform-origin:center bottom;opacity:0}} @keyframes toast-grow-bottom{0%{transform:scale(1);transform-origin:center top;opacity:1}100%{transform:scale(0);transform-origin:center top;opacity:0}} @keyframes toast-grow-center{0%{transform:scale(1);opacity:1}100%{transform:scale(0);opacity:0}} @keyframes toast-enter-grow-left{0%{transform:scale(0);transform-origin:right center;opacity:0}100%{transform:scale(1);opacity:1}} @keyframes toast-enter-grow-right{0%{transform:scale(0);transform-origin:left center;opacity:0}100%{transform:scale(1);opacity:1}} @keyframes toast-enter-grow-top{0%{transform:scale(0);transform-origin:center bottom;opacity:0}100%{transform:scale(1);opacity:1}} @keyframes toast-enter-grow-bottom{0%{transform:scale(0);transform-origin:center top;opacity:0}100%{transform:scale(1);opacity:1}} @keyframes toast-enter-grow-center{0%{transform:scale(0);opacity:0}100%{transform:scale(1);opacity:1}} @keyframes toast-slam-left{0%{transform:scale(1);opacity:1}40%{transform:scale(1.15) translateX(5%);opacity:1}100%{transform:scale(.5) translateX(-120%);opacity:0}} @keyframes toast-slam-right{0%{transform:scale(1);opacity:1}40%{transform:scale(1.15) translateX(-5%);opacity:1}100%{transform:scale(.5) translateX(120%);opacity:0}} @keyframes toast-slam-top{0%{transform:scale(1);opacity:1}40%{transform:scale(1.15) translateY(5%);opacity:1}100%{transform:scale(.5) translateY(-120%);opacity:0}} @keyframes toast-slam-bottom{0%{transform:scale(1);opacity:1}40%{transform:scale(1.15) translateY(-5%);opacity:1}100%{transform:scale(.5) translateY(120%);opacity:0}} @keyframes toast-slam-center{0%{transform:scale(1);opacity:1}40%{transform:scale(1.15);opacity:1}100%{transform:scale(0);opacity:0}} @keyframes toast-enter-slam-left{0%{transform:scale(.5) translateX(-120%);opacity:0}60%{transform:scale(1.15) translateX(3%);opacity:1}100%{transform:scale(1) translateX(0);opacity:1}} @keyframes toast-enter-slam-right{0%{transform:scale(.5) translateX(120%);opacity:0}60%{transform:scale(1.15) translateX(-3%);opacity:1}100%{transform:scale(1) translateX(0);opacity:1}} @keyframes toast-enter-slam-top{0%{transform:scale(.5) translateY(-120%);opacity:0}60%{transform:scale(1.15) translateY(3%);opacity:1}100%{transform:scale(1) translateY(0);opacity:1}} @keyframes toast-enter-slam-bottom{0%{transform:scale(.5) translateY(120%);opacity:0}60%{transform:scale(1.15) translateY(-3%);opacity:1}100%{transform:scale(1) translateY(0);opacity:1}} @keyframes toast-enter-slam-center{0%{transform:scale(0);opacity:0}60%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}} @keyframes toast-bounce-center{0%{transform:scale(1);opacity:1}30%{transform:scale(1.1);opacity:1}100%{transform:scale(0);opacity:0}} @keyframes toast-enter-bounce-center{0%{transform:scale(0);opacity:0}70%{transform:scale(1.08);opacity:1}100%{transform:scale(1);opacity:1}} @keyframes toast-shrink-center{0%{transform:scale(1);opacity:1}100%{transform:scale(0);opacity:0}} @keyframes toast-enter-shrink-center{0%{transform:scale(0);opacity:0}100%{transform:scale(1);opacity:1}} @keyframes toast-fade-center{0%{opacity:1}100%{opacity:0}} @keyframes toast-enter-fade-center{0%{opacity:0}100%{opacity:1}} @keyframes toast-slide{0%{transform:translateX(0);opacity:1}100%{transform:translateX(120%);opacity:0}} @keyframes toast-enter-slide{0%{transform:translateX(120%);opacity:0}100%{transform:translateX(0);opacity:1}} @keyframes toast-bounce{0%{transform:scale(1);opacity:1}30%{transform:scale(1.1);opacity:1}100%{transform:scale(0);opacity:0}} @keyframes toast-enter-bounce{0%{transform:scale(0);opacity:0}70%{transform:scale(1.08);opacity:1}100%{transform:scale(1);opacity:1}} @keyframes toast-shrink{0%{transform:scale(1);opacity:1}100%{transform:scale(0);opacity:0}} @keyframes toast-enter-shrink{0%{transform:scale(0);opacity:0}100%{transform:scale(1);opacity:1}} @keyframes toast-flip{0%{transform:perspective(600px) rotateY(0);opacity:1}100%{transform:perspective(600px) rotateY(180deg);opacity:0}} @keyframes toast-enter-flip{0%{transform:perspective(600px) rotateY(180deg);opacity:0}100%{transform:perspective(600px) rotateY(0);opacity:1}} @keyframes toast-spin{0%{transform:rotate(0) scale(1);opacity:1}100%{transform:rotate(360deg) scale(0);opacity:0}} @keyframes toast-enter-spin{0%{transform:rotate(-360deg) scale(0);opacity:0}100%{transform:rotate(0) scale(1);opacity:1}} @keyframes toast-grow{0%{transform:scale(1);opacity:1}100%{transform:scale(0);opacity:0}} @keyframes toast-enter-grow{0%{transform:scale(0);opacity:0}100%{transform:scale(1);opacity:1}} @keyframes toast-slam{0%{transform:scale(1);opacity:1}40%{transform:scale(1.15);opacity:1}100%{transform:scale(0);opacity:0}} @keyframes toast-enter-slam{0%{transform:scale(0);opacity:0}60%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}} @keyframes toast-wobble{0%{transform:translateX(0);opacity:1}15%{transform:translateX(-6px) rotate(-3deg)}30%{transform:translateX(5px) rotate(2deg)}45%{transform:translateX(-4px) rotate(-1deg)}60%{transform:translateX(2px)}75%{transform:translateX(-1px)}85%{transform:translateX(0);opacity:1}100%{transform:translateX(0);opacity:0}} @keyframes toast-wobble-left{0%{transform:translateX(0);opacity:1}25%{transform:translateX(8%)}100%{transform:translateX(-120%);opacity:0}} @keyframes toast-wobble-right{0%{transform:translateX(0);opacity:1}25%{transform:translateX(-8%)}100%{transform:translateX(120%);opacity:0}} @keyframes toast-wobble-top{0%{transform:translateY(0);opacity:1}25%{transform:translateY(10%)}100%{transform:translateY(-120%);opacity:0}} @keyframes toast-wobble-bottom{0%{transform:translateY(0);opacity:1}25%{transform:translateY(-10%)}100%{transform:translateY(120%);opacity:0}} @keyframes toast-wobble-center{0%{transform:scale(1);opacity:1}15%{transform:scale(1.05) rotate(-2deg)}30%{transform:scale(0.95) rotate(2deg)}45%{transform:scale(1.02) rotate(-1deg)}60%{transform:scale(1);opacity:1}100%{transform:scale(0);opacity:0}} @keyframes toast-enter-wobble{0%{transform:translateX(0);opacity:0}1%{opacity:1}15%{transform:translateX(-6px) rotate(-3deg)}30%{transform:translateX(5px) rotate(2deg)}45%{transform:translateX(-4px) rotate(-1deg)}60%{transform:translateX(2px)}75%{transform:translateX(-1px)}100%{transform:translateX(0);opacity:1}} @keyframes toast-enter-wobble-left{0%{transform:translateX(-120%);opacity:0}70%{transform:translateX(5%);opacity:1}85%{transform:translateX(-2%)}100%{transform:translateX(0)}} @keyframes toast-enter-wobble-right{0%{transform:translateX(120%);opacity:0}70%{transform:translateX(-5%);opacity:1}85%{transform:translateX(2%)}100%{transform:translateX(0)}} @keyframes toast-enter-wobble-top{0%{transform:translateY(-120%);opacity:0}70%{transform:translateY(8%);opacity:1}85%{transform:translateY(-3%)}100%{transform:translateY(0)}} @keyframes toast-enter-wobble-bottom{0%{transform:translateY(120%);opacity:0}70%{transform:translateY(-8%);opacity:1}85%{transform:translateY(3%)}100%{transform:translateY(0)}} @keyframes toast-enter-wobble-center{0%{transform:scale(0);opacity:0}50%{transform:scale(1.08);opacity:1}65%{transform:scale(0.95)}80%{transform:scale(1.02)}100%{transform:scale(1);opacity:1}}" !!}
+{!! "[data-bs-theme=dark] .text-bg-success,.dark .text-bg-success{background-color:#064e3b!important;color:#d1fae5!important} [data-bs-theme=dark] .text-bg-danger,.dark .text-bg-danger{background-color:#7f1d1d!important;color:#fee2e2!important} [data-bs-theme=dark] .text-bg-warning,.dark .text-bg-warning{background-color:#78350f!important;color:#fef3c7!important} [data-bs-theme=dark] .text-bg-info,.dark .text-bg-info{background-color:#1e3a5f!important;color:#dbeafe!important} @media(prefers-color-scheme:dark){.text-bg-success{background-color:#064e3b!important;color:#d1fae5!important} .text-bg-danger{background-color:#7f1d1d!important;color:#fee2e2!important} .text-bg-warning{background-color:#78350f!important;color:#fef3c7!important} .text-bg-info{background-color:#1e3a5f!important;color:#dbeafe!important}}" !!}
+{!! '</style>' !!}
+@foreach($grouped as $pos => $posToasts)
+<div class="position-fixed" style="{{ $positionMap[$pos] }} z-index:9999; min-width:320px; max-width:400px;">
+    <div class="toast-container">
+        @foreach($posToasts as $toast)
+        @php
+            $bsType = $typeMap[$toast['type']] ?? 'info';
+            $enterStyle = '';
+            if (($toast['enter_animation'] ?? 'none') !== 'none') {
+                $enterStyle = 'animation:toast-enter-' . $toast['enter_animation'] . ' ' . ($toast['enter_duration'] ?? 0.5) . 's ease forwards;';
+            }
+            $opacityStyle = (($toast['opacity'] ?? 1) < 1) ? 'opacity:' . $toast['opacity'] . ';' : '';
+            $borderClass = (($toast['show_border'] ?? true) === false) ? ' border-0' : '';
+        @endphp
+        <div class="toast show align-items-center mb-2 text-bg-{{ $bsType }} overflow-hidden{{ $borderClass }}"
+             role="alert" aria-live="assertive" aria-atomic="true"
+             dir="{{ $toast['dir'] ?? 'ltr' }}"
+             style="cursor:default;{{ $opacityStyle }}{{ $enterStyle }}"
+             id="toast-{{ $toast['id'] }}"
+             data-auto-dismiss="{{ ($toast['auto_dismiss'] ?? true) ? 'true' : 'false' }}"
+             data-duration="{{ $toast['duration'] }}"
+             data-pause-on-hover="{{ ($toast['pause_on_hover'] ?? true) ? 'true' : 'false' }}"
+             data-exit-animation="{{ $toast['exit_animation'] ?? 'none' }}"
+             data-exit-duration="{{ $toast['exit_duration'] ?? 0.5 }}">
+            @if(($toast['auto_dismiss'] ?? true) && ($toast['show_progress'] ?? true) !== false && $toast['duration'] > 0 && ($toast['progress_position'] ?? 'top') === 'top')
+            <div style="height:3px;background:rgba(255,255,255,0.3);"><div class="toast-progress-bar" style="height:100%;width:100%;background:rgba(255,255,255,0.7);transition:none;{{ ($toast['progress_direction'] ?? 'rtl') === 'rtl' ? 'margin-left:auto;' : '' }}" data-duration="{{ $toast['duration'] }}"></div></div>
+            @endif
+            <div class="d-flex">
+                <div class="toast-body d-flex align-items-center gap-2" style="cursor:default;">
+                    @if(($toast['show_icon'] ?? true) !== false)
+                        <span class="flex-shrink-0">{!! $toast['custom_icon'] ?? ($iconMap[$toast['type']] ?? $iconMap['info']) !!}</span>
+                    @endif
+                    <div>
+                        @if($toast['title']) <strong class="d-block">{{ $toast['title'] }}</strong> @endif
+                        {{ $toast['message'] }}
+                    </div>
+                </div>
+                @if(($toast['show_close'] ?? true) !== false)
+                <button type="button" class="btn-close btn-close-white me-2 m-auto" style="cursor:pointer;" data-bs-dismiss="toast" aria-label="{{ __('toast::toast.dismiss') }}"></button>
+                @endif
+            </div>
+            @if(($toast['auto_dismiss'] ?? true) && ($toast['show_progress'] ?? true) !== false && $toast['duration'] > 0 && ($toast['progress_position'] ?? 'top') !== 'top')
+            <div style="height:3px;background:rgba(255,255,255,0.3);"><div class="toast-progress-bar" style="height:100%;width:100%;background:rgba(255,255,255,0.7);transition:none;{{ ($toast['progress_direction'] ?? 'rtl') === 'rtl' ? 'margin-left:auto;' : '' }}" data-duration="{{ $toast['duration'] }}"></div></div>
+            @endif
+        </div>
+        @endforeach
+    </div>
+</div>
+@endforeach
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    document.querySelectorAll('.toast.show[data-auto-dismiss="true"]').forEach(function(el) {
+        var duration = parseInt(el.dataset.duration) || 5000;
+        var pauseOnHover = el.dataset.pauseOnHover === 'true';
+        var exitAnim = el.dataset.exitAnimation || 'none';
+        var exitDur = parseFloat(el.dataset.exitDuration) || 0.5;
+        var bar = el.querySelector('.toast-progress-bar');
+        var start = Date.now(), paused = false, pausedAt = 0, elapsed = 0;
+        function dismiss() {
+            if (exitAnim !== 'none') {
+                el.style.animation = 'toast-' + exitAnim + ' ' + exitDur + 's ease forwards';
+                setTimeout(function() { el.remove(); }, exitDur * 1000);
+            } else { el.classList.remove('show'); setTimeout(function() { el.remove(); }, 150); }
+        }
+        function tick() {
+            if (paused) return;
+            var e = Date.now() - start - elapsed;
+            if (bar) bar.style.width = Math.max(0, 100 - (e / duration * 100)) + '%';
+            if (e >= duration) dismiss(); else requestAnimationFrame(tick);
+        }
+        if (pauseOnHover) {
+            el.addEventListener('mouseenter', function() { paused = true; pausedAt = Date.now(); });
+            el.addEventListener('mouseleave', function() { elapsed += Date.now() - pausedAt; paused = false; requestAnimationFrame(tick); });
+        }
+        requestAnimationFrame(tick);
+    });
+    document.querySelectorAll('.toast.show[data-auto-dismiss="false"] .btn-close').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+            var el = btn.closest('.toast');
+            var exitAnim = el.dataset.exitAnimation || 'none';
+            var exitDur = parseFloat(el.dataset.exitDuration) || 0.5;
+            if (exitAnim !== 'none') {
+                el.style.animation = 'toast-' + exitAnim + ' ' + exitDur + 's ease forwards';
+                setTimeout(function() { el.remove(); }, exitDur * 1000);
+            } else { el.classList.remove('show'); setTimeout(function() { el.remove(); }, 150); }
+        });
+    });
+});
+</script>
+@endif

@@ -107,8 +107,7 @@ it('HasToasts trait has all expected methods', function () {
 });
 
 it('HasToasts trait toast() returns ToastManager', function () {
-    $obj = new class
-    {
+    $obj = new class() {
         use HasToasts;
 
         public function getToast(): ToastManager
@@ -121,8 +120,7 @@ it('HasToasts trait toast() returns ToastManager', function () {
 });
 
 it('HasToasts trait toastSuccess creates success toast', function () {
-    $obj = new class
-    {
+    $obj = new class() {
         use HasToasts;
 
         public function doIt(): static
@@ -140,8 +138,7 @@ it('HasToasts trait toastSuccess creates success toast', function () {
 });
 
 it('HasToasts trait toastError creates error toast', function () {
-    $obj = new class
-    {
+    $obj = new class() {
         use HasToasts;
 
         public function doIt(): static
@@ -155,8 +152,7 @@ it('HasToasts trait toastError creates error toast', function () {
 });
 
 it('HasToasts trait toastWarning creates warning toast', function () {
-    $obj = new class
-    {
+    $obj = new class() {
         use HasToasts;
 
         public function doIt(): static
@@ -170,8 +166,7 @@ it('HasToasts trait toastWarning creates warning toast', function () {
 });
 
 it('HasToasts trait toastInfo creates info toast', function () {
-    $obj = new class
-    {
+    $obj = new class() {
         use HasToasts;
 
         public function doIt(): static
@@ -272,7 +267,7 @@ it('renders bootstrap5 blade view with toasts', function () {
 
     $this->app->make('view')->getFinder()->flush();
     $css = config('ui-kit.css_framework', 'tailwind');
-    $path = base_path('packages/laravel-toast/resources/views/' . $css . '/blade');
+    $path = base_path('packages/laravel-toast/resources/views/'.$css.'/blade');
     $this->app->make('view')->addNamespace('toast', $path);
 
     app(ToastManager::class)->success('BS5 Success');
@@ -453,72 +448,72 @@ it('tailwind view displays toast title', function () {
 
 it('toast:install command runs with valid options', function () {
     $this->artisan('toast:install', [
-        '--css' => 'tailwind',
-        '--frontend' => 'blade',
+        '--css'            => 'tailwind',
+        '--frontend'       => 'blade',
         '--no-interaction' => true,
     ])->assertSuccessful();
 });
 
 it('toast:install command fails with invalid css', function () {
     $this->artisan('toast:install', [
-        '--css' => 'invalid',
-        '--frontend' => 'blade',
+        '--css'            => 'invalid',
+        '--frontend'       => 'blade',
         '--no-interaction' => true,
     ])->assertFailed();
 });
 
 it('toast:install command fails with invalid frontend', function () {
     $this->artisan('toast:install', [
-        '--css' => 'tailwind',
-        '--frontend' => 'invalid',
+        '--css'            => 'tailwind',
+        '--frontend'       => 'invalid',
         '--no-interaction' => true,
     ])->assertFailed();
 });
 
 it('toast:install accepts bootstrap5', function () {
     $this->artisan('toast:install', [
-        '--css' => 'bootstrap5',
-        '--frontend' => 'blade',
+        '--css'            => 'bootstrap5',
+        '--frontend'       => 'blade',
         '--no-interaction' => true,
     ])->assertSuccessful();
 });
 
 it('toast:install accepts bootstrap4', function () {
     $this->artisan('toast:install', [
-        '--css' => 'bootstrap4',
-        '--frontend' => 'blade',
+        '--css'            => 'bootstrap4',
+        '--frontend'       => 'blade',
         '--no-interaction' => true,
     ])->assertSuccessful();
 });
 
 it('toast:install accepts livewire frontend', function () {
     $this->artisan('toast:install', [
-        '--css' => 'tailwind',
-        '--frontend' => 'livewire',
+        '--css'            => 'tailwind',
+        '--frontend'       => 'livewire',
         '--no-interaction' => true,
     ])->assertSuccessful();
 });
 
 it('toast:install accepts vue frontend', function () {
     $this->artisan('toast:install', [
-        '--css' => 'tailwind',
-        '--frontend' => 'vue',
+        '--css'            => 'tailwind',
+        '--frontend'       => 'vue',
         '--no-interaction' => true,
     ])->assertSuccessful();
 });
 
 it('toast:install accepts react frontend', function () {
     $this->artisan('toast:install', [
-        '--css' => 'tailwind',
-        '--frontend' => 'react',
+        '--css'            => 'tailwind',
+        '--frontend'       => 'react',
         '--no-interaction' => true,
     ])->assertSuccessful();
 });
 
 it('toast:install accepts svelte frontend', function () {
     $this->artisan('toast:install', [
-        '--css' => 'tailwind',
-        '--frontend' => 'svelte',
+        '--css'            => 'tailwind',
+        '--frontend'       => 'svelte',
         '--no-interaction' => true,
     ])->assertSuccessful();
 });
@@ -531,8 +526,8 @@ foreach ($cssFrameworks as $css) {
     foreach ($frontendFrameworks as $frontend) {
         it("toast:install works with {$css} + {$frontend}", function () use ($css, $frontend) {
             $this->artisan('toast:install', [
-                '--css' => $css,
-                '--frontend' => $frontend,
+                '--css'            => $css,
+                '--frontend'       => $frontend,
                 '--no-interaction' => true,
             ])->assertSuccessful();
         });
@@ -553,7 +548,7 @@ it('toast:switch command switches frontend framework', function () {
 
 it('toast:switch command switches both at once', function () {
     $this->artisan('toast:switch', [
-        '--css' => 'bootstrap4',
+        '--css'      => 'bootstrap4',
         '--frontend' => 'vue',
     ])->assertSuccessful();
 });
@@ -593,7 +588,7 @@ foreach ($cssFrameworks as $css) {
     foreach ($frontendFrameworks as $frontend) {
         it("toast:switch works with {$css} + {$frontend}", function () use ($css, $frontend) {
             $this->artisan('toast:switch', [
-                '--css' => $css,
+                '--css'      => $css,
                 '--frontend' => $frontend,
             ])->assertSuccessful();
         });

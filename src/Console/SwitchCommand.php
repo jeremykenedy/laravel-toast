@@ -24,7 +24,7 @@ class SwitchCommand extends Command
         $css = $this->option('css');
         $frontend = $this->option('frontend');
 
-        if (! $css && ! $frontend) {
+        if (!$css && !$frontend) {
             $this->error('Provide at least one of --css or --frontend.');
             $this->line('');
             $this->line('  Examples:');
@@ -38,14 +38,14 @@ class SwitchCommand extends Command
         $validCss = ['tailwind', 'bootstrap5', 'bootstrap4'];
         $validFrontend = ['blade', 'livewire', 'vue', 'react', 'svelte'];
 
-        if ($css && ! in_array($css, $validCss)) {
-            $this->error("Invalid CSS framework: {$css}. Valid: " . implode(', ', $validCss));
+        if ($css && !in_array($css, $validCss)) {
+            $this->error("Invalid CSS framework: {$css}. Valid: ".implode(', ', $validCss));
 
             return self::FAILURE;
         }
 
-        if ($frontend && ! in_array($frontend, $validFrontend)) {
-            $this->error("Invalid frontend framework: {$frontend}. Valid: " . implode(', ', $validFrontend));
+        if ($frontend && !in_array($frontend, $validFrontend)) {
+            $this->error("Invalid frontend framework: {$frontend}. Valid: ".implode(', ', $validFrontend));
 
             return self::FAILURE;
         }

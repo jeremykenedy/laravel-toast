@@ -12,7 +12,7 @@ class ToastServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        $this->mergeConfigFrom(__DIR__ . '/../../config/toast.php', 'toast');
+        $this->mergeConfigFrom(__DIR__.'/../../config/toast.php', 'toast');
         $this->app->singleton(ToastManager::class);
     }
 
@@ -30,15 +30,15 @@ class ToastServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->publishes([
-                __DIR__ . '/../../config/toast.php' => config_path('toast.php'),
+                __DIR__.'/../../config/toast.php' => config_path('toast.php'),
             ], 'toast-config');
 
             $this->publishes([
-                __DIR__ . '/../../resources/views' => resource_path('views/vendor/toast'),
+                __DIR__.'/../../resources/views' => resource_path('views/vendor/toast'),
             ], 'toast-views');
 
             $this->publishes([
-                __DIR__ . '/../../resources/lang' => $this->app->langPath('vendor/toast'),
+                __DIR__.'/../../resources/lang' => $this->app->langPath('vendor/toast'),
             ], 'toast-lang');
         }
     }
@@ -56,15 +56,15 @@ class ToastServiceProvider extends ServiceProvider
     protected function registerViews(): void
     {
         $css = config('ui-kit.css_framework', 'tailwind');
-        $bladePath = __DIR__ . '/../../resources/views/' . $css . '/blade';
+        $bladePath = __DIR__.'/../../resources/views/'.$css.'/blade';
 
-        if (! is_dir($bladePath)) {
-            $bladePath = __DIR__ . '/../../resources/views/tailwind/blade';
+        if (!is_dir($bladePath)) {
+            $bladePath = __DIR__.'/../../resources/views/tailwind/blade';
         }
 
         $this->loadViewsFrom($bladePath, 'toast');
 
-        $livewirePath = __DIR__ . '/../../resources/views/livewire';
+        $livewirePath = __DIR__.'/../../resources/views/livewire';
         if (is_dir($livewirePath)) {
             $this->loadViewsFrom($livewirePath, 'toast-livewire');
         }
@@ -72,7 +72,7 @@ class ToastServiceProvider extends ServiceProvider
 
     protected function registerTranslations(): void
     {
-        $this->loadTranslationsFrom(__DIR__ . '/../../resources/lang', 'toast');
+        $this->loadTranslationsFrom(__DIR__.'/../../resources/lang', 'toast');
     }
 
     protected function registerBladeDirectives(): void

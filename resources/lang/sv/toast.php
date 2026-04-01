@@ -2,8 +2,8 @@
 
 return [
     'success' => 'Success',
-    'error' => 'Error',
+    'error'   => 'Error',
     'warning' => 'Warning',
-    'info' => 'Info',
+    'info'    => 'Info',
     'dismiss' => 'Dismiss',
 ];

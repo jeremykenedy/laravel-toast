@@ -12,7 +12,7 @@ use Jeremykenedy\LaravelToast\Services\ToastManager;
  * @method static \Jeremykenedy\LaravelToast\Services\ToastManager error(string $message, ?string $title = null, ?int $duration = null)
  * @method static \Jeremykenedy\LaravelToast\Services\ToastManager warning(string $message, ?string $title = null, ?int $duration = null)
  * @method static \Jeremykenedy\LaravelToast\Services\ToastManager info(string $message, ?string $title = null, ?int $duration = null)
- * @method static array get()
+ * @method static array                                            get()
  * @method static \Jeremykenedy\LaravelToast\Services\ToastManager clear()
  *
  * @see \Jeremykenedy\LaravelToast\Services\ToastManager

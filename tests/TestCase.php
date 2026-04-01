@@ -26,9 +26,9 @@ abstract class TestCase extends OrchestraTestCase
         // Force SQLite in-memory -- toast tests NEVER touch a real database
         $app['config']->set('database.default', 'testing');
         $app['config']->set('database.connections.testing', [
-            'driver' => 'sqlite',
+            'driver'   => 'sqlite',
             'database' => ':memory:',
-            'prefix' => '',
+            'prefix'   => '',
         ]);
 
         // Explicitly disable all external database connections
@@ -72,9 +72,9 @@ abstract class TestCase extends OrchestraTestCase
 
             if ($dbDriver !== 'sqlite' || $dbName !== ':memory:') {
                 $this->fail(
-                    "SAFETY: Toast tests detected a non-memory database connection: "
-                    . "{$dbDriver}/{$dbName}. Toast tests must NEVER touch a real database. "
-                    . "Only SQLite :memory: is allowed."
+                    'SAFETY: Toast tests detected a non-memory database connection: '
+                    ."{$dbDriver}/{$dbName}. Toast tests must NEVER touch a real database. "
+                    .'Only SQLite :memory: is allowed.'
                 );
             }
         }

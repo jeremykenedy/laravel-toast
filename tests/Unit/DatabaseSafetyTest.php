@@ -4,7 +4,6 @@
  * These tests guarantee that the toast package NEVER touches a real database.
  * Toast is a session/view-only package -- zero database required.
  */
-
 it('database driver is sqlite', function () {
     expect(config('database.default'))->toBe('testing');
     expect(config('database.connections.testing.driver'))->toBe('sqlite');

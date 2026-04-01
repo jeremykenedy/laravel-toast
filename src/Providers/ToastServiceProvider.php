@@ -7,6 +7,10 @@ namespace Jeremykenedy\LaravelToast\Providers;
 use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Jeremykenedy\LaravelToast\Services\ToastManager;
+use Jeremykenedy\LaravelToast\Console\InstallCommand;
+use Jeremykenedy\LaravelToast\Console\SwitchCommand;
+use Jeremykenedy\LaravelToast\Livewire\ToastContainer;
+use Livewire\Livewire;
 
 class ToastServiceProvider extends ServiceProvider
 {
@@ -47,8 +51,8 @@ class ToastServiceProvider extends ServiceProvider
     {
         if ($this->app->runningInConsole()) {
             $this->commands([
-                \Jeremykenedy\LaravelToast\Console\InstallCommand::class,
-                \Jeremykenedy\LaravelToast\Console\SwitchCommand::class,
+                InstallCommand::class,
+                SwitchCommand::class,
             ]);
         }
     }
@@ -84,8 +88,8 @@ class ToastServiceProvider extends ServiceProvider
 
     protected function registerLivewireComponents(): void
     {
-        if (class_exists(\Livewire\Livewire::class)) {
-            \Livewire\Livewire::component('toast-container', \Jeremykenedy\LaravelToast\Livewire\ToastContainer::class);
+        if (class_exists(Livewire::class)) {
+            Livewire::component('toast-container', ToastContainer::class);
         }
     }
 }

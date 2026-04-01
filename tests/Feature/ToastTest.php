@@ -107,7 +107,8 @@ it('HasToasts trait has all expected methods', function () {
 });
 
 it('HasToasts trait toast() returns ToastManager', function () {
-    $obj = new class() {
+    $obj = new class()
+    {
         use HasToasts;
 
         public function getToast(): ToastManager
@@ -120,7 +121,8 @@ it('HasToasts trait toast() returns ToastManager', function () {
 });
 
 it('HasToasts trait toastSuccess creates success toast', function () {
-    $obj = new class() {
+    $obj = new class()
+    {
         use HasToasts;
 
         public function doIt(): static
@@ -138,7 +140,8 @@ it('HasToasts trait toastSuccess creates success toast', function () {
 });
 
 it('HasToasts trait toastError creates error toast', function () {
-    $obj = new class() {
+    $obj = new class()
+    {
         use HasToasts;
 
         public function doIt(): static
@@ -152,7 +155,8 @@ it('HasToasts trait toastError creates error toast', function () {
 });
 
 it('HasToasts trait toastWarning creates warning toast', function () {
-    $obj = new class() {
+    $obj = new class()
+    {
         use HasToasts;
 
         public function doIt(): static
@@ -166,7 +170,8 @@ it('HasToasts trait toastWarning creates warning toast', function () {
 });
 
 it('HasToasts trait toastInfo creates info toast', function () {
-    $obj = new class() {
+    $obj = new class()
+    {
         use HasToasts;
 
         public function doIt(): static
@@ -266,9 +271,8 @@ it('renders bootstrap5 blade view with toasts', function () {
     config(['ui-kit.css_framework' => 'bootstrap5']);
 
     $this->app->make('view')->getFinder()->flush();
-    $css = config('ui-kit.css_framework', 'tailwind');
-    $path = base_path('packages/laravel-toast/resources/views/'.$css.'/blade');
-    $this->app->make('view')->addNamespace('toast', $path);
+    $path = realpath(__DIR__.'/../../resources/views/bootstrap5/blade');
+    $this->app->make('view')->replaceNamespace('toast', $path);
 
     app(ToastManager::class)->success('BS5 Success');
     $html = view('toast::toasts')->render();
@@ -285,8 +289,8 @@ it('renders bootstrap5 error toast as danger variant', function () {
     config(['ui-kit.css_framework' => 'bootstrap5']);
 
     $this->app->make('view')->getFinder()->flush();
-    $path = base_path('packages/laravel-toast/resources/views/bootstrap5/blade');
-    $this->app->make('view')->addNamespace('toast', $path);
+    $path = realpath(__DIR__.'/../../resources/views/bootstrap5/blade');
+    $this->app->make('view')->replaceNamespace('toast', $path);
 
     app(ToastManager::class)->error('BS5 Error');
     $html = view('toast::toasts')->render();
@@ -298,8 +302,8 @@ it('renders bootstrap5 view with auto-dismiss script', function () {
     config(['ui-kit.css_framework' => 'bootstrap5']);
 
     $this->app->make('view')->getFinder()->flush();
-    $path = base_path('packages/laravel-toast/resources/views/bootstrap5/blade');
-    $this->app->make('view')->addNamespace('toast', $path);
+    $path = realpath(__DIR__.'/../../resources/views/bootstrap5/blade');
+    $this->app->make('view')->replaceNamespace('toast', $path);
 
     app(ToastManager::class)->info('Script test');
     $html = view('toast::toasts')->render();
@@ -314,8 +318,8 @@ it('renders bootstrap4 blade view with toasts', function () {
     config(['ui-kit.css_framework' => 'bootstrap4']);
 
     $this->app->make('view')->getFinder()->flush();
-    $path = base_path('packages/laravel-toast/resources/views/bootstrap4/blade');
-    $this->app->make('view')->addNamespace('toast', $path);
+    $path = realpath(__DIR__.'/../../resources/views/bootstrap4/blade');
+    $this->app->make('view')->replaceNamespace('toast', $path);
 
     app(ToastManager::class)->success('BS4 Success');
     $html = view('toast::toasts')->render();
@@ -332,8 +336,8 @@ it('renders bootstrap4 error toast as danger variant', function () {
     config(['ui-kit.css_framework' => 'bootstrap4']);
 
     $this->app->make('view')->getFinder()->flush();
-    $path = base_path('packages/laravel-toast/resources/views/bootstrap4/blade');
-    $this->app->make('view')->addNamespace('toast', $path);
+    $path = realpath(__DIR__.'/../../resources/views/bootstrap4/blade');
+    $this->app->make('view')->replaceNamespace('toast', $path);
 
     app(ToastManager::class)->error('BS4 Error');
     $html = view('toast::toasts')->render();
@@ -345,8 +349,8 @@ it('renders bootstrap4 view with auto-dismiss script', function () {
     config(['ui-kit.css_framework' => 'bootstrap4']);
 
     $this->app->make('view')->getFinder()->flush();
-    $path = base_path('packages/laravel-toast/resources/views/bootstrap4/blade');
-    $this->app->make('view')->addNamespace('toast', $path);
+    $path = realpath(__DIR__.'/../../resources/views/bootstrap4/blade');
+    $this->app->make('view')->replaceNamespace('toast', $path);
 
     app(ToastManager::class)->warning('Script test');
     $html = view('toast::toasts')->render();
@@ -362,8 +366,8 @@ it('tailwind view reflects top-right position', function () {
     app(ToastManager::class)->success('Pos test');
 
     $html = view('toast::toasts')->render();
-    expect($html)->toContain('top-20')
-        ->and($html)->toContain('right-4');
+    expect($html)->toContain('top: 0.5rem')
+        ->and($html)->toContain('right: 0.5rem');
 });
 
 it('tailwind view reflects bottom-left position', function () {
@@ -371,8 +375,8 @@ it('tailwind view reflects bottom-left position', function () {
     app(ToastManager::class)->success('Pos test');
 
     $html = view('toast::toasts')->render();
-    expect($html)->toContain('bottom-4')
-        ->and($html)->toContain('left-4');
+    expect($html)->toContain('bottom: 0.5rem')
+        ->and($html)->toContain('left: 0.5rem');
 });
 
 it('tailwind view reflects top-center position', function () {
@@ -380,36 +384,36 @@ it('tailwind view reflects top-center position', function () {
     app(ToastManager::class)->success('Pos test');
 
     $html = view('toast::toasts')->render();
-    expect($html)->toContain('left-1/2')
-        ->and($html)->toContain('-translate-x-1/2');
+    expect($html)->toContain('left: 50%')
+        ->and($html)->toContain('translateX(-50%)');
 });
 
 it('bootstrap5 view reflects bottom-right position', function () {
     config(['ui-kit.css_framework' => 'bootstrap5', 'toast.position' => 'bottom-right']);
 
     $this->app->make('view')->getFinder()->flush();
-    $path = base_path('packages/laravel-toast/resources/views/bootstrap5/blade');
-    $this->app->make('view')->addNamespace('toast', $path);
+    $path = realpath(__DIR__.'/../../resources/views/bootstrap5/blade');
+    $this->app->make('view')->replaceNamespace('toast', $path);
 
     app(ToastManager::class)->success('Pos test');
     $html = view('toast::toasts')->render();
 
-    expect($html)->toContain('bottom: 1rem')
-        ->and($html)->toContain('right: 1rem');
+    expect($html)->toContain('bottom:0.5rem')
+        ->and($html)->toContain('right:0.5rem');
 });
 
 it('bootstrap4 view reflects top-left position', function () {
     config(['ui-kit.css_framework' => 'bootstrap4', 'toast.position' => 'top-left']);
 
     $this->app->make('view')->getFinder()->flush();
-    $path = base_path('packages/laravel-toast/resources/views/bootstrap4/blade');
-    $this->app->make('view')->addNamespace('toast', $path);
+    $path = realpath(__DIR__.'/../../resources/views/bootstrap4/blade');
+    $this->app->make('view')->replaceNamespace('toast', $path);
 
     app(ToastManager::class)->success('Pos test');
     $html = view('toast::toasts')->render();
 
-    expect($html)->toContain('top: 1rem')
-        ->and($html)->toContain('left: 1rem');
+    expect($html)->toContain('top:0.5rem')
+        ->and($html)->toContain('left:0.5rem');
 });
 
 // ─── Flash Message Conversion in Views ──────────────────────────

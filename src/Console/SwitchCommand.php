@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace Jeremykenedy\LaravelToast\Console;
 
 use Illuminate\Console\Command;
-use Jeremykenedy\LaravelUiKit\Console\Concerns\HandlesFrameworkSetup;
+use Jeremykenedy\LaravelToast\Console\Concerns\HandlesFrameworkSetup;
 
 use function Laravel\Prompts\info;
 

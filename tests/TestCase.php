@@ -6,6 +6,7 @@ namespace Jeremykenedy\LaravelToast\Tests;
 
 use Jeremykenedy\LaravelToast\Providers\ToastServiceProvider;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
+use Jeremykenedy\LaravelToast\Facades\Toast;
 
 abstract class TestCase extends OrchestraTestCase
 {
@@ -17,7 +18,7 @@ abstract class TestCase extends OrchestraTestCase
     protected function getPackageAliases($app): array
     {
         return [
-            'Toast' => \Jeremykenedy\LaravelToast\Facades\Toast::class,
+            'Toast' => Toast::class,
         ];
     }
 

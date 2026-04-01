@@ -15,7 +15,7 @@ use Jeremykenedy\LaravelToast\Services\ToastManager;
  * @method static array                                            get()
  * @method static \Jeremykenedy\LaravelToast\Services\ToastManager clear()
  *
- * @see \Jeremykenedy\LaravelToast\Services\ToastManager
+ * @see ToastManager
  */
 class Toast extends Facade
 {

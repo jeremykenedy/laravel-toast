@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-A powerful, highly configurable toast notification system for Laravel. Built for flexibility across every CSS and frontend framework combination with full dark mode support, 56 animation styles, RTL layouts, and 19 per-toast props.
+Powerful, highly configurable toast notifications for Laravel with 56 animations,<br>19 per-toast props, RTL support, dark mode, and full CSS/frontend framework parity.
 </p>
 
 [![Total Downloads](https://poser.pugx.org/jeremykenedy/laravel-toast/d/total.svg)](https://packagist.org/packages/jeremykenedy/laravel-toast)

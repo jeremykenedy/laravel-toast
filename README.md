@@ -10,9 +10,12 @@
 Powerful, highly configurable toast notifications for Laravel with 56 animations,<br>19 per-toast props, RTL support, dark mode, and full CSS/frontend framework parity.
 </p>
 
-[![Total Downloads](https://poser.pugx.org/jeremykenedy/laravel-toast/d/total.svg)](https://packagist.org/packages/jeremykenedy/laravel-toast)
-[![Tests](https://github.com/jeremykenedy/laravel-toast/actions/workflows/tests.yml/badge.svg)](https://github.com/jeremykenedy/laravel-toast/actions)
-[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+<p align="center">
+  <a href="https://packagist.org/packages/jeremykenedy/laravel-toast"><img src="https://poser.pugx.org/jeremykenedy/laravel-toast/d/total.svg" alt="Total Downloads"></a>
+  <a href="https://github.com/jeremykenedy/laravel-toast/actions"><img src="https://github.com/jeremykenedy/laravel-toast/actions/workflows/tests.yml/badge.svg" alt="Tests"></a>
+  <a href="https://github.styleci.io/repos/1195049143?branch=main"><img src="https://github.styleci.io/repos/1195049143/shield?branch=main" alt="StyleCI"></a>
+  <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+</p>
 
 ## Table of Contents
 

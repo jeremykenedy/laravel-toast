@@ -29,6 +29,7 @@ Powerful, highly configurable toast notifications for Laravel with 56 animations
 - [Dark Mode](#dark-mode)
 - [Customizing Colors](#customizing-colors)
 - [Usage](#usage)
+- [Changing Frameworks](#changing-frameworks)
 - [Artisan Commands](#artisan-commands)
 - [Testing](#testing)
 - [License](#license)
@@ -405,22 +406,56 @@ return Inertia::render('Dashboard', [
 </script>
 ```
 
-## Artisan Commands
+## Changing Frameworks
+
+After installation, use **update** or **switch** to change frameworks without losing configuration.
+
+### Update (Interactive)
+
+The update command walks through framework selection with an interactive menu:
 
 ```bash
-# Install (interactive)
-php artisan toast:install
-
-# Install (explicit)
-php artisan toast:install --css=tailwind --frontend=blade
-
-# Switch frameworks
-php artisan toast:switch --css=bootstrap5
-php artisan toast:switch --frontend=livewire
-php artisan toast:switch --css=bootstrap4 --frontend=vue
+php artisan toast:update
 ```
 
-## Publishing Assets
+Or pass options directly:
+
+```bash
+php artisan toast:update --css=bootstrap5 --frontend=vue
+```
+
+| Option | Values | Description |
+|--------|--------|-------------|
+| `--css` | `tailwind`, `bootstrap5`, `bootstrap4` | Change CSS framework |
+| `--frontend` | `blade`, `livewire`, `vue`, `react`, `svelte` | Change frontend framework |
+
+### Switch (Quick)
+
+```bash
+php artisan toast:switch --css=bootstrap5
+php artisan toast:switch --frontend=livewire
+php artisan toast:switch --css=tailwind --frontend=vue
+```
+
+After switching, run `npm run build`.
+
+## Artisan Commands
+
+| Command | Description |
+|---------|-------------|
+| `toast:install` | Fresh install with interactive prompts. Detects existing installation. |
+| `toast:update` | Update framework selection interactively. Does not overwrite config. |
+| `toast:switch` | Quick framework switch via flags. |
+
+### Install Options
+
+| Flag | Description |
+|------|-------------|
+| `--css=` | CSS framework: `tailwind`, `bootstrap5`, `bootstrap4` |
+| `--frontend=` | Frontend: `blade`, `livewire`, `vue`, `react`, `svelte` |
+| `--force` | Skip reinstall confirmation when already installed |
+
+### Publishing Assets
 
 ```bash
 php artisan vendor:publish --tag=toast-config
@@ -431,20 +466,8 @@ php artisan vendor:publish --tag=toast-lang
 ## Testing
 
 ```bash
-php artisan test --filter=Toast
+./vendor/bin/pest --ci
 ```
-
-191 tests covering:
-
-- All 19 props stored and rendered correctly
-- All 3 CSS frameworks (Tailwind, BS5, BS4) x all positions x all props
-- Livewire component with per-toast options
-- Vue, React, Svelte component file verification (all props present)
-- toast() helper, Facade, HasToasts trait, @toasts directive
-- Flash message conversion
-- Stacking and non-stacking modes
-- Enter/exit animation keyframes
-- All 15 install/switch framework combinations
 
 ## License
 

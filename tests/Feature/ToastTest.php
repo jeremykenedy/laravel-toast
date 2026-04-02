@@ -449,6 +449,7 @@ it('toast:install command runs with valid options', function () {
     $this->artisan('toast:install', [
         '--css'            => 'tailwind',
         '--frontend'       => 'blade',
+        '--force'          => true,
         '--no-interaction' => true,
     ])->assertSuccessful();
 });
@@ -457,6 +458,7 @@ it('toast:install command fails with invalid css', function () {
     $this->artisan('toast:install', [
         '--css'            => 'invalid',
         '--frontend'       => 'blade',
+        '--force'          => true,
         '--no-interaction' => true,
     ])->assertFailed();
 });
@@ -465,6 +467,7 @@ it('toast:install command fails with invalid frontend', function () {
     $this->artisan('toast:install', [
         '--css'            => 'tailwind',
         '--frontend'       => 'invalid',
+        '--force'          => true,
         '--no-interaction' => true,
     ])->assertFailed();
 });
@@ -473,6 +476,7 @@ it('toast:install accepts bootstrap5', function () {
     $this->artisan('toast:install', [
         '--css'            => 'bootstrap5',
         '--frontend'       => 'blade',
+        '--force'          => true,
         '--no-interaction' => true,
     ])->assertSuccessful();
 });
@@ -481,6 +485,7 @@ it('toast:install accepts bootstrap4', function () {
     $this->artisan('toast:install', [
         '--css'            => 'bootstrap4',
         '--frontend'       => 'blade',
+        '--force'          => true,
         '--no-interaction' => true,
     ])->assertSuccessful();
 });
@@ -489,6 +494,7 @@ it('toast:install accepts livewire frontend', function () {
     $this->artisan('toast:install', [
         '--css'            => 'tailwind',
         '--frontend'       => 'livewire',
+        '--force'          => true,
         '--no-interaction' => true,
     ])->assertSuccessful();
 });
@@ -497,6 +503,7 @@ it('toast:install accepts vue frontend', function () {
     $this->artisan('toast:install', [
         '--css'            => 'tailwind',
         '--frontend'       => 'vue',
+        '--force'          => true,
         '--no-interaction' => true,
     ])->assertSuccessful();
 });
@@ -505,6 +512,7 @@ it('toast:install accepts react frontend', function () {
     $this->artisan('toast:install', [
         '--css'            => 'tailwind',
         '--frontend'       => 'react',
+        '--force'          => true,
         '--no-interaction' => true,
     ])->assertSuccessful();
 });
@@ -513,6 +521,7 @@ it('toast:install accepts svelte frontend', function () {
     $this->artisan('toast:install', [
         '--css'            => 'tailwind',
         '--frontend'       => 'svelte',
+        '--force'          => true,
         '--no-interaction' => true,
     ])->assertSuccessful();
 });
@@ -527,6 +536,7 @@ foreach ($cssFrameworks as $css) {
             $this->artisan('toast:install', [
                 '--css'            => $css,
                 '--frontend'       => $frontend,
+                '--force'          => true,
                 '--no-interaction' => true,
             ])->assertSuccessful();
         });
@@ -593,3 +603,68 @@ foreach ($cssFrameworks as $css) {
         });
     }
 }
+
+// ─── Update Command Tests ──────────────────────────────────────
+
+it('toast:update runs with valid css option', function () {
+    $this->artisan('toast:update', [
+        '--css' => 'bootstrap5',
+    ])->assertSuccessful();
+});
+
+it('toast:update runs with valid frontend option', function () {
+    $this->artisan('toast:update', [
+        '--frontend' => 'livewire',
+    ])->assertSuccessful();
+});
+
+it('toast:update runs with both options', function () {
+    $this->artisan('toast:update', [
+        '--css'      => 'tailwind',
+        '--frontend' => 'vue',
+    ])->assertSuccessful();
+});
+
+it('toast:update fails with invalid css', function () {
+    $this->artisan('toast:update', [
+        '--css' => 'material',
+    ])->assertFailed();
+});
+
+it('toast:update fails with invalid frontend', function () {
+    $this->artisan('toast:update', [
+        '--frontend' => 'angular',
+    ])->assertFailed();
+});
+
+foreach ($cssFrameworks as $css) {
+    it("toast:update works with --css={$css}", function () use ($css) {
+        $this->artisan('toast:update', ['--css' => $css])->assertSuccessful();
+    });
+}
+
+foreach ($frontendFrameworks as $frontend) {
+    it("toast:update works with --frontend={$frontend}", function () use ($frontend) {
+        $this->artisan('toast:update', ['--frontend' => $frontend])->assertSuccessful();
+    });
+}
+
+foreach ($cssFrameworks as $css) {
+    foreach ($frontendFrameworks as $frontend) {
+        it("toast:update works with {$css} + {$frontend}", function () use ($css, $frontend) {
+            $this->artisan('toast:update', [
+                '--css'      => $css,
+                '--frontend' => $frontend,
+            ])->assertSuccessful();
+        });
+    }
+}
+
+it('toast:install with --force skips confirmation when already installed', function () {
+    $this->artisan('toast:install', [
+        '--css'            => 'tailwind',
+        '--frontend'       => 'blade',
+        '--force'          => true,
+        '--no-interaction' => true,
+    ])->assertSuccessful();
+});

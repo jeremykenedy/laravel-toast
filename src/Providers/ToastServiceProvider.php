@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Blade;
 use Illuminate\Support\ServiceProvider;
 use Jeremykenedy\LaravelToast\Console\InstallCommand;
 use Jeremykenedy\LaravelToast\Console\SwitchCommand;
+use Jeremykenedy\LaravelToast\Console\UpdateCommand;
 use Jeremykenedy\LaravelToast\Livewire\ToastContainer;
 use Jeremykenedy\LaravelToast\Services\ToastManager;
 use Livewire\Livewire;
@@ -52,6 +53,7 @@ class ToastServiceProvider extends ServiceProvider
         if ($this->app->runningInConsole()) {
             $this->commands([
                 InstallCommand::class,
+                UpdateCommand::class,
                 SwitchCommand::class,
             ]);
         }

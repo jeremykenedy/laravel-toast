@@ -96,7 +96,7 @@
     }
 
     function scan() {
-        document.querySelectorAll('[id^="lw-toast-"][data-auto-dismiss="true"]').forEach(bind);
+        document.querySelectorAll('[data-laravel-toast="livewire"][data-auto-dismiss="true"]').forEach(bind);
     }
 
     // This partial first renders with the opening toast, which can be well after

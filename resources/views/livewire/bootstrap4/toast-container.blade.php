@@ -44,6 +44,7 @@
     @endphp
     <div wire:key="{{ $toast['id'] }}"
          id="lw-toast-{{ $toast['id'] }}"
+         data-laravel-toast="livewire"
          class="alert alert-{{ $bs4Type }} alert-dismissible fade show mb-2 shadow-sm"
          style="overflow:hidden;cursor:default;pointer-events:auto;word-break:break-word;{{ $opacityStyle }}{{ $borderStyle }}{{ $enterStyle }}"
          role="alert"

@@ -132,8 +132,8 @@ it('keeps the react progress updater free of side effects', function () {
     expect($source)->not->toMatch('/setProgress\(\s*prev\s*=>\s*\{[^}]*startTimer/s');
 });
 
-it('scopes its listeners so a host application toast is never touched', function (string $css) {
-    $source = file_get_contents(dirname(__DIR__, 2)."/resources/views/{$css}/blade/toasts.blade.php");
+it('scopes its listeners so a host application toast is never touched', function (string $file, string $marker) {
+    $source = file_get_contents(dirname(__DIR__, 2).'/'.$file);
 
     // `.toast.show .btn-close` matches every Bootstrap toast on the page, so
     // clicking the host application's own toast would run our dismiss.
@@ -142,11 +142,15 @@ it('scopes its listeners so a host application toast is never touched', function
     expect($matches[1])->not->toBeEmpty();
 
     foreach ($matches[1] as $selector) {
-        expect($selector)->toStartWith('[data-laravel-toast]');
+        expect($selector)->toStartWith('[data-laravel-toast="'.$marker.'"]');
     }
-})->with(['bootstrap5', 'bootstrap4']);
+})->with([
+    ['resources/views/bootstrap5/blade/toasts.blade.php', 'blade'],
+    ['resources/views/bootstrap4/blade/toasts.blade.php', 'blade'],
+    ['resources/views/livewire/partials/timer-script.blade.php', 'livewire'],
+]);
 
-it('marks every toast it renders with the package attribute', function (string $css) {
+it('marks blade toasts so the two renderers never bind each other', function (string $css) {
     config(['toast.css_framework' => $css]);
 
     app('view')->getFinder()->flush();
@@ -154,5 +158,16 @@ it('marks every toast it renders with the package attribute', function (string $
 
     app(ToastManager::class)->success('Marked');
 
-    expect(view('toast::toasts')->render())->toContain('data-laravel-toast');
+    expect(view('toast::toasts')->render())->toContain('data-laravel-toast="blade"');
 })->with(['bootstrap5', 'bootstrap4']);
+
+it('marks livewire toasts with the livewire value', function (string $view) {
+    $source = file_get_contents(dirname(__DIR__, 2)."/resources/views/livewire/{$view}");
+
+    expect($source)->toContain('data-laravel-toast="livewire"')
+        ->and($source)->not->toContain('data-laravel-toast="blade"');
+})->with([
+    'toast-container.blade.php',
+    'bootstrap5/toast-container.blade.php',
+    'bootstrap4/toast-container.blade.php',
+]);

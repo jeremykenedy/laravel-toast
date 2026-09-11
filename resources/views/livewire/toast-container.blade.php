@@ -28,6 +28,7 @@
     @endphp
     <div wire:key="{{ $toast['id'] }}"
          id="lw-toast-{{ $toast['id'] }}"
+         data-laravel-toast="livewire"
          dir="{{ $toast['dir'] ?? 'ltr' }}"
          style="pointer-events:auto;cursor:default;{{ $opacityStyle }}{{ $enterStyle }}"
          data-auto-dismiss="{{ ($toast['auto_dismiss'] ?? true) ? 'true' : 'false' }}"

@@ -45,6 +45,7 @@
         @endphp
         <div wire:key="{{ $toast['id'] }}"
              id="lw-toast-{{ $toast['id'] }}"
+         data-laravel-toast="livewire"
              class="toast show align-items-center mb-2 w-100 text-bg-{{ $bsType }} overflow-hidden rounded-3 shadow{{ $borderClass }}"
              role="alert" aria-live="{{ $toast['type'] === 'error' ? 'assertive' : 'polite' }}" aria-atomic="true"
              dir="{{ $toast['dir'] ?? 'ltr' }}"

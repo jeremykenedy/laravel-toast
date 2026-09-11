@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 use Illuminate\Support\ServiceProvider;
 use Jeremykenedy\LaravelToast\Providers\ToastServiceProvider;
-use Jeremykenedy\LaravelToast\Support\ToastAnimations;
 use Jeremykenedy\LaravelToast\Services\ToastManager;
+use Jeremykenedy\LaravelToast\Support\ToastAnimations;
 
 /**
  * `vendor:publish --tag=toast-views` copies the whole tree, so an override

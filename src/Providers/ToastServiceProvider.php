@@ -86,7 +86,6 @@ class ToastServiceProvider extends ServiceProvider
             $this->publishes([
                 ToastAnimations::path() => resource_path('css/vendor/toast/toast-animations.css'),
             ], 'toast-css');
-
         }
     }
 

@@ -44,6 +44,7 @@
                 @default bg-blue-50 text-blue-800 dark:bg-blue-950 dark:text-blue-200 {{ ($toast['show_border'] ?? true) !== false ? 'border-blue-200 dark:border-blue-800' : '' }}
             @endswitch"
          role="alert"
+         aria-live="{{ $toast['type'] === 'error' ? 'assertive' : 'polite' }}"
          aria-atomic="true">
         @if(($toast['auto_dismiss'] ?? true) && ($toast['show_progress'] ?? true) !== false && ($toast['duration'] ?? 0) > 0 && ($toast['progress_position'] ?? 'top') === 'top')
         <div class="h-1 w-full @switch($toast['type']) @case('success') bg-green-200 dark:bg-green-900 @break @case('error') bg-red-200 dark:bg-red-900 @break @case('warning') bg-amber-200 dark:bg-amber-900 @break @default bg-blue-200 dark:bg-blue-900 @endswitch">

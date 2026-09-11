@@ -36,30 +36,45 @@ function ToastIcon({ type, className }) {
 
 export default function ToastContainer({ initialToasts = [], position = 'top-right', dismissLabel = 'Dismiss' }) {
     const [toasts, setToasts] = useState([])
-    // State, not a ref: a ref ticks without repainting the progress bar.
+    // State drives the render, the refs let the animation frame read current
+    // values without the callbacks going stale or rerunning the effect.
     const [progress, setProgress] = useState({})
+    const toastsRef = useRef([])
+    const progressRef = useRef({})
     const timers = useRef({})
     const paused = useRef({})
+    const holders = useRef({})
     const exiting = useRef({})
+
+    const writeToasts = useCallback((next) => {
+        toastsRef.current = next
+        setToasts(next)
+    }, [])
+
+    const writeProgress = useCallback((id, pct) => {
+        progressRef.current = { ...progressRef.current, [id]: pct }
+        setProgress(progressRef.current)
+    }, [])
 
     const remove = useCallback((id) => {
         delete timers.current[id]
         delete paused.current[id]
+        delete holders.current[id]
         delete exiting.current[id]
-        setToasts(prev => prev.filter(t => t.id !== id))
-        setProgress(prev => {
-            const next = { ...prev }
-            delete next[id]
 
-            return next
-        })
-    }, [])
+        const next = { ...progressRef.current }
+        delete next[id]
+        progressRef.current = next
+        setProgress(next)
+
+        writeToasts(toastsRef.current.filter(t => t.id !== id))
+    }, [writeToasts])
 
     const dismiss = useCallback((id) => {
         if (exiting.current[id]) return
         if (timers.current[id]) { cancelAnimationFrame(timers.current[id]); delete timers.current[id] }
 
-        const toast = toasts.find(t => t.id === id)
+        const toast = toastsRef.current.find(t => t.id === id)
         const anim = toast?.exit_animation || 'none'
         const dur = toast?.exit_duration || 0.5
 
@@ -69,7 +84,7 @@ export default function ToastContainer({ initialToasts = [], position = 'top-rig
         const el = document.querySelector(`[data-toast-id="${id}"]`)
         if (el) { el.style.animation = `toast-${anim} ${dur}s ease forwards` }
         setTimeout(() => remove(id), dur * 1000)
-    }, [toasts, remove])
+    }, [remove])
 
     const startTimer = useCallback((toast, remaining) => {
         if (!toast.auto_dismiss || toast.duration <= 0 || remaining <= 0) return
@@ -82,34 +97,47 @@ export default function ToastContainer({ initialToasts = [], position = 'top-rig
             if (paused.current[id] || exiting.current[id]) return
             const elapsed = Date.now() - start
             const pct = Math.max(0, startPct - (elapsed / remaining * startPct))
-            setProgress(prev => ({ ...prev, [id]: pct }))
+            writeProgress(id, pct)
             if (pct <= 0) { dismiss(id) } else { timers.current[id] = requestAnimationFrame(tick) }
         }
 
         timers.current[id] = requestAnimationFrame(tick)
-    }, [dismiss])
+    }, [dismiss, writeProgress])
 
-    const pause = useCallback((toast) => {
-        if (!toast.pause_on_hover || !timers.current[toast.id]) return
-        paused.current[toast.id] = true
-        cancelAnimationFrame(timers.current[toast.id])
-        delete timers.current[toast.id]
+    // Hover and focus are tracked apart so leaving one does not restart the
+    // countdown while the other is still holding it.
+    const hold = useCallback((toast, source) => {
+        if (!toast.pause_on_hover) return
+
+        const id = toast.id
+        holders.current[id] = { ...holders.current[id], [source]: true }
+        if (!timers.current[id]) return
+        paused.current[id] = true
+        cancelAnimationFrame(timers.current[id])
+        delete timers.current[id]
     }, [])
 
-    const resume = useCallback((toast) => {
-        if (!toast.pause_on_hover || !paused.current[toast.id]) return
-        delete paused.current[toast.id]
-        setProgress(prev => {
-            startTimer(toast, (prev[toast.id] ?? 100) / 100 * toast.duration)
+    const release = useCallback((toast, source) => {
+        if (!toast.pause_on_hover) return
 
-            return prev
-        })
+        const id = toast.id
+        if (holders.current[id]) delete holders.current[id][source]
+        if (holders.current[id] && Object.keys(holders.current[id]).length) return
+        if (!paused.current[id]) return
+
+        delete paused.current[id]
+        startTimer(toast, (progressRef.current[id] ?? 100) / 100 * toast.duration)
     }, [startTimer])
 
     useEffect(() => {
         const initial = initialToasts.length ? initialToasts : (typeof window !== 'undefined' ? window.__toasts || [] : [])
-        setToasts(initial)
-        setProgress(Object.fromEntries(initial.map(t => [t.id, 100])))
+
+        writeToasts(initial)
+
+        const seeded = Object.fromEntries(initial.map(t => [t.id, 100]))
+        progressRef.current = seeded
+        setProgress(seeded)
+
         initial.forEach(toast => startTimer(toast, toast.duration))
 
         const frames = timers.current
@@ -139,12 +167,13 @@ export default function ToastContainer({ initialToasts = [], position = 'top-rig
                 return (
                     <div key={toast.id} data-toast-id={toast.id} dir={toast.dir || 'ltr'}
                          style={{ cursor: 'default', pointerEvents: 'auto', ...(toast.opacity < 1 ? { opacity: toast.opacity } : {}), ...enterStyle }}
-                         onMouseEnter={() => pause(toast)}
-                         onMouseLeave={() => resume(toast)}
-                         onFocus={() => pause(toast)}
-                         onBlur={() => resume(toast)}
+                         onMouseEnter={() => hold(toast, 'hover')}
+                         onMouseLeave={() => release(toast, 'hover')}
+                         onFocus={() => hold(toast, 'focus')}
+                         onBlur={() => release(toast, 'focus')}
                          className={`rounded-xl shadow-lg shadow-black/5 ring-1 ring-black/5 dark:shadow-black/40 dark:ring-white/10 overflow-hidden ${ts.bg} ${toast.show_border !== false ? 'border ' + ts.border : ''}`}
                          role="alert"
+                         aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
                          aria-atomic="true">
                         {toast.auto_dismiss && toast.show_progress !== false && toast.duration > 0 && toast.progress_position === 'top' && (
                             <div className={`h-1 w-full ${ts.barBg}`}><div className={`h-full ${ts.bar}`} style={{ width: `${progress[toast.id] ?? 100}%`, transition: 'none', ...(toast.progress_direction === 'rtl' ? { marginLeft: 'auto' } : {}) }} /></div>

@@ -18,6 +18,7 @@ const toasts = ref([])
 const progress = reactive({})
 const timers = reactive({})
 const paused = reactive({})
+const holders = reactive({})
 const exiting = reactive({})
 
 const positionMap = {
@@ -54,10 +55,26 @@ function dismiss(id) {
     else remove(id)
 }
 
-function remove(id) { delete progress[id]; delete exiting[id]; toasts.value = toasts.value.filter(t => t.id !== id) }
+function remove(id) { delete progress[id]; delete exiting[id]; delete holders[id]; toasts.value = toasts.value.filter(t => t.id !== id) }
 
-function pauseTimer(id) { if (!timers[id]) return; paused[id] = true; cancelAnimationFrame(timers[id]); delete timers[id] }
-function resumeTimer(id) { const t = toasts.value.find(x => x.id === id); if (!t || !paused[id]) return; delete paused[id]; startTimerFrom(t, (progress[id] ?? 100) / 100 * t.duration) }
+// Hover and focus are tracked apart so leaving one does not restart the
+// countdown while the other is still holding it.
+function hold(id, source) {
+    holders[id] = { ...holders[id], [source]: true }
+    if (!timers[id]) return
+    paused[id] = true
+    cancelAnimationFrame(timers[id])
+    delete timers[id]
+}
+
+function release(id, source) {
+    if (holders[id]) delete holders[id][source]
+    if (holders[id] && Object.keys(holders[id]).length) return
+    const toast = toasts.value.find(t => t.id === id)
+    if (!toast || !paused[id]) return
+    delete paused[id]
+    startTimerFrom(toast, (progress[id] ?? 100) / 100 * toast.duration)
+}
 
 function startTimerFrom(toast, remaining) {
     if (!toast.auto_dismiss || remaining <= 0) return
@@ -93,12 +110,13 @@ onUnmounted(() => { Object.values(timers).forEach(id => cancelAnimationFrame(id)
         <div v-for="toast in toasts" :key="toast.id" :data-toast-id="toast.id"
              :dir="toast.dir || 'ltr'"
              :style="'pointer-events:auto;' + (toast.opacity < 1 ? 'opacity:'+toast.opacity+';' : '') + 'cursor:default;' + enterStyle(toast)"
-             @mouseenter="toast.pause_on_hover && pauseTimer(toast.id)"
-             @mouseleave="toast.pause_on_hover && resumeTimer(toast.id)"
-             @focusin="toast.pause_on_hover && pauseTimer(toast.id)"
-             @focusout="toast.pause_on_hover && resumeTimer(toast.id)"
+             @mouseenter="toast.pause_on_hover && hold(toast.id, 'hover')"
+             @mouseleave="toast.pause_on_hover && release(toast.id, 'hover')"
+             @focusin="toast.pause_on_hover && hold(toast.id, 'focus')"
+             @focusout="toast.pause_on_hover && release(toast.id, 'focus')"
              :class="['rounded-xl shadow-lg shadow-black/5 ring-1 ring-black/5 dark:shadow-black/40 dark:ring-white/10 overflow-hidden', getStyle(toast).bg, toast.show_border !== false ? 'border ' + getStyle(toast).border : '']"
              role="alert"
+             :aria-live="toast.type === 'error' ? 'assertive' : 'polite'"
              aria-atomic="true">
             <div v-if="toast.auto_dismiss && toast.show_progress !== false && toast.duration > 0 && toast.progress_position === 'top'" :class="['h-1 w-full', getStyle(toast).barBg]">
                 <div :class="['h-full', getStyle(toast).bar]" :style="'width:'+(progress[toast.id]??100)+'%;transition:none;'+(toast.progress_direction==='rtl'?'margin-left:auto;':'')"></div>

@@ -48,10 +48,10 @@
             :data-toast-id="toast.id"
             x-show="toasts.find(t => t.id === toast.id)"
             x-cloak
-            @mouseenter="toast.pause_on_hover && pause(toast.id)"
-            @mouseleave="toast.pause_on_hover && resume(toast.id)"
-            @focusin="toast.pause_on_hover && pause(toast.id)"
-            @focusout="toast.pause_on_hover && resume(toast.id)"
+            @mouseenter="toast.pause_on_hover && hold(toast.id, 'hover')"
+            @mouseleave="toast.pause_on_hover && release(toast.id, 'hover')"
+            @focusin="toast.pause_on_hover && hold(toast.id, 'focus')"
+            @focusout="toast.pause_on_hover && release(toast.id, 'focus')"
             :dir="toast.dir || 'ltr'"
             :style="'pointer-events:auto;' + (toast.opacity < 1 ? 'opacity:' + toast.opacity + ';' : '') + 'cursor:default;' + (toast.enter_animation && toast.enter_animation !== 'none' ? 'animation:toast-enter-' + toast.enter_animation + ' ' + (toast.enter_duration || 0.5) + 's ease forwards;' : '')"
             class="rounded-xl overflow-hidden shadow-lg shadow-black/5 ring-1 ring-black/5 dark:shadow-black/40 dark:ring-white/10"
@@ -67,6 +67,7 @@
                 'border-blue-200 dark:border-blue-800': toast.type === 'info' && toast.show_border !== false
             }"
             role="alert"
+            :aria-live="toast.type === 'error' ? 'assertive' : 'polite'"
             aria-atomic="true"
         >
             <template x-if="toast.auto_dismiss && toast.show_progress !== false && toast.duration > 0 && toast.progress_position === 'top'">
@@ -109,6 +110,7 @@ function toastContainer_{{ str_replace(['-', ' '], '_', $pos) }}() {
         progress: {},
         timers: {},
         paused: {},
+        holders: {},
         exiting: {},
         reduceMotion() {
             return window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -119,6 +121,7 @@ function toastContainer_{{ str_replace(['-', ' '], '_', $pos) }}() {
             if (this.timers[id]) cancelAnimationFrame(this.timers[id]);
             delete this.timers[id];
             delete this.paused[id];
+            delete this.holders[id];
             var anim = toast.exit_animation || 'none';
             var dur = toast.exit_duration || 0.5;
             if (anim === 'none' || this.reduceMotion()) { this.remove(id); return; }
@@ -136,13 +139,17 @@ function toastContainer_{{ str_replace(['-', ' '], '_', $pos) }}() {
             delete this.exiting[id];
             this.toasts = this.toasts.filter(function(t) { return t.id !== id; });
         },
-        pause(id) {
+        hold(id, source) {
+            this.holders[id] = this.holders[id] || {};
+            this.holders[id][source] = true;
             if (!this.timers[id]) return;
             this.paused[id] = true;
             cancelAnimationFrame(this.timers[id]);
             delete this.timers[id];
         },
-        resume(id) {
+        release(id, source) {
+            if (this.holders[id]) delete this.holders[id][source];
+            if (this.holders[id] && Object.keys(this.holders[id]).length) return;
             var toast = this.toasts.find(function(t) { return t.id === id; });
             if (!toast || !this.paused[id]) return;
             delete this.paused[id];

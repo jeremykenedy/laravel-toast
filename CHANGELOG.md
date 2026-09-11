@@ -40,6 +40,24 @@ attribute and container id from v1.0.0 behaves as it did before.
   threw when the Livewire service provider had not been registered.
 - The Livewire component never applied `max_visible`, so dispatching in a loop
   grew the stack without bound.
+- Bootstrap 4, Bootstrap 5 and Livewire turned a `duration` of 0 into a five
+  second countdown, so a toast documented as manual-dismiss-only disappeared on
+  its own. Tailwind, Vue, React and Svelte already honoured it.
+- Hover and focus shared one pause flag, so moving focus off the close button
+  restarted the countdown while the pointer was still over the toast, and the
+  later mouseleave could start a second timer loop.
+- `role="alert"` carries an implicit assertive live region, so every toast
+  interrupted the screen reader regardless of type. Politeness is now stated
+  outright in each renderer.
+- A Livewire toast that auto-dismissed was removed from the DOM but left in the
+  component's `$toasts`, so the next morph rendered it again with a fresh timer.
+- The Livewire morph hook was only registered inside the `livewire:initialized`
+  listener. When the container first renders with a later toast that event has
+  already fired, so no hook was attached and subsequent toasts got no timers.
+- The React mount effect captured `dismiss` while the toast list was still
+  empty, so every toast skipped its exit animation.
+- React `resume` started an animation frame inside a `setProgress` updater.
+  Strict Mode invokes updaters twice, which started two competing timer loops.
 
 ### Added
 

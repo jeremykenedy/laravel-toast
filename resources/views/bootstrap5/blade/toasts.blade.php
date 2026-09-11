@@ -102,22 +102,44 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     document.querySelectorAll('.toast.show[data-auto-dismiss="true"]').forEach(function(el) {
-        var duration = parseInt(el.dataset.duration) || 5000;
+        // A duration of 0 means the toast stays until it is dismissed by hand.
+        var duration = parseInt(el.dataset.duration, 10);
+        if (!isFinite(duration) || duration <= 0) return;
+
         var pauseOnHover = el.dataset.pauseOnHover === 'true';
         var bar = el.querySelector('.toast-progress-bar');
-        var start = Date.now(), paused = false, pausedAt = 0, elapsed = 0;
+        var start = Date.now(), elapsed = 0, pausedAt = 0;
+        var running = true, hovered = false, focused = false;
+
         function tick() {
-            if (paused || el.dataset.toastDismissing === 'true') return;
+            if (!running || el.dataset.toastDismissing === 'true' || !el.isConnected) return;
             var e = Date.now() - start - elapsed;
             if (bar) bar.style.width = Math.max(0, 100 - (e / duration * 100)) + '%';
             if (e >= duration) dismiss(el); else requestAnimationFrame(tick);
         }
-        if (pauseOnHover) {
-            el.addEventListener('mouseenter', function() { paused = true; pausedAt = Date.now(); });
-            el.addEventListener('mouseleave', function() { elapsed += Date.now() - pausedAt; paused = false; requestAnimationFrame(tick); });
-            el.addEventListener('focusin', function() { paused = true; pausedAt = Date.now(); });
-            el.addEventListener('focusout', function() { elapsed += Date.now() - pausedAt; paused = false; requestAnimationFrame(tick); });
+
+        // Hover and focus are tracked apart so leaving one does not restart the
+        // countdown while the other is still holding it.
+        function pause() {
+            if (!running) return;
+            running = false;
+            pausedAt = Date.now();
         }
+
+        function resume() {
+            if (running || hovered || focused) return;
+            elapsed += Date.now() - pausedAt;
+            running = true;
+            requestAnimationFrame(tick);
+        }
+
+        if (pauseOnHover) {
+            el.addEventListener('mouseenter', function() { hovered = true; pause(); });
+            el.addEventListener('mouseleave', function() { hovered = false; resume(); });
+            el.addEventListener('focusin', function() { focused = true; pause(); });
+            el.addEventListener('focusout', function() { focused = false; resume(); });
+        }
+
         requestAnimationFrame(tick);
     });
 

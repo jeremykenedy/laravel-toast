@@ -89,3 +89,11 @@ it('renders bootstrap markup standalone when only TOAST_CSS is set', function ()
     expect($html)->toContain('text-bg-success')
         ->and($html)->not->toContain('bg-green-50');
 });
+
+it('does not fall through to ui-kit when the toast setting is set but invalid', function () {
+    config(['toast.css_framework' => 'material', 'ui-kit.css_framework' => 'bootstrap5']);
+    expect(ToastServiceProvider::cssFramework())->toBe('tailwind');
+
+    config(['toast.frontend' => 'angular', 'ui-kit.frontend' => 'vue']);
+    expect(ToastServiceProvider::frontend())->toBe('blade');
+});

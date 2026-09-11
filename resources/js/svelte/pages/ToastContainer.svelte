@@ -33,6 +33,7 @@
     let progress = {}
     let timers = {}
     let pausedMap = {}
+    let holders = {}
     let exiting = {}
 
     function getStyle(toast) { return styles[toast.type] || styles.info }
@@ -54,6 +55,7 @@
     function remove(id) {
         delete progress[id]
         delete exiting[id]
+        delete holders[id]
         toasts = toasts.filter(t => t.id !== id)
     }
 
@@ -70,9 +72,19 @@
         timers[id] = requestAnimationFrame(tick)
     }
 
-    function pauseTimer(id) { if (!timers[id]) return; pausedMap[id] = true; cancelAnimationFrame(timers[id]); delete timers[id] }
+    // Hover and focus are tracked apart so leaving one does not restart the
+    // countdown while the other is still holding it.
+    function hold(id, source) {
+        holders[id] = { ...holders[id], [source]: true }
+        if (!timers[id]) return
+        pausedMap[id] = true
+        cancelAnimationFrame(timers[id])
+        delete timers[id]
+    }
 
-    function resumeTimer(id) {
+    function release(id, source) {
+        if (holders[id]) delete holders[id][source]
+        if (holders[id] && Object.keys(holders[id]).length) return
         const toast = toasts.find(t => t.id === id)
         if (!toast || !pausedMap[id]) return
         delete pausedMap[id]
@@ -104,12 +116,13 @@
         {@const ts = getStyle(toast)}
         <div data-toast-id={toast.id} dir={toast.dir || 'ltr'}
              style="pointer-events:auto;cursor:default;{toast.opacity < 1 ? 'opacity:'+toast.opacity+';' : ''}{enterStyle(toast)}"
-             on:mouseenter={() => toast.pause_on_hover && pauseTimer(toast.id)}
-             on:mouseleave={() => toast.pause_on_hover && resumeTimer(toast.id)}
-             on:focusin={() => toast.pause_on_hover && pauseTimer(toast.id)}
-             on:focusout={() => toast.pause_on_hover && resumeTimer(toast.id)}
+             on:mouseenter={() => toast.pause_on_hover && hold(toast.id, 'hover')}
+             on:mouseleave={() => toast.pause_on_hover && release(toast.id, 'hover')}
+             on:focusin={() => toast.pause_on_hover && hold(toast.id, 'focus')}
+             on:focusout={() => toast.pause_on_hover && release(toast.id, 'focus')}
              class="rounded-xl shadow-lg shadow-black/5 ring-1 ring-black/5 dark:shadow-black/40 dark:ring-white/10 overflow-hidden {ts.bg} {toast.show_border !== false ? 'border ' + ts.border : ''}"
              role="alert"
+             aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
              aria-atomic="true">
             {#if toast.auto_dismiss && toast.show_progress !== false && toast.duration > 0 && toast.progress_position === 'top'}
             <div class="h-1 w-full {ts.barBg}"><div class="h-full {ts.bar}" style="width:{progress[toast.id] ?? 100}%;transition:none;{toast.progress_direction === 'rtl' ? 'margin-left:auto;' : ''}"></div></div>

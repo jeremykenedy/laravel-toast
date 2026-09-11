@@ -55,7 +55,22 @@ it('strips comments so the inlined stylesheet carries no documentation weight', 
 it('honours the reduced motion preference', function () {
     expect(ToastAnimations::css())->toContain('prefers-reduced-motion: reduce')
         ->and(ToastAnimations::css())->toContain('[data-toast-id]')
-        ->and(ToastAnimations::css())->toContain('[id^="lw-toast-"]');
+        ->and(ToastAnimations::css())->toContain('[data-laravel-toast]');
+});
+
+it('scopes the reduced motion rule to its own attributes', function () {
+    preg_match('/prefers-reduced-motion: reduce\)\s*\{\s*([^{]+)\{/', ToastAnimations::css(), $matches);
+
+    $selectors = array_map('trim', explode(',', $matches[1] ?? ''));
+
+    // An id prefix would reach a host element such as toast-modal and freeze
+    // its animations whenever the visitor prefers reduced motion.
+    expect($selectors)->not->toBeEmpty();
+
+    foreach ($selectors as $selector) {
+        expect($selector)->toStartWith('[data-')
+            ->and($selector)->not->toContain('id^=');
+    }
 });
 
 it('wraps the stylesheet in an identified style tag', function () {

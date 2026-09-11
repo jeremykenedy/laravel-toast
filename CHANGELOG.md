@@ -88,7 +88,8 @@ attribute and container id from v1.0.0 behaves as it did before.
   keyframes shared by every renderer.
 - `resources/css/toast-animations.css`, published with `--tag=toast-css`.
 - `prefers-reduced-motion` support. Toasts still appear and dismiss on schedule,
-  they just stop moving.
+  they just stop moving. The rule is scoped to the package's own attributes, so
+  it cannot reach a host element whose id happens to start with `toast-`.
 - Keyboard focus pauses the countdown, matching the existing hover behavior.
 - `dismissLabel` prop on the Vue, React and Svelte components, so the close
   button can be translated.
@@ -113,7 +114,7 @@ attribute and container id from v1.0.0 behaves as it did before.
 
 ### Testing and CI
 
-- Suite grew from 164 to 312 tests.
+- Suite grew from 164 to 313 tests.
 - New jobs: install without Livewire, `composer validate`, framework isolation
   (no Bootstrap classes in Tailwind views, no Alpine in Livewire views, and so
   on), and frontend checks that reject application path aliases.

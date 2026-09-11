@@ -134,7 +134,9 @@
  * still dismiss on schedule, they simply stop moving. WCAG 2.2 SC 2.3.3.
  */
 @media (prefers-reduced-motion: reduce) {
-    [data-toast-id], [id^="toast-"], [id^="lw-toast-"] {
+    /* Both attributes are this package's own. An id prefix such as
+       [id^="toast-"] would also catch a host element like toast-modal. */
+    [data-toast-id], [data-laravel-toast] {
         animation-duration: 0.01ms !important;
         animation-iteration-count: 1 !important;
         transition-duration: 0.01ms !important;

@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Jeremykenedy\LaravelToast\Console\Concerns;
 
+use Jeremykenedy\LaravelToast\Providers\ToastServiceProvider;
+
 use function Laravel\Prompts\select;
 
 trait HasInstallPrompts
@@ -84,29 +86,28 @@ trait HasInstallPrompts
         $css = $this->option('css');
         $frontend = $this->option('frontend');
 
+        // Validated up front so a single invalid flag cannot slip through the
+        // non interactive path and be written to .env as a success.
+        if ($css && !in_array($css, ToastServiceProvider::CSS_FRAMEWORKS)) {
+            $this->error("Invalid CSS framework: {$css}. Use: ".implode(', ', ToastServiceProvider::CSS_FRAMEWORKS));
+
+            return false;
+        }
+
+        if ($frontend && !in_array($frontend, ToastServiceProvider::FRONTENDS)) {
+            $this->error("Invalid frontend: {$frontend}. Use: ".implode(', ', ToastServiceProvider::FRONTENDS));
+
+            return false;
+        }
+
         if ($css && $frontend) {
-            $validCss = ['tailwind', 'bootstrap5', 'bootstrap4'];
-            $validFrontend = ['blade', 'livewire', 'vue', 'react', 'svelte'];
-
-            if (!in_array($css, $validCss)) {
-                $this->error("Invalid CSS framework: {$css}. Use: ".implode(', ', $validCss));
-
-                return false;
-            }
-
-            if (!in_array($frontend, $validFrontend)) {
-                $this->error("Invalid frontend: {$frontend}. Use: ".implode(', ', $validFrontend));
-
-                return false;
-            }
-
             return ['css' => $css, 'frontend' => $frontend];
         }
 
         if ($this->option('no-interaction')) {
             return [
-                'css'      => $css ?: config('ui-kit.css_framework', 'tailwind'),
-                'frontend' => $frontend ?: config('ui-kit.frontend', 'blade'),
+                'css'      => $css ?: ToastServiceProvider::cssFramework(),
+                'frontend' => $frontend ?: ToastServiceProvider::frontend(),
             ];
         }
 
@@ -142,7 +143,7 @@ trait HasInstallPrompts
 
     protected function promptCssFramework(): string|false
     {
-        $valid = ['tailwind', 'bootstrap5', 'bootstrap4'];
+        $valid = ToastServiceProvider::CSS_FRAMEWORKS;
         $css = $this->option('css');
 
         if ($css) {
@@ -156,7 +157,7 @@ trait HasInstallPrompts
         }
 
         if ($this->option('no-interaction')) {
-            return config('ui-kit.css_framework', 'tailwind');
+            return ToastServiceProvider::cssFramework();
         }
 
         return select(
@@ -166,13 +167,13 @@ trait HasInstallPrompts
                 'bootstrap5' => 'Bootstrap 5',
                 'bootstrap4' => 'Bootstrap 4',
             ],
-            default: config('ui-kit.css_framework', 'tailwind'),
+            default: ToastServiceProvider::cssFramework(),
         );
     }
 
     protected function promptFrontendFramework(): string|false
     {
-        $valid = ['blade', 'livewire', 'vue', 'react', 'svelte'];
+        $valid = ToastServiceProvider::FRONTENDS;
         $frontend = $this->option('frontend');
 
         if ($frontend) {
@@ -186,7 +187,7 @@ trait HasInstallPrompts
         }
 
         if ($this->option('no-interaction')) {
-            return config('ui-kit.frontend', 'blade');
+            return ToastServiceProvider::frontend();
         }
 
         return select(
@@ -199,7 +200,7 @@ trait HasInstallPrompts
                 'react'      => 'React 18',
                 'svelte'     => 'Svelte 4',
             ],
-            default: config('ui-kit.frontend', 'blade'),
+            default: ToastServiceProvider::frontend(),
         );
     }
 

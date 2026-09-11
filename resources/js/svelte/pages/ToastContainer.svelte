@@ -1,9 +1,15 @@
 <script>
-    import { __ } from "@/i18n/translator"
     import { onMount, onDestroy } from 'svelte'
+    import '../../../css/toast-animations.css'
 
     export let initialToasts = []
     export let position = 'top-right'
+    export let stack = true
+    export let dismissLabel = 'Dismiss'
+
+    const reduceMotion = typeof window !== 'undefined' && window.matchMedia
+        ? window.matchMedia('(prefers-reduced-motion: reduce)').matches
+        : false
 
     const positionMap = {
         'top-left': 'top:0.5rem;left:0.5rem;', 'top-center': 'top:0.5rem;left:50%;transform:translateX(-50%);',
@@ -28,86 +34,141 @@
     let progress = {}
     let timers = {}
     let pausedMap = {}
+    let holders = {}
+    let exiting = {}
 
     function getStyle(toast) { return styles[toast.type] || styles.info }
 
     function dismiss(id) {
         const toast = toasts.find(t => t.id === id)
+        if (!toast || exiting[id]) return
         if (timers[id]) { cancelAnimationFrame(timers[id]); delete timers[id] }
         delete pausedMap[id]
-        const anim = toast?.exit_animation || 'none'
-        const dur = toast?.exit_duration || 0.5
-        if (anim !== 'none') {
-            const el = document.querySelector(`[data-toast-id="${id}"]`)
-            if (el) { el.style.animation = `toast-${anim} ${dur}s ease forwards` }
-            setTimeout(() => remove(id), dur * 1000)
-        } else remove(id)
+        const anim = toast.exit_animation || 'none'
+        const dur = toast.exit_duration || 0.5
+        if (anim === 'none' || reduceMotion) { remove(id); return }
+        exiting[id] = true
+        const el = document.querySelector(`[data-toast-id="${id}"]`)
+        if (el) { el.style.animation = `toast-${anim} ${dur}s ease forwards` }
+        setTimeout(() => remove(id), dur * 1000)
     }
 
-    function remove(id) { delete progress[id]; toasts = toasts.filter(t => t.id !== id) }
+    function remove(id) {
+        delete progress[id]
+        delete exiting[id]
+        delete holders[id]
+        toasts = toasts.filter(t => t.id !== id)
+    }
 
-    function startTimer(toast) {
-        if (!toast.auto_dismiss || toast.duration <= 0) return
-        progress[toast.id] = 100
-        const start = Date.now(), id = toast.id, dur = toast.duration
+    function startTimer(toast, remaining) {
+        if (!toast.auto_dismiss || toast.duration <= 0 || remaining <= 0) return
+        const id = toast.id, startPct = progress[id] ?? 100, start = Date.now()
         function tick() {
-            if (pausedMap[id]) return
+            if (pausedMap[id] || exiting[id]) return
             const elapsed = Date.now() - start
-            progress[id] = Math.max(0, 100 - (elapsed / dur * 100))
+            progress[id] = Math.max(0, startPct - (elapsed / remaining * startPct))
             progress = progress
             if (progress[id] <= 0) dismiss(id); else timers[id] = requestAnimationFrame(tick)
         }
         timers[id] = requestAnimationFrame(tick)
     }
 
-    function pauseTimer(id) { if (!timers[id]) return; pausedMap[id] = true; cancelAnimationFrame(timers[id]); delete timers[id] }
-    function resumeTimer(id) { const t = toasts.find(x => x.id === id); if (!t || !pausedMap[id]) return; delete pausedMap[id]; startTimer(t) }
+    // Hover and focus are tracked apart so leaving one does not restart the
+    // countdown while the other is still holding it.
+    function hold(id, source) {
+        holders[id] = { ...holders[id], [source]: true }
+        if (!timers[id]) return
+        pausedMap[id] = true
+        cancelAnimationFrame(timers[id])
+        delete timers[id]
+    }
+
+    function release(id, source) {
+        if (holders[id]) delete holders[id][source]
+        if (holders[id] && Object.keys(holders[id]).length) return
+        const toast = toasts.find(t => t.id === id)
+        if (!toast || !pausedMap[id]) return
+        delete pausedMap[id]
+        startTimer(toast, (progress[id] ?? 100) / 100 * toast.duration)
+    }
 
     function enterStyle(toast) {
         const anim = toast.enter_animation || 'none'
         return anim !== 'none' ? `animation:toast-enter-${anim} ${toast.enter_duration || 0.5}s ease forwards;` : ''
     }
 
-    $: posStyle = positionMap[position] || positionMap['top-right']
+    // Each toast may carry its own position, and stack: false shows only the
+    // newest per position. The Blade and Livewire renderers already do this.
+    $: grouped = groupByPosition(toasts, position, stack)
+
+    function groupByPosition(list, fallback, keepAll) {
+        const groups = {}
+
+        for (const toast of list) {
+            const key = positionMap[toast.position] ? toast.position : fallback
+            const at = positionMap[key] ? key : 'top-right'
+            ;(groups[at] = groups[at] || []).push(toast)
+        }
+
+        if (!keepAll) {
+            for (const key of Object.keys(groups)) {
+                groups[key] = groups[key].slice(-1)
+            }
+        }
+
+        return Object.entries(groups)
+    }
+
+    function positionStyleFor(key) {
+        return positionMap[key] || positionMap['top-right']
+    }
 
     onMount(() => {
         toasts = initialToasts.length ? [...initialToasts] : [...(window.__toasts || [])]
-        toasts.forEach(startTimer)
+        toasts.forEach(toast => {
+            progress[toast.id] = 100
+            startTimer(toast, toast.duration)
+        })
+        progress = progress
     })
 
     onDestroy(() => { Object.values(timers).forEach(id => cancelAnimationFrame(id)) })
 </script>
 
-{#if toasts.length}
-<div style="position:fixed;{posStyle}z-index:9999;width:24rem;max-width:calc(100vw - 2rem);display:flex;flex-direction:column;gap:0.75rem;" role="status" aria-live="polite">
-    {#each toasts as toast (toast.id)}
+{#each grouped as [at, group] (at)}
+<div style="position:fixed;{positionStyleFor(at)}z-index:9999;width:24rem;max-width:calc(100vw - 1rem);display:flex;flex-direction:column;gap:0.75rem;pointer-events:none;" role="status" aria-live="polite" aria-atomic="false">
+    {#each group as toast (toast.id)}
         {@const ts = getStyle(toast)}
         <div data-toast-id={toast.id} dir={toast.dir || 'ltr'}
-             style="cursor:default;{toast.opacity < 1 ? 'opacity:'+toast.opacity+';' : ''}{enterStyle(toast)}"
-             on:mouseenter={() => toast.pause_on_hover && pauseTimer(toast.id)}
-             on:mouseleave={() => toast.pause_on_hover && resumeTimer(toast.id)}
-             class="rounded-lg shadow-lg overflow-hidden {ts.bg} {toast.show_border !== false ? 'border ' + ts.border : ''}"
-             role="alert">
+             style="pointer-events:auto;cursor:default;{toast.opacity < 1 ? 'opacity:'+toast.opacity+';' : ''}{enterStyle(toast)}"
+             on:mouseenter={() => toast.pause_on_hover && hold(toast.id, 'hover')}
+             on:mouseleave={() => toast.pause_on_hover && release(toast.id, 'hover')}
+             on:focusin={() => toast.pause_on_hover && hold(toast.id, 'focus')}
+             on:focusout={() => toast.pause_on_hover && release(toast.id, 'focus')}
+             class="rounded-xl shadow-lg shadow-black/5 ring-1 ring-black/5 dark:shadow-black/40 dark:ring-white/10 overflow-hidden {ts.bg} {toast.show_border !== false ? 'border ' + ts.border : ''}"
+             role="alert"
+             aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
+             aria-atomic="true">
             {#if toast.auto_dismiss && toast.show_progress !== false && toast.duration > 0 && toast.progress_position === 'top'}
             <div class="h-1 w-full {ts.barBg}"><div class="h-full {ts.bar}" style="width:{progress[toast.id] ?? 100}%;transition:none;{toast.progress_direction === 'rtl' ? 'margin-left:auto;' : ''}"></div></div>
             {/if}
             <div class="p-4 flex items-start gap-3">
                 {#if toast.show_icon !== false}
-                <div class="flex-shrink-0 mt-0.5">
+                <div class="shrink-0 mt-0.5">
                     {#if toast.custom_icon}
                         {@html toast.custom_icon}
                     {:else}
-                        <svg class="h-5 w-5 {ts.icon}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d={iconPaths[toast.type] || iconPaths.info} /></svg>
+                        <svg class="h-5 w-5 {ts.icon}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d={iconPaths[toast.type] || iconPaths.info} /></svg>
                     {/if}
                 </div>
                 {/if}
                 <div class="flex-1 min-w-0" style="cursor:default;">
-                    {#if toast.title}<p class="text-sm font-semibold">{toast.title}</p>{/if}
-                    <p class="text-sm">{toast.message}</p>
+                    {#if toast.title}<p class="text-sm font-semibold tracking-tight">{toast.title}</p>{/if}
+                    <p class="text-sm leading-relaxed break-words">{toast.message}</p>
                 </div>
                 {#if toast.show_close !== false}
-                <button on:click={() => dismiss(toast.id)} class="flex-shrink-0 rounded-md p-1 opacity-60 hover:opacity-100 transition-opacity cursor-pointer" aria-label="Dismiss">
-                    <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                <button type="button" on:click={() => dismiss(toast.id)} class="shrink-0 rounded-md p-1 opacity-60 hover:opacity-100 transition-opacity cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-transparent" aria-label={dismissLabel}>
+                    <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
                 </button>
                 {/if}
             </div>
@@ -117,4 +178,4 @@
         </div>
     {/each}
 </div>
-{/if}
+{/each}

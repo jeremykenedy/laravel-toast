@@ -71,12 +71,46 @@ class ToastManager
      */
     public function add(string $type, string $message, ?string $title = null, ?int $duration = null, array $options = []): static
     {
-        $type = in_array($type, self::VALID_TYPES) ? $type : 'info';
-
         $key = $this->sessionKey();
         $toasts = Session::get($key, []);
 
-        $toasts[] = [
+        $toast = $this->build($type, $message, $title, $duration, $options);
+        $toasts[] = $toast;
+
+        // The payload already resolved this, so a per-toast override counts.
+        $max = (int) $toast['max_visible'];
+        if ($max > 0 && count($toasts) > $max) {
+            $toasts = array_slice($toasts, -$max);
+        }
+
+        Session::flash($key, $toasts);
+
+        return $this;
+    }
+
+    /**
+     * Build a toast payload without touching the session. The Livewire
+     * component builds through here too, so defaults resolve in one place.
+     *
+     * @param  array{
+     *     position?: string,
+     *     auto_dismiss?: bool,
+     *     show_icon?: bool,
+     *     show_progress?: bool,
+     *     custom_icon?: string|null,
+     *     progress_direction?: string,
+     *     pause_on_hover?: bool,
+     *     opacity?: float,
+     *     max_visible?: int,
+     * }  $options  All props are optional; defaults come from config/toast.php.
+     *
+     * @return array<string, mixed>
+     */
+    public function build(string $type, string $message, ?string $title = null, ?int $duration = null, array $options = []): array
+    {
+        $type = in_array($type, self::VALID_TYPES) ? $type : 'info';
+
+        return [
             'id'                 => uniqid('toast_'),
             'type'               => $type,
             'message'            => $message,
@@ -101,15 +135,6 @@ class ToastManager
             'max_visible'        => $options['max_visible'] ?? (int) config('toast.max_visible', 5),
             'timestamp'          => now()->toISOString(),
         ];
-
-        $max = (int) config('toast.max_visible', 5);
-        if (count($toasts) > $max) {
-            $toasts = array_slice($toasts, -$max);
-        }
-
-        Session::flash($key, $toasts);
-
-        return $this;
     }
 
     public function get(): array

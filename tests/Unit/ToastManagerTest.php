@@ -309,3 +309,27 @@ it('uses custom session key', function () {
 
     expect(session('custom_key'))->toHaveCount(1);
 });
+
+it('builds a payload without writing to the session', function () {
+    $manager = app(ToastManager::class);
+
+    $toast = $manager->build('success', 'Not stored');
+
+    expect($toast['message'])->toBe('Not stored')
+        ->and($manager->get())->toBe([]);
+});
+
+it('builds the same keys that add stores', function () {
+    $manager = app(ToastManager::class);
+
+    $built = array_keys($manager->build('info', 'Shape'));
+
+    $manager->info('Shape');
+    $stored = array_keys($manager->get()[0]);
+
+    expect($built)->toBe($stored);
+});
+
+it('defaults an unknown type to info when building', function () {
+    expect(app(ToastManager::class)->build('explosion', 'Nope')['type'])->toBe('info');
+});

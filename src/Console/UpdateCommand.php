@@ -45,8 +45,8 @@ class UpdateCommand extends Command
             $css = $result['css'];
             $frontend = $result['frontend'];
         } else {
-            $validCss = ['tailwind', 'bootstrap5', 'bootstrap4'];
-            $validFrontend = ['blade', 'livewire', 'vue', 'react', 'svelte'];
+            $validCss = $this->validCssFrameworks();
+            $validFrontend = $this->validFrontends();
 
             if ($css && !in_array($css, $validCss)) {
                 $this->error("Invalid CSS framework: {$css}. Valid: ".implode(', ', $validCss));

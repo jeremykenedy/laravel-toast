@@ -11,10 +11,25 @@ use Jeremykenedy\LaravelToast\Console\SwitchCommand;
 use Jeremykenedy\LaravelToast\Console\UpdateCommand;
 use Jeremykenedy\LaravelToast\Livewire\ToastContainer;
 use Jeremykenedy\LaravelToast\Services\ToastManager;
+use Jeremykenedy\LaravelToast\Support\ToastAnimations;
 use Livewire\Livewire;
 
 class ToastServiceProvider extends ServiceProvider
 {
+    /**
+     * CSS frameworks that ship a view directory.
+     *
+     * @var list<string>
+     */
+    public const CSS_FRAMEWORKS = ['tailwind', 'bootstrap5', 'bootstrap4'];
+
+    /**
+     * Frontends the install and switch commands accept.
+     *
+     * @var list<string>
+     */
+    public const FRONTENDS = ['blade', 'livewire', 'vue', 'react', 'svelte'];
+
     public function register(): void
     {
         $this->mergeConfigFrom(__DIR__.'/../../config/toast.php', 'toast');
@@ -31,6 +46,28 @@ class ToastServiceProvider extends ServiceProvider
         $this->registerLivewireComponents();
     }
 
+    /**
+     * `toast.css_framework` is checked first so the package works standalone. It
+     * defaults to null, leaving `ui-kit.css_framework` in control where that is
+     * what the application uses.
+     */
+    public static function cssFramework(): string
+    {
+        $css = config('toast.css_framework') ?: config('ui-kit.css_framework');
+
+        return in_array($css, self::CSS_FRAMEWORKS, true) ? $css : 'tailwind';
+    }
+
+    /**
+     * Same precedence as the CSS framework.
+     */
+    public static function frontend(): string
+    {
+        $frontend = config('toast.frontend') ?: config('ui-kit.frontend');
+
+        return in_array($frontend, self::FRONTENDS, true) ? $frontend : 'blade';
+    }
+
     protected function registerPublishing(): void
     {
         if ($this->app->runningInConsole()) {
@@ -45,6 +82,14 @@ class ToastServiceProvider extends ServiceProvider
             $this->publishes([
                 __DIR__.'/../../resources/lang' => $this->app->langPath('vendor/toast'),
             ], 'toast-lang');
+
+            $this->publishes([
+                ToastAnimations::path() => resource_path('css/vendor/toast/toast-animations.css'),
+            ], 'toast-css');
+
+            $this->publishes([
+                __DIR__.'/../../resources/js' => resource_path('js/vendor/toast'),
+            ], 'toast-js');
         }
     }
 
@@ -61,19 +106,70 @@ class ToastServiceProvider extends ServiceProvider
 
     protected function registerViews(): void
     {
-        $css = config('ui-kit.css_framework', 'tailwind');
+        $css = static::cssFramework();
+
         $bladePath = __DIR__.'/../../resources/views/'.$css.'/blade';
 
         if (!is_dir($bladePath)) {
             $bladePath = __DIR__.'/../../resources/views/tailwind/blade';
         }
 
-        $this->loadViewsFrom($bladePath, 'toast');
+        $this->loadViewsFrom($this->withPublishedOverride($bladePath, $css.'/blade'), 'toast');
 
         $livewirePath = __DIR__.'/../../resources/views/livewire';
         if (is_dir($livewirePath)) {
-            $this->loadViewsFrom($livewirePath, 'toast-livewire');
+            $this->loadViewsFrom($this->livewireViewPaths($livewirePath, $css), 'toast-livewire');
         }
+    }
+
+    /**
+     * Livewire lookup order, first match wins. The Tailwind markup stays at the
+     * root of `views/livewire` so published overrides keep working; Bootstrap 5
+     * and Bootstrap 4 live in their own subdirectories.
+     *
+     * @return list<string>
+     */
+    protected function livewireViewPaths(string $packagePath, string $css): array
+    {
+        $paths = [];
+
+        foreach ([$css, ''] as $variant) {
+            $relative = $variant === '' ? 'livewire' : 'livewire/'.$variant;
+            $published = resource_path('views/vendor/toast/'.$relative);
+
+            if (is_dir($published)) {
+                $paths[] = $published;
+            }
+        }
+
+        if (is_dir($packagePath.'/'.$css)) {
+            $paths[] = $packagePath.'/'.$css;
+        }
+
+        $paths[] = $packagePath;
+
+        return $paths;
+    }
+
+    /**
+     * Publishing copies the whole tree, so an override lands at
+     * `views/vendor/toast/{framework}/blade`. Laravel only checks
+     * `views/vendor/toast`, so register the nested path and let it win.
+     *
+     * @return list<string>
+     */
+    protected function withPublishedOverride(string $packagePath, string $relative): array
+    {
+        $paths = [];
+        $published = resource_path('views/vendor/toast/'.$relative);
+
+        if (is_dir($published)) {
+            $paths[] = $published;
+        }
+
+        $paths[] = $packagePath;
+
+        return $paths;
     }
 
     protected function registerTranslations(): void
@@ -90,7 +186,9 @@ class ToastServiceProvider extends ServiceProvider
 
     protected function registerLivewireComponents(): void
     {
-        if (class_exists(Livewire::class)) {
+        // The class can be autoloadable while the provider is not loaded, and
+        // registering a component in that state throws on livewire.finder.
+        if (class_exists(Livewire::class) && $this->app->bound('livewire')) {
             Livewire::component('toast-container', ToastContainer::class);
         }
     }

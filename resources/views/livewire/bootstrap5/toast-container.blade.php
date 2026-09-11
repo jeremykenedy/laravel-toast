@@ -1,15 +1,12 @@
 @php
     use Jeremykenedy\LaravelToast\Support\ToastAnimations;
 
-    $toastManager = app(\Jeremykenedy\LaravelToast\Services\ToastManager::class);
-    if (config('toast.convert_flash', true)) { $toastManager->convertFlashMessages(); }
-    $toasts = $toastManager->get();
-    $globalPosition = $toastManager->position();
+    $globalPosition = config('toast.position', 'top-right');
     $stack = config('toast.stack', true);
     $positionMap = [
-        'top-left' => 'top:0.5rem;left:0.5rem;', 'top-center' => 'top:0.5rem;left:50%;transform:translateX(-50%);',
-        'top-right' => 'top:0.5rem;right:0.5rem;', 'bottom-right' => 'bottom:0.5rem;right:0.5rem;',
-        'bottom-left' => 'bottom:0.5rem;left:0.5rem;', 'bottom-center' => 'bottom:0.5rem;left:50%;transform:translateX(-50%);',
+        'top-left'=>'top:0.5rem;left:0.5rem;','top-center'=>'top:0.5rem;left:50%;transform:translateX(-50%);',
+        'top-right'=>'top:0.5rem;right:0.5rem;','bottom-right'=>'bottom:0.5rem;right:0.5rem;',
+        'bottom-left'=>'bottom:0.5rem;left:0.5rem;','bottom-center'=>'bottom:0.5rem;left:50%;transform:translateX(-50%);',
     ];
     $grouped = [];
     $displayToasts = $stack ? $toasts : (count($toasts) ? [end($toasts)] : []);
@@ -26,6 +23,7 @@
         'info'=>'<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16" aria-hidden="true"><path d="M8 16A8 8 0 1 0 8 0a8 8 0 0 0 0 16zm.93-9.412-1 4.705c-.07.34.029.533.304.533.194 0 .487-.07.686-.246l-.088.416c-.287.346-.92.598-1.465.598-.703 0-1.002-.422-.808-1.319l.738-3.468c.064-.293.006-.399-.287-.47l-.451-.081.082-.381 2.29-.287zM8 5.5a1 1 0 1 1 0-2 1 1 0 0 1 0 2z"/></svg>',
     ];
 @endphp
+<div>
 @if(count($displayToasts) > 0)
 {!! ToastAnimations::styleTag() !!}
 <style id="toast-bs5-theme">
@@ -41,25 +39,23 @@
         @foreach($posToasts as $toast)
         @php
             $bsType = $typeMap[$toast['type']] ?? 'info';
-            $enterStyle = '';
-            if (($toast['enter_animation'] ?? 'none') !== 'none') {
-                $enterStyle = 'animation:toast-enter-' . $toast['enter_animation'] . ' ' . ($toast['enter_duration'] ?? 0.5) . 's ease forwards;';
-            }
+            $enterStyle = (($toast['enter_animation'] ?? 'none') !== 'none') ? 'animation:toast-enter-' . $toast['enter_animation'] . ' ' . ($toast['enter_duration'] ?? 0.5) . 's ease forwards;' : '';
             $opacityStyle = (($toast['opacity'] ?? 1) < 1) ? 'opacity:' . $toast['opacity'] . ';' : '';
             $borderClass = (($toast['show_border'] ?? true) === false) ? ' border-0' : '';
         @endphp
-        <div class="toast show align-items-center mb-2 w-100 text-bg-{{ $bsType }} overflow-hidden rounded-3 shadow{{ $borderClass }}"
+        <div wire:key="{{ $toast['id'] }}"
+             id="lw-toast-{{ $toast['id'] }}"
+             class="toast show align-items-center mb-2 w-100 text-bg-{{ $bsType }} overflow-hidden rounded-3 shadow{{ $borderClass }}"
              role="alert" aria-live="{{ $toast['type'] === 'error' ? 'assertive' : 'polite' }}" aria-atomic="true"
              dir="{{ $toast['dir'] ?? 'ltr' }}"
              style="pointer-events:auto;cursor:default;{{ $opacityStyle }}{{ $enterStyle }}"
-             id="toast-{{ $toast['id'] }}"
              data-auto-dismiss="{{ ($toast['auto_dismiss'] ?? true) ? 'true' : 'false' }}"
              data-duration="{{ $toast['duration'] }}"
              data-pause-on-hover="{{ ($toast['pause_on_hover'] ?? true) ? 'true' : 'false' }}"
              data-exit-animation="{{ $toast['exit_animation'] ?? 'none' }}"
              data-exit-duration="{{ $toast['exit_duration'] ?? 0.5 }}">
-            @if(($toast['auto_dismiss'] ?? true) && ($toast['show_progress'] ?? true) !== false && $toast['duration'] > 0 && ($toast['progress_position'] ?? 'top') === 'top')
-            <div style="height:3px;background:rgba(255,255,255,0.3);"><div class="toast-progress-bar" style="height:100%;width:100%;background:rgba(255,255,255,0.7);transition:none;{{ ($toast['progress_direction'] ?? 'rtl') === 'rtl' ? 'margin-left:auto;' : '' }}" data-duration="{{ $toast['duration'] }}"></div></div>
+            @if(($toast['auto_dismiss'] ?? true) && ($toast['show_progress'] ?? true) !== false && ($toast['duration'] ?? 0) > 0 && ($toast['progress_position'] ?? 'top') === 'top')
+            <div style="height:3px;background:rgba(255,255,255,0.3);"><div class="toast-progress-bar" style="height:100%;width:100%;background:rgba(255,255,255,0.7);transition:none;{{ ($toast['progress_direction'] ?? 'rtl') === 'rtl' ? 'margin-left:auto;' : '' }}"></div></div>
             @endif
             <div class="d-flex">
                 <div class="toast-body d-flex align-items-center gap-2" style="cursor:default;">
@@ -67,70 +63,22 @@
                         <span class="flex-shrink-0 d-inline-flex">{!! $toast['custom_icon'] ?? ($iconMap[$toast['type']] ?? $iconMap['info']) !!}</span>
                     @endif
                     <div class="text-break">
-                        @if($toast['title']) <strong class="d-block">{{ $toast['title'] }}</strong> @endif
+                        @if($toast['title'] ?? null) <strong class="d-block">{{ $toast['title'] }}</strong> @endif
                         {{ $toast['message'] }}
                     </div>
                 </div>
                 @if(($toast['show_close'] ?? true) !== false)
-                <button type="button" class="btn-close btn-close-white me-2 m-auto flex-shrink-0" style="cursor:pointer;" data-bs-dismiss="toast" aria-label="{{ __('toast::toast.dismiss') }}"></button>
+                <button type="button" wire:click="dismiss('{{ $toast['id'] }}')" class="btn-close btn-close-white me-2 m-auto flex-shrink-0" style="cursor:pointer;" aria-label="{{ __('toast::toast.dismiss') }}"></button>
                 @endif
             </div>
-            @if(($toast['auto_dismiss'] ?? true) && ($toast['show_progress'] ?? true) !== false && $toast['duration'] > 0 && ($toast['progress_position'] ?? 'top') !== 'top')
-            <div style="height:3px;background:rgba(255,255,255,0.3);"><div class="toast-progress-bar" style="height:100%;width:100%;background:rgba(255,255,255,0.7);transition:none;{{ ($toast['progress_direction'] ?? 'rtl') === 'rtl' ? 'margin-left:auto;' : '' }}" data-duration="{{ $toast['duration'] }}"></div></div>
+            @if(($toast['auto_dismiss'] ?? true) && ($toast['show_progress'] ?? true) !== false && ($toast['duration'] ?? 0) > 0 && ($toast['progress_position'] ?? 'top') !== 'top')
+            <div style="height:3px;background:rgba(255,255,255,0.3);"><div class="toast-progress-bar" style="height:100%;width:100%;background:rgba(255,255,255,0.7);transition:none;{{ ($toast['progress_direction'] ?? 'rtl') === 'rtl' ? 'margin-left:auto;' : '' }}"></div></div>
             @endif
         </div>
         @endforeach
     </div>
 </div>
 @endforeach
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-
-    function dismiss(el) {
-        if (el.dataset.toastDismissing === 'true') return;
-        el.dataset.toastDismissing = 'true';
-        var exitAnim = el.dataset.exitAnimation || 'none';
-        var exitDur = parseFloat(el.dataset.exitDuration) || 0.5;
-        if (exitAnim !== 'none' && !reduceMotion) {
-            el.style.animation = 'toast-' + exitAnim + ' ' + exitDur + 's ease forwards';
-            setTimeout(function() { el.remove(); }, exitDur * 1000);
-        } else {
-            el.classList.remove('show');
-            setTimeout(function() { el.remove(); }, 150);
-        }
-    }
-
-    document.querySelectorAll('.toast.show[data-auto-dismiss="true"]').forEach(function(el) {
-        var duration = parseInt(el.dataset.duration) || 5000;
-        var pauseOnHover = el.dataset.pauseOnHover === 'true';
-        var bar = el.querySelector('.toast-progress-bar');
-        var start = Date.now(), paused = false, pausedAt = 0, elapsed = 0;
-        function tick() {
-            if (paused || el.dataset.toastDismissing === 'true') return;
-            var e = Date.now() - start - elapsed;
-            if (bar) bar.style.width = Math.max(0, 100 - (e / duration * 100)) + '%';
-            if (e >= duration) dismiss(el); else requestAnimationFrame(tick);
-        }
-        if (pauseOnHover) {
-            el.addEventListener('mouseenter', function() { paused = true; pausedAt = Date.now(); });
-            el.addEventListener('mouseleave', function() { elapsed += Date.now() - pausedAt; paused = false; requestAnimationFrame(tick); });
-            el.addEventListener('focusin', function() { paused = true; pausedAt = Date.now(); });
-            el.addEventListener('focusout', function() { elapsed += Date.now() - pausedAt; paused = false; requestAnimationFrame(tick); });
-        }
-        requestAnimationFrame(tick);
-    });
-
-    // Handled here so dismissal works without the Bootstrap JS bundle.
-    document.querySelectorAll('.toast.show .btn-close').forEach(function(btn) {
-        btn.addEventListener('click', function(event) {
-            var el = btn.closest('.toast');
-            if (!el) return;
-            event.preventDefault();
-            event.stopPropagation();
-            dismiss(el);
-        });
-    });
-});
-</script>
+@include('toast-livewire::partials.timer-script')
 @endif
+</div>

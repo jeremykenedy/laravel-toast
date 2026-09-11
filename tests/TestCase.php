@@ -6,13 +6,22 @@ namespace Jeremykenedy\LaravelToast\Tests;
 
 use Jeremykenedy\LaravelToast\Facades\Toast;
 use Jeremykenedy\LaravelToast\Providers\ToastServiceProvider;
+use Livewire\LivewireServiceProvider;
 use Orchestra\Testbench\TestCase as OrchestraTestCase;
 
 abstract class TestCase extends OrchestraTestCase
 {
     protected function getPackageProviders($app): array
     {
-        return [ToastServiceProvider::class];
+        $providers = [];
+
+        if (class_exists(LivewireServiceProvider::class)) {
+            $providers[] = LivewireServiceProvider::class;
+        }
+
+        $providers[] = ToastServiceProvider::class;
+
+        return $providers;
     }
 
     protected function getPackageAliases($app): array
@@ -48,6 +57,9 @@ abstract class TestCase extends OrchestraTestCase
 
         // Safety: ensure we are in testing environment
         $app['config']->set('app.env', 'testing');
+
+        // Livewire signs its payloads, so the test app needs a key.
+        $app['config']->set('app.key', 'base64:'.base64_encode(random_bytes(32)));
     }
 
     protected function setUp(): void

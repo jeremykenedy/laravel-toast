@@ -2,7 +2,18 @@
     "name": "jeremykenedy/laravel-toast",
     "description": "Multi-framework toast notifications for Laravel with Tailwind, Bootstrap 5, Bootstrap 4, Blade, Livewire, Vue, React, and Svelte support.",
     "license": "MIT",
-    "keywords": ["laravel", "toast", "notifications", "flash", "tailwind", "bootstrap", "livewire", "vue", "react", "svelte"],
+    "keywords": [
+        "laravel",
+        "toast",
+        "notifications",
+        "flash",
+        "tailwind",
+        "bootstrap",
+        "livewire",
+        "vue",
+        "react",
+        "svelte"
+    ],
     "authors": [
         {
             "name": "Jeremy Kenedy",
@@ -10,12 +21,13 @@
         }
     ],
     "require": {
-        "php": "^8.2|^8.3",
+        "php": "^8.2",
         "illuminate/support": "^10.0|^11.0|^12.0|^13.0",
         "illuminate/view": "^10.0|^11.0|^12.0|^13.0"
     },
     "require-dev": {
         "laravel/pint": "^1.0",
+        "livewire/livewire": "^3.0|^4.0",
         "orchestra/testbench": "^8.0|^9.0|^10.0|^11.0",
         "pestphp/pest": "^2.0|^3.0|^4.0",
         "pestphp/pest-plugin-laravel": "^2.0|^3.0|^4.0"
@@ -42,6 +54,11 @@
                 "Toast": "Jeremykenedy\\LaravelToast\\Facades\\Toast"
             }
         }
+    },
+    "scripts": {
+        "test": "@php vendor/bin/pest --ci",
+        "lint": "@php vendor/bin/pint --test",
+        "format": "@php vendor/bin/pint"
     },
     "config": {
         "sort-packages": true,

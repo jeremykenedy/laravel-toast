@@ -2,6 +2,18 @@
 
 return [
 
+    // Which CSS framework's views to render: "tailwind", "bootstrap5", "bootstrap4".
+    //
+    // Leave this null to defer to config('ui-kit.css_framework'), which is how
+    // applications running jeremykenedy/laravel-ui-kit drive every package from
+    // one place. Set TOAST_CSS to take control when using toast standalone.
+    'css_framework' => env('TOAST_CSS'),
+
+    // Which frontend is driving the toasts: "blade", "livewire", "vue",
+    // "react", "svelte". Same precedence as css_framework: null defers to
+    // config('ui-kit.frontend').
+    'frontend' => env('TOAST_FRONTEND'),
+
     // Where toasts appear: top-right, top-left, top-center,
     //                       bottom-right, bottom-left, bottom-center
     'position' => env('TOAST_POSITION', 'top-right'),

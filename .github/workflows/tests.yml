@@ -2,6 +2,10 @@ name: Tests
 
 on: ['push', 'pull_request']
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   tests:
     runs-on: ubuntu-latest
@@ -43,6 +47,33 @@ jobs:
       - name: Tests
         run: ./vendor/bin/pest --ci
 
+  without-livewire:
+    runs-on: ubuntu-latest
+    name: Without Livewire
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          extensions: mbstring, pdo, pdo_sqlite
+          tools: composer:v2
+          coverage: none
+
+      # Most installs do not have Livewire. Booting without it has to keep
+      # working, so run everything that does not depend on the package.
+      - name: Install dependencies without Livewire
+        run: |
+          composer config allow-plugins.pestphp/pest-plugin true
+          composer remove livewire/livewire --dev --no-interaction --no-update
+          composer update --prefer-dist --no-interaction
+
+      - name: Tests
+        run: ./vendor/bin/pest --ci --exclude-group livewire
+
   lint:
     runs-on: ubuntu-latest
     name: Pint
@@ -64,6 +95,23 @@ jobs:
 
       - name: Pint
         run: ./vendor/bin/pint --test
+
+  composer-validate:
+    runs-on: ubuntu-latest
+    name: Composer validate
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.4'
+          tools: composer:v2
+
+      - name: Validate composer.json
+        run: composer validate --strict --no-check-lock
 
   js-check:
     runs-on: ubuntu-latest
@@ -99,3 +147,56 @@ jobs:
           for prop in dir show_border show_close progress_position enter_animation exit_animation pause_on_hover opacity auto_dismiss; do
             grep -q "$prop" resources/js/svelte/pages/ToastContainer.svelte || (echo "Svelte missing: $prop" && exit 1)
           done
+
+      # An application alias such as "@/i18n/translator" does not resolve inside
+      # this package and breaks the consuming bundler build.
+      - name: Reject application path aliases
+        run: |
+          if grep -rn "from \"@/\|from '@/" resources/js/; then
+            echo "Components must not import through an application alias"
+            exit 1
+          fi
+
+      - name: Verify each component imports the shared keyframes
+        run: |
+          for file in resources/js/vue/pages/ToastContainer.vue resources/js/react/pages/ToastContainer.jsx resources/js/svelte/pages/ToastContainer.svelte; do
+            grep -q "css/toast-animations.css" "$file" || (echo "$file does not import the shared keyframes" && exit 1)
+          done
+
+  framework-isolation:
+    runs-on: ubuntu-latest
+    name: Framework isolation
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      # Each view directory owns exactly one CSS framework. Mixing them is the
+      # one thing that breaks every consuming application at once.
+      - name: Reject Bootstrap classes in Tailwind views
+        run: |
+          if grep -rnE 'class="[^"]*\b(alert-(success|danger|warning|info)|toast-body|btn-close|text-bg-)' resources/views/tailwind resources/views/livewire/toast-container.blade.php; then
+            echo "Bootstrap classes found in a Tailwind view"
+            exit 1
+          fi
+
+      - name: Reject Tailwind classes in Bootstrap views
+        run: |
+          if grep -rnE '\b(bg|text|border)-(green|red|amber|blue)-[0-9]{2,3}\b' resources/views/bootstrap5 resources/views/bootstrap4 resources/views/livewire/bootstrap5 resources/views/livewire/bootstrap4; then
+            echo "Tailwind utilities found in a Bootstrap view"
+            exit 1
+          fi
+
+      - name: Reject Alpine directives in Livewire views
+        run: |
+          if grep -rn "x-data" resources/views/livewire; then
+            echo "Livewire views must not use Alpine state"
+            exit 1
+          fi
+
+      - name: Reject wire directives in Blade views
+        run: |
+          if grep -rn "wire:" resources/views/tailwind resources/views/bootstrap5 resources/views/bootstrap4; then
+            echo "Blade views must not use Livewire directives"
+            exit 1
+          fi

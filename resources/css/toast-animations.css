@@ -1,0 +1,142 @@
+/*!
+ * Laravel Toast animation keyframes.
+ *
+ * 49 animations, each with a matching enter and exit variant:
+ *   exit  -> @keyframes toast-{name}
+ *   enter -> @keyframes toast-enter-{name}
+ *
+ * The Blade and Livewire views inline this file automatically. Vue, React and
+ * Svelte consumers import it once from their bundler entry point:
+ *
+ *   import "../../vendor/jeremykenedy/laravel-toast/resources/css/toast-animations.css";
+ *
+ * Or publish it:  php artisan vendor:publish --tag=toast-css
+ */
+
+/* Fade */
+@keyframes toast-enter-fade-center{0%{opacity:0}100%{opacity:1}}
+@keyframes toast-enter-fade{0%{opacity:0}100%{opacity:1}}
+@keyframes toast-fade-center{0%{opacity:1}100%{opacity:0}}
+@keyframes toast-fade{0%{opacity:1}100%{opacity:0}}
+
+/* Slide */
+@keyframes toast-enter-slide-bottom{0%{transform:translateY(120%);opacity:0}100%{transform:translateY(0);opacity:1}}
+@keyframes toast-enter-slide-left{0%{transform:translateX(-120%);opacity:0}100%{transform:translateX(0);opacity:1}}
+@keyframes toast-enter-slide-right{0%{transform:translateX(120%);opacity:0}100%{transform:translateX(0);opacity:1}}
+@keyframes toast-enter-slide-top{0%{transform:translateY(-120%);opacity:0}100%{transform:translateY(0);opacity:1}}
+@keyframes toast-enter-slide{0%{transform:translateX(120%);opacity:0}100%{transform:translateX(0);opacity:1}}
+@keyframes toast-slide-bottom{0%{transform:translateY(0);opacity:1}100%{transform:translateY(120%);opacity:0}}
+@keyframes toast-slide-left{0%{transform:translateX(0);opacity:1}100%{transform:translateX(-120%);opacity:0}}
+@keyframes toast-slide-right{0%{transform:translateX(0);opacity:1}100%{transform:translateX(120%);opacity:0}}
+@keyframes toast-slide-top{0%{transform:translateY(0);opacity:1}100%{transform:translateY(-120%);opacity:0}}
+@keyframes toast-slide{0%{transform:translateX(0);opacity:1}100%{transform:translateX(120%);opacity:0}}
+
+/* Bounce */
+@keyframes toast-bounce-bottom{0%{transform:translateY(0);opacity:1}30%{transform:translateY(-15%)}100%{transform:translateY(120%);opacity:0}}
+@keyframes toast-bounce-center{0%{transform:scale(1);opacity:1}30%{transform:scale(1.1);opacity:1}100%{transform:scale(0);opacity:0}}
+@keyframes toast-bounce-left{0%{transform:translateX(0);opacity:1}30%{transform:translateX(8%)}100%{transform:translateX(-120%);opacity:0}}
+@keyframes toast-bounce-right{0%{transform:translateX(0);opacity:1}30%{transform:translateX(-8%)}100%{transform:translateX(120%);opacity:0}}
+@keyframes toast-bounce-top{0%{transform:translateY(0);opacity:1}30%{transform:translateY(15%)}100%{transform:translateY(-120%);opacity:0}}
+@keyframes toast-bounce{0%{transform:scale(1);opacity:1}30%{transform:scale(1.1);opacity:1}100%{transform:scale(0);opacity:0}}
+@keyframes toast-enter-bounce-bottom{0%{transform:translateY(120%);opacity:0}70%{transform:translateY(-10%);opacity:1}100%{transform:translateY(0)}}
+@keyframes toast-enter-bounce-center{0%{transform:scale(0);opacity:0}70%{transform:scale(1.08);opacity:1}100%{transform:scale(1);opacity:1}}
+@keyframes toast-enter-bounce-left{0%{transform:translateX(-120%);opacity:0}70%{transform:translateX(5%);opacity:1}100%{transform:translateX(0)}}
+@keyframes toast-enter-bounce-right{0%{transform:translateX(120%);opacity:0}70%{transform:translateX(-5%);opacity:1}100%{transform:translateX(0)}}
+@keyframes toast-enter-bounce-top{0%{transform:translateY(-120%);opacity:0}70%{transform:translateY(10%);opacity:1}100%{transform:translateY(0)}}
+@keyframes toast-enter-bounce{0%{transform:scale(0);opacity:0}70%{transform:scale(1.08);opacity:1}100%{transform:scale(1);opacity:1}}
+
+/* Shrink */
+@keyframes toast-enter-shrink-bottom{0%{transform:scaleY(0);transform-origin:top;opacity:0}100%{transform:scaleY(1);transform-origin:top;opacity:1}}
+@keyframes toast-enter-shrink-center{0%{transform:scale(0);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes toast-enter-shrink-left{0%{transform:scaleX(0);transform-origin:right;opacity:0}100%{transform:scaleX(1);transform-origin:right;opacity:1}}
+@keyframes toast-enter-shrink-right{0%{transform:scaleX(0);transform-origin:left;opacity:0}100%{transform:scaleX(1);transform-origin:left;opacity:1}}
+@keyframes toast-enter-shrink-top{0%{transform:scaleY(0);transform-origin:bottom;opacity:0}100%{transform:scaleY(1);transform-origin:bottom;opacity:1}}
+@keyframes toast-enter-shrink{0%{transform:scale(0);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes toast-shrink-bottom{0%{transform:scaleY(1);transform-origin:top;opacity:1}100%{transform:scaleY(0);transform-origin:top;opacity:0}}
+@keyframes toast-shrink-center{0%{transform:scale(1);opacity:1}100%{transform:scale(0);opacity:0}}
+@keyframes toast-shrink-left{0%{transform:scaleX(1);transform-origin:right;opacity:1}100%{transform:scaleX(0);transform-origin:right;opacity:0}}
+@keyframes toast-shrink-right{0%{transform:scaleX(1);transform-origin:left;opacity:1}100%{transform:scaleX(0);transform-origin:left;opacity:0}}
+@keyframes toast-shrink-top{0%{transform:scaleY(1);transform-origin:bottom;opacity:1}100%{transform:scaleY(0);transform-origin:bottom;opacity:0}}
+@keyframes toast-shrink{0%{transform:scale(1);opacity:1}100%{transform:scale(0);opacity:0}}
+
+/* Flip (3D) */
+@keyframes toast-enter-flip-bottom{0%{transform:perspective(600px) rotateX(90deg);opacity:0}100%{transform:perspective(600px) rotateX(0);opacity:1}}
+@keyframes toast-enter-flip-center{0%{transform:perspective(600px) rotateY(180deg);opacity:0}100%{transform:perspective(600px) rotateY(0);opacity:1}}
+@keyframes toast-enter-flip-left{0%{transform:perspective(600px) rotateY(90deg);opacity:0}100%{transform:perspective(600px) rotateY(0);opacity:1}}
+@keyframes toast-enter-flip-right{0%{transform:perspective(600px) rotateY(-90deg);opacity:0}100%{transform:perspective(600px) rotateY(0);opacity:1}}
+@keyframes toast-enter-flip-top{0%{transform:perspective(600px) rotateX(-90deg);opacity:0}100%{transform:perspective(600px) rotateX(0);opacity:1}}
+@keyframes toast-enter-flip{0%{transform:perspective(600px) rotateY(180deg);opacity:0}100%{transform:perspective(600px) rotateY(0);opacity:1}}
+@keyframes toast-flip-bottom{0%{transform:perspective(600px) rotateX(0);opacity:1}100%{transform:perspective(600px) rotateX(-90deg);opacity:0}}
+@keyframes toast-flip-center{0%{transform:perspective(600px) rotateY(0);opacity:1}100%{transform:perspective(600px) rotateY(180deg);opacity:0}}
+@keyframes toast-flip-left{0%{transform:perspective(600px) rotateY(0);opacity:1}100%{transform:perspective(600px) rotateY(-90deg);opacity:0}}
+@keyframes toast-flip-right{0%{transform:perspective(600px) rotateY(0);opacity:1}100%{transform:perspective(600px) rotateY(90deg);opacity:0}}
+@keyframes toast-flip-top{0%{transform:perspective(600px) rotateX(0);opacity:1}100%{transform:perspective(600px) rotateX(90deg);opacity:0}}
+@keyframes toast-flip{0%{transform:perspective(600px) rotateY(0);opacity:1}100%{transform:perspective(600px) rotateY(180deg);opacity:0}}
+
+/* Spin */
+@keyframes toast-enter-spin-bottom{0%{transform:rotate(-360deg) translateY(120%);opacity:0}100%{transform:rotate(0) translateY(0);opacity:1}}
+@keyframes toast-enter-spin-center{0%{transform:rotate(-360deg) scale(0);opacity:0}100%{transform:rotate(0) scale(1);opacity:1}}
+@keyframes toast-enter-spin-left{0%{transform:rotate(360deg) translateX(-120%);opacity:0}100%{transform:rotate(0) translateX(0);opacity:1}}
+@keyframes toast-enter-spin-right{0%{transform:rotate(-360deg) translateX(120%);opacity:0}100%{transform:rotate(0) translateX(0);opacity:1}}
+@keyframes toast-enter-spin-top{0%{transform:rotate(360deg) translateY(-120%);opacity:0}100%{transform:rotate(0) translateY(0);opacity:1}}
+@keyframes toast-enter-spin{0%{transform:rotate(-360deg) scale(0);opacity:0}100%{transform:rotate(0) scale(1);opacity:1}}
+@keyframes toast-spin-bottom{0%{transform:rotate(0) translateY(0);opacity:1}100%{transform:rotate(360deg) translateY(120%);opacity:0}}
+@keyframes toast-spin-center{0%{transform:rotate(0) scale(1);opacity:1}100%{transform:rotate(360deg) scale(0);opacity:0}}
+@keyframes toast-spin-left{0%{transform:rotate(0) translateX(0);opacity:1}100%{transform:rotate(-360deg) translateX(-120%);opacity:0}}
+@keyframes toast-spin-right{0%{transform:rotate(0) translateX(0);opacity:1}100%{transform:rotate(360deg) translateX(120%);opacity:0}}
+@keyframes toast-spin-top{0%{transform:rotate(0) translateY(0);opacity:1}100%{transform:rotate(-360deg) translateY(-120%);opacity:0}}
+@keyframes toast-spin{0%{transform:rotate(0) scale(1);opacity:1}100%{transform:rotate(360deg) scale(0);opacity:0}}
+
+/* Grow */
+@keyframes toast-enter-grow-bottom{0%{transform:scale(0);transform-origin:center top;opacity:0}100%{transform:scale(1);transform-origin:center top;opacity:1}}
+@keyframes toast-enter-grow-center{0%{transform:scale(0);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes toast-enter-grow-left{0%{transform:scale(0);transform-origin:right center;opacity:0}100%{transform:scale(1);transform-origin:right center;opacity:1}}
+@keyframes toast-enter-grow-right{0%{transform:scale(0);transform-origin:left center;opacity:0}100%{transform:scale(1);transform-origin:left center;opacity:1}}
+@keyframes toast-enter-grow-top{0%{transform:scale(0);transform-origin:center bottom;opacity:0}100%{transform:scale(1);transform-origin:center bottom;opacity:1}}
+@keyframes toast-enter-grow{0%{transform:scale(0);opacity:0}100%{transform:scale(1);opacity:1}}
+@keyframes toast-grow-bottom{0%{transform:scale(1);transform-origin:center top;opacity:1}100%{transform:scale(0);transform-origin:center top;opacity:0}}
+@keyframes toast-grow-center{0%{transform:scale(1);opacity:1}100%{transform:scale(0);opacity:0}}
+@keyframes toast-grow-left{0%{transform:scale(1);transform-origin:right center;opacity:1}100%{transform:scale(0);transform-origin:right center;opacity:0}}
+@keyframes toast-grow-right{0%{transform:scale(1);transform-origin:left center;opacity:1}100%{transform:scale(0);transform-origin:left center;opacity:0}}
+@keyframes toast-grow-top{0%{transform:scale(1);transform-origin:center bottom;opacity:1}100%{transform:scale(0);transform-origin:center bottom;opacity:0}}
+@keyframes toast-grow{0%{transform:scale(1);opacity:1}100%{transform:scale(0);opacity:0}}
+
+/* Slam (overshoot) */
+@keyframes toast-enter-slam-bottom{0%{transform:scale(0.5) translateY(120%);opacity:0}60%{transform:scale(1.15) translateY(-3%);opacity:1}100%{transform:scale(1) translateY(0);opacity:1}}
+@keyframes toast-enter-slam-center{0%{transform:scale(0);opacity:0}60%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}}
+@keyframes toast-enter-slam-left{0%{transform:scale(0.5) translateX(-120%);opacity:0}60%{transform:scale(1.15) translateX(3%);opacity:1}100%{transform:scale(1) translateX(0);opacity:1}}
+@keyframes toast-enter-slam-right{0%{transform:scale(0.5) translateX(120%);opacity:0}60%{transform:scale(1.15) translateX(-3%);opacity:1}100%{transform:scale(1) translateX(0);opacity:1}}
+@keyframes toast-enter-slam-top{0%{transform:scale(0.5) translateY(-120%);opacity:0}60%{transform:scale(1.15) translateY(3%);opacity:1}100%{transform:scale(1) translateY(0);opacity:1}}
+@keyframes toast-enter-slam{0%{transform:scale(0);opacity:0}60%{transform:scale(1.2);opacity:1}100%{transform:scale(1);opacity:1}}
+@keyframes toast-slam-bottom{0%{transform:scale(1);opacity:1}40%{transform:scale(1.15) translateY(-5%);opacity:1}100%{transform:scale(0.5) translateY(120%);opacity:0}}
+@keyframes toast-slam-center{0%{transform:scale(1);opacity:1}40%{transform:scale(1.15);opacity:1}100%{transform:scale(0);opacity:0}}
+@keyframes toast-slam-left{0%{transform:scale(1);opacity:1}40%{transform:scale(1.15) translateX(5%);opacity:1}100%{transform:scale(0.5) translateX(-120%);opacity:0}}
+@keyframes toast-slam-right{0%{transform:scale(1);opacity:1}40%{transform:scale(1.15) translateX(-5%);opacity:1}100%{transform:scale(0.5) translateX(120%);opacity:0}}
+@keyframes toast-slam-top{0%{transform:scale(1);opacity:1}40%{transform:scale(1.15) translateY(5%);opacity:1}100%{transform:scale(0.5) translateY(-120%);opacity:0}}
+@keyframes toast-slam{0%{transform:scale(1);opacity:1}40%{transform:scale(1.15);opacity:1}100%{transform:scale(0);opacity:0}}
+
+/* Wobble */
+@keyframes toast-enter-wobble-bottom{0%{transform:translateY(120%);opacity:0}70%{transform:translateY(-8%);opacity:1}85%{transform:translateY(3%)}100%{transform:translateY(0)}}
+@keyframes toast-enter-wobble-center{0%{transform:scale(0);opacity:0}50%{transform:scale(1.08);opacity:1}65%{transform:scale(0.95)}80%{transform:scale(1.02)}100%{transform:scale(1);opacity:1}}
+@keyframes toast-enter-wobble-left{0%{transform:translateX(-120%);opacity:0}70%{transform:translateX(5%);opacity:1}85%{transform:translateX(-2%)}100%{transform:translateX(0)}}
+@keyframes toast-enter-wobble-right{0%{transform:translateX(120%);opacity:0}70%{transform:translateX(-5%);opacity:1}85%{transform:translateX(2%)}100%{transform:translateX(0)}}
+@keyframes toast-enter-wobble-top{0%{transform:translateY(-120%);opacity:0}70%{transform:translateY(8%);opacity:1}85%{transform:translateY(-3%)}100%{transform:translateY(0)}}
+@keyframes toast-enter-wobble{0%{transform:translateX(0);opacity:0}1%{opacity:1}15%{transform:translateX(-6px) rotate(-3deg)}30%{transform:translateX(5px) rotate(2deg)}45%{transform:translateX(-4px) rotate(-1deg)}60%{transform:translateX(2px)}75%{transform:translateX(-1px)}100%{transform:translateX(0);opacity:1}}
+@keyframes toast-wobble-bottom{0%{transform:translateY(0);opacity:1}25%{transform:translateY(-10%)}100%{transform:translateY(120%);opacity:0}}
+@keyframes toast-wobble-center{0%{transform:scale(1);opacity:1}15%{transform:scale(1.05) rotate(-2deg)}30%{transform:scale(0.95) rotate(2deg)}45%{transform:scale(1.02) rotate(-1deg)}60%{transform:scale(1);opacity:1}100%{transform:scale(0);opacity:0}}
+@keyframes toast-wobble-left{0%{transform:translateX(0);opacity:1}25%{transform:translateX(8%)}100%{transform:translateX(-120%);opacity:0}}
+@keyframes toast-wobble-right{0%{transform:translateX(0);opacity:1}25%{transform:translateX(-8%)}100%{transform:translateX(120%);opacity:0}}
+@keyframes toast-wobble-top{0%{transform:translateY(0);opacity:1}25%{transform:translateY(10%)}100%{transform:translateY(-120%);opacity:0}}
+@keyframes toast-wobble{0%{transform:translateX(0);opacity:1}15%{transform:translateX(-6px) rotate(-3deg)}30%{transform:translateX(5px) rotate(2deg)}45%{transform:translateX(-4px) rotate(-1deg)}60%{transform:translateX(2px) rotate(0)}75%{transform:translateX(-1px)}85%{transform:translateX(0);opacity:1}100%{transform:translateX(0);opacity:0}}
+
+/*
+ * Respect the operating system reduced-motion setting. Toasts still appear and
+ * still dismiss on schedule, they simply stop moving. WCAG 2.2 SC 2.3.3.
+ */
+@media (prefers-reduced-motion: reduce) {
+    [data-toast-id], [id^="toast-"], [id^="lw-toast-"] {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+    }
+}

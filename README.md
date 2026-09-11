@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-Powerful, highly configurable toast notifications for Laravel with 56 animations,<br>19 per-toast props, RTL support, dark mode, and full CSS/frontend framework parity.
+Powerful, highly configurable toast notifications for Laravel with 49 animations,<br>19 per-toast props, RTL support, dark mode, and full CSS/frontend framework parity.
 </p>
 
 <p align="center">
@@ -23,15 +23,19 @@ Powerful, highly configurable toast notifications for Laravel with 56 animations
 - [Framework Support](#framework-support-matrix)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
+- [Choosing Your Frameworks](#choosing-your-frameworks)
 - [Configuration](#configuration)
 - [Props Reference](#props-reference)
 - [Animations](#animations)
+- [Animations Outside Blade](#animations-outside-blade)
 - [Dark Mode](#dark-mode)
 - [Customizing Colors](#customizing-colors)
 - [Usage](#usage)
 - [Changing Frameworks](#changing-frameworks)
 - [Artisan Commands](#artisan-commands)
 - [Testing](#testing)
+- [Contributing](#contributing)
+- [Changelog](#changelog)
 - [License](#license)
 
 ## Framework Support
@@ -49,9 +53,9 @@ Every CSS and frontend combination is fully supported with identical features:
 ## Requirements
 
 - PHP 8.2+
-- Laravel 12 or 13
+- Laravel 10, 11, 12 or 13 (continuous integration covers 12 and 13)
 - One CSS framework: Tailwind v4, Bootstrap 5, or Bootstrap 4
-- One frontend: Blade + Alpine.js, Livewire 3, Vue 3, React 18, or Svelte 4
+- One frontend: Blade + Alpine.js, Livewire 3 or 4, Vue 3, React 18, or Svelte 4
 
 ## Installation
 
@@ -93,6 +97,27 @@ return back()->with('success', 'Profile updated.');
 // Displays as a success toast with no code changes
 ```
 
+## Choosing Your Frameworks
+
+`toast:install` writes your choice to `.env`. You can also set it by hand:
+
+```env
+TOAST_CSS=bootstrap5
+TOAST_FRONTEND=livewire
+```
+
+| Setting | Values | Default |
+|---------|--------|---------|
+| `TOAST_CSS` | `tailwind`, `bootstrap5`, `bootstrap4` | `tailwind` |
+| `TOAST_FRONTEND` | `blade`, `livewire`, `vue`, `react`, `svelte` | `blade` |
+
+If you also run [jeremykenedy/laravel-ui-kit](https://github.com/jeremykenedy/laravel-ui-kit),
+leave `TOAST_CSS` unset and `config('ui-kit.css_framework')` keeps control, so one
+switch still moves every package together. `TOAST_CSS` only takes over when you set it.
+
+Anything unrecognised falls back to `tailwind` and `blade` rather than failing to
+resolve a view.
+
 ## Configuration
 
 ```bash
@@ -102,6 +127,8 @@ php artisan vendor:publish --tag=toast-config
 Every config option is also an ENV variable and a per-toast prop override:
 
 ```env
+TOAST_CSS=tailwind
+TOAST_FRONTEND=blade
 TOAST_POSITION=top-right
 TOAST_DIR=ltr
 TOAST_DURATION=5000
@@ -167,7 +194,8 @@ toast()->success('Saved!', 'Done', 3000, [
 
 ## Animations
 
-56 animation styles available for both `enter_animation` and `exit_animation`.
+49 animation styles, plus `none`, available for both `enter_animation` and `exit_animation`.
+Every style ships an enter and an exit keyframe, and all of them work in all 15 combinations.
 Directionless names (e.g., `slide`, `bounce`) use a sensible default (typically center or right):
 
 | Style                | Enter                                          | Exit                                  |
@@ -233,6 +261,29 @@ Directionless names (e.g., `slide`, `bounce`) use a sensible default (typically 
 | `wobble-center`      | Wobble + scale up from center                  | Wobble + scale down to center         |
 
 Enter and exit animations have independent duration controls (`enter_duration`, `exit_duration`).
+
+## Animations Outside Blade
+
+Blade and Livewire inline the keyframes for you, so there is nothing to wire up.
+
+The Vue, React and Svelte components import the same stylesheet directly:
+
+```js
+import '../../../css/toast-animations.css'
+```
+
+That resolves on its own when you import the component from the package:
+
+```js
+import ToastContainer from '../../vendor/jeremykenedy/laravel-toast/resources/js/vue/pages/ToastContainer.vue'
+```
+
+If you copy the component into your own source tree instead, publish the stylesheet
+and point the import at it:
+
+```bash
+php artisan vendor:publish --tag=toast-css
+```
 
 ## Dark Mode
 
@@ -461,13 +512,42 @@ After switching, run `npm run build`.
 php artisan vendor:publish --tag=toast-config
 php artisan vendor:publish --tag=toast-views
 php artisan vendor:publish --tag=toast-lang
+php artisan vendor:publish --tag=toast-css
 ```
+
+| Tag | Publishes to |
+|-----|--------------|
+| `toast-config` | `config/toast.php` |
+| `toast-views` | `resources/views/vendor/toast/` |
+| `toast-lang` | `lang/vendor/toast/` |
+| `toast-css` | `resources/css/vendor/toast/toast-animations.css` |
 
 ## Testing
 
 ```bash
-./vendor/bin/pest --ci
+composer test          # ./vendor/bin/pest --ci
+composer lint          # ./vendor/bin/pint --test
+composer format        # ./vendor/bin/pint
 ```
+
+The suite has zero database dependencies. `tests/TestCase.php` forces SQLite
+`:memory:`, nullifies every real connection, and fails in `setUp()` if anything
+else is configured.
+
+Livewire tests are grouped so the package can be verified without it installed:
+
+```bash
+./vendor/bin/pest --ci --exclude-group livewire
+```
+
+## Contributing
+
+See [CONTRIBUTING.md](CONTRIBUTING.md). Security issues go through
+[SECURITY.md](SECURITY.md), never a public issue.
+
+## Changelog
+
+See [CHANGELOG.md](CHANGELOG.md).
 
 ## License
 

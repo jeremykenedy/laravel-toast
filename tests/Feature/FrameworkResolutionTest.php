@@ -97,3 +97,24 @@ it('does not fall through to ui-kit when the toast setting is set but invalid', 
     config(['toast.frontend' => 'angular', 'ui-kit.frontend' => 'vue']);
     expect(ToastServiceProvider::frontend())->toBe('blade');
 });
+
+it('does not pin toast behind a ui-kit switch', function () {
+    // Writing TOAST_CSS in a ui-kit application would win over ui-kit forever
+    // after, so the kit would no longer be able to move toast with it.
+    config(['ui-kit.css_framework' => 'tailwind', 'ui-kit.frontend' => 'blade']);
+
+    $this->artisan('toast:switch', ['--css' => 'bootstrap5'])->assertSuccessful();
+
+    expect(config('toast.css_framework'))->toBeNull()
+        ->and(config('ui-kit.css_framework'))->toBe('bootstrap5')
+        ->and(ToastServiceProvider::cssFramework())->toBe('bootstrap5');
+});
+
+it('uses its own setting when ui-kit is not installed', function () {
+    config(['ui-kit' => null]);
+
+    $this->artisan('toast:switch', ['--frontend' => 'vue'])->assertSuccessful();
+
+    expect(config('toast.frontend'))->toBe('vue')
+        ->and(ToastServiceProvider::frontend())->toBe('vue');
+});

@@ -53,6 +53,7 @@
              dir="{{ $toast['dir'] ?? 'ltr' }}"
              style="pointer-events:auto;cursor:default;{{ $opacityStyle }}{{ $enterStyle }}"
              id="toast-{{ $toast['id'] }}"
+             data-laravel-toast
              data-auto-dismiss="{{ ($toast['auto_dismiss'] ?? true) ? 'true' : 'false' }}"
              data-duration="{{ $toast['duration'] }}"
              data-pause-on-hover="{{ ($toast['pause_on_hover'] ?? true) ? 'true' : 'false' }}"
@@ -101,7 +102,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    document.querySelectorAll('.toast.show[data-auto-dismiss="true"]').forEach(function(el) {
+    document.querySelectorAll('[data-laravel-toast][data-auto-dismiss="true"]').forEach(function(el) {
         // A duration of 0 means the toast stays until it is dismissed by hand.
         var duration = parseInt(el.dataset.duration, 10);
         if (!isFinite(duration) || duration <= 0) return;
@@ -143,10 +144,11 @@ document.addEventListener('DOMContentLoaded', function() {
         requestAnimationFrame(tick);
     });
 
-    // Handled here so dismissal works without the Bootstrap JS bundle.
-    document.querySelectorAll('.toast.show .btn-close').forEach(function(btn) {
+    // Handled here so dismissal works without the Bootstrap JS bundle. Scoped to
+    // this package's toasts so a host application's own toasts are left alone.
+    document.querySelectorAll('[data-laravel-toast] .btn-close').forEach(function(btn) {
         btn.addEventListener('click', function(event) {
-            var el = btn.closest('.toast');
+            var el = btn.closest('[data-laravel-toast]');
             if (!el) return;
             event.preventDefault();
             event.stopPropagation();

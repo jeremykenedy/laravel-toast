@@ -131,3 +131,28 @@ it('keeps the react progress updater free of side effects', function () {
     // Strict Mode invokes updaters twice, which would start two timer loops.
     expect($source)->not->toMatch('/setProgress\(\s*prev\s*=>\s*\{[^}]*startTimer/s');
 });
+
+it('scopes its listeners so a host application toast is never touched', function (string $css) {
+    $source = file_get_contents(dirname(__DIR__, 2)."/resources/views/{$css}/blade/toasts.blade.php");
+
+    // `.toast.show .btn-close` matches every Bootstrap toast on the page, so
+    // clicking the host application's own toast would run our dismiss.
+    preg_match_all('/document\.querySelectorAll\(\s*\'([^\']+)\'/', $source, $matches);
+
+    expect($matches[1])->not->toBeEmpty();
+
+    foreach ($matches[1] as $selector) {
+        expect($selector)->toStartWith('[data-laravel-toast]');
+    }
+})->with(['bootstrap5', 'bootstrap4']);
+
+it('marks every toast it renders with the package attribute', function (string $css) {
+    config(['toast.css_framework' => $css]);
+
+    app('view')->getFinder()->flush();
+    app('view')->replaceNamespace('toast', realpath(__DIR__."/../../resources/views/{$css}/blade"));
+
+    app(ToastManager::class)->success('Marked');
+
+    expect(view('toast::toasts')->render())->toContain('data-laravel-toast');
+})->with(['bootstrap5', 'bootstrap4']);

@@ -121,3 +121,16 @@ it('keeps each css framework free of the other frameworks classes', function () 
 it('renders nothing at all when there are no toasts', function (string $css) {
     expect(trim(renderFramework($css)))->toBeEmpty();
 })->with('css frameworks');
+
+it('rejects a single invalid option even without interaction', function (string $option, string $value) {
+    // Validation used to run only when both options were supplied, so this
+    // wrote an invalid framework to .env and reported success.
+    $this->artisan('toast:install', [
+        "--{$option}"      => $value,
+        '--force'          => true,
+        '--no-interaction' => true,
+    ])->assertFailed();
+})->with([
+    ['css', 'material'],
+    ['frontend', 'angular'],
+]);

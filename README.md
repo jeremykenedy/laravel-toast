@@ -126,14 +126,22 @@ TOAST_CSS=bootstrap5
 TOAST_FRONTEND=livewire
 ```
 
-| Setting | Values | Default |
-|---------|--------|---------|
-| `TOAST_CSS` | `tailwind`, `bootstrap5`, `bootstrap4` | `tailwind` |
-| `TOAST_FRONTEND` | `blade`, `livewire`, `vue`, `react`, `svelte` | `blade` |
+| Setting | Values | Default | Effect |
+|---------|--------|---------|--------|
+| `TOAST_CSS` | `tailwind`, `bootstrap5`, `bootstrap4` | `tailwind` | Selects the view directory that renders |
+| `TOAST_FRONTEND` | `blade`, `livewire`, `vue`, `react`, `svelte` | `blade` | Records your setup for the install and switch commands |
+
+`TOAST_FRONTEND` does not select anything while rendering. Blade and Livewire
+resolve their own views, and the Vue, React and Svelte components are imported
+directly in your own code, so how you mount the toasts is already decided by
+what you import.
 
 If you also run [jeremykenedy/laravel-ui-kit](https://github.com/jeremykenedy/laravel-ui-kit),
-leave `TOAST_CSS` unset and `config('ui-kit.css_framework')` keeps control, so one
-switch still moves every package together. `TOAST_CSS` only takes over when you set it.
+`config('ui-kit.css_framework')` keeps control so one switch still moves every
+package together. `toast:install` and `toast:switch` detect the kit and write
+`UI_KIT_CSS` rather than `TOAST_CSS` in that case, so toast is never pinned
+behind a later kit-wide switch. `TOAST_CSS` only takes over when you set it
+yourself.
 
 Anything unrecognised falls back to `tailwind` and `blade` rather than failing to
 resolve a view.

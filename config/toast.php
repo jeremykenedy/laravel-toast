@@ -9,9 +9,14 @@ return [
     // one place. Set TOAST_CSS to take control when using toast standalone.
     'css_framework' => env('TOAST_CSS'),
 
-    // Which frontend is driving the toasts: "blade", "livewire", "vue",
-    // "react", "svelte". Same precedence as css_framework: null defers to
-    // config('ui-kit.frontend').
+    // Which frontend you are using: "blade", "livewire", "vue", "react",
+    // "svelte".
+    //
+    // This records your setup, it does not select anything at runtime. Blade
+    // and Livewire resolve their own views and the Vue, React and Svelte
+    // components are imported directly, so nothing reads this while rendering.
+    // The install, update and switch commands read and write it. Same
+    // precedence as css_framework: null defers to config('ui-kit.frontend').
     'frontend' => env('TOAST_FRONTEND'),
 
     // Where toasts appear: top-right, top-left, top-center,

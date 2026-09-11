@@ -58,6 +58,17 @@ attribute and container id from v1.0.0 behaves as it did before.
   empty, so every toast skipped its exit animation.
 - React `resume` started an animation frame inside a `setProgress` updater.
   Strict Mode invokes updaters twice, which started two competing timer loops.
+- The Bootstrap close and timer listeners were page wide. `.toast.show
+  .btn-close` matches every Bootstrap 5 toast on the page, so clicking a host
+  application's own toast ran this package's dismiss and removed it. Every
+  listener is now scoped to a `data-laravel-toast` marker.
+- `toast:install` and `toast:switch` wrote `TOAST_CSS` alongside `UI_KIT_CSS`.
+  Since `toast.css_framework` takes precedence, that pinned toast and stopped a
+  later kit wide switch from moving it. In a ui-kit application only the
+  `UI_KIT_*` value is written now, matching v1.0.0.
+- `toast:install --no-interaction` validated its options only when both `--css`
+  and `--frontend` were given, so a single invalid value was written to `.env`
+  and reported as a success.
 
 ### Added
 
@@ -76,6 +87,8 @@ attribute and container id from v1.0.0 behaves as it did before.
 - Keyboard focus pauses the countdown, matching the existing hover behavior.
 - `dismissLabel` prop on the Vue, React and Svelte components, so the close
   button can be translated.
+- `data-laravel-toast` on every Bootstrap toast, so the package's own scripts
+  can tell its markup apart from the host application's.
 - Composer scripts: `composer test`, `composer lint`, `composer format`.
 
 ### Changed
@@ -95,7 +108,7 @@ attribute and container id from v1.0.0 behaves as it did before.
 
 ### Testing and CI
 
-- Suite grew from 164 to 292 tests.
+- Suite grew from 164 to 306 tests.
 - New jobs: install without Livewire, `composer validate`, framework isolation
   (no Bootstrap classes in Tailwind views, no Alpine in Livewire views, and so
   on), and frontend checks that reject application path aliases.

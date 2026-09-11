@@ -63,26 +63,40 @@ trait HandlesFrameworkSetup
         file_put_contents($path, $content);
     }
 
+    /**
+     * Writing TOAST_CSS in a ui-kit application would pin toast to whatever it
+     * was set to and leave it behind on the next kit wide switch, because
+     * `toast.css_framework` takes precedence. So only one of the two is written.
+     */
     protected function setCssFramework(string $css): void
     {
-        // UI_KIT_CSS is still written so laravel-ui-kit applications, where one
-        // switch moves every package together, keep their existing behavior.
-        $this->updateEnvValue('TOAST_CSS', $css);
-        $this->updateEnvValue('UI_KIT_CSS', $css);
-
-        config(['toast.css_framework' => $css]);
+        if ($this->uiKitIsInstalled()) {
+            $this->updateEnvValue('UI_KIT_CSS', $css);
+            config(['ui-kit.css_framework' => $css]);
+        } else {
+            $this->updateEnvValue('TOAST_CSS', $css);
+            config(['toast.css_framework' => $css]);
+        }
 
         $this->clearCaches();
     }
 
     protected function setFrontendFramework(string $frontend): void
     {
-        $this->updateEnvValue('TOAST_FRONTEND', $frontend);
-        $this->updateEnvValue('UI_KIT_FRONTEND', $frontend);
-
-        config(['toast.frontend' => $frontend]);
+        if ($this->uiKitIsInstalled()) {
+            $this->updateEnvValue('UI_KIT_FRONTEND', $frontend);
+            config(['ui-kit.frontend' => $frontend]);
+        } else {
+            $this->updateEnvValue('TOAST_FRONTEND', $frontend);
+            config(['toast.frontend' => $frontend]);
+        }
 
         $this->clearCaches();
+    }
+
+    protected function uiKitIsInstalled(): bool
+    {
+        return config('ui-kit') !== null;
     }
 
     protected function clearCaches(): void

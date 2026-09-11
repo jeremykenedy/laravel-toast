@@ -86,22 +86,21 @@ trait HasInstallPrompts
         $css = $this->option('css');
         $frontend = $this->option('frontend');
 
+        // Validated up front so a single invalid flag cannot slip through the
+        // non interactive path and be written to .env as a success.
+        if ($css && !in_array($css, ToastServiceProvider::CSS_FRAMEWORKS)) {
+            $this->error("Invalid CSS framework: {$css}. Use: ".implode(', ', ToastServiceProvider::CSS_FRAMEWORKS));
+
+            return false;
+        }
+
+        if ($frontend && !in_array($frontend, ToastServiceProvider::FRONTENDS)) {
+            $this->error("Invalid frontend: {$frontend}. Use: ".implode(', ', ToastServiceProvider::FRONTENDS));
+
+            return false;
+        }
+
         if ($css && $frontend) {
-            $validCss = ToastServiceProvider::CSS_FRAMEWORKS;
-            $validFrontend = ToastServiceProvider::FRONTENDS;
-
-            if (!in_array($css, $validCss)) {
-                $this->error("Invalid CSS framework: {$css}. Use: ".implode(', ', $validCss));
-
-                return false;
-            }
-
-            if (!in_array($frontend, $validFrontend)) {
-                $this->error("Invalid frontend: {$frontend}. Use: ".implode(', ', $validFrontend));
-
-                return false;
-            }
-
             return ['css' => $css, 'frontend' => $frontend];
         }
 

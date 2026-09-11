@@ -54,6 +54,7 @@
          aria-atomic="true"
          dir="{{ $toast['dir'] ?? 'ltr' }}"
          id="toast-{{ $toast['id'] }}"
+         data-laravel-toast
          data-auto-dismiss="{{ ($toast['auto_dismiss'] ?? true) ? 'true' : 'false' }}"
          data-duration="{{ $toast['duration'] }}"
          data-pause-on-hover="{{ ($toast['pause_on_hover'] ?? true) ? 'true' : 'false' }}"
@@ -99,7 +100,7 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
-    document.querySelectorAll('[id^="toast-"][data-auto-dismiss="true"]').forEach(function(el) {
+    document.querySelectorAll('[data-laravel-toast][data-auto-dismiss="true"]').forEach(function(el) {
         // A duration of 0 means the toast stays until it is dismissed by hand.
         var duration = parseInt(el.dataset.duration, 10);
         if (!isFinite(duration) || duration <= 0) return;
@@ -142,9 +143,10 @@ document.addEventListener('DOMContentLoaded', function() {
     });
 
     // Bootstrap 4 needs jQuery for data-dismiss, so handle the click here too.
-    document.querySelectorAll('[id^="toast-"] .close').forEach(function(btn) {
+    // Scoped to this package's alerts so a host application's own are left alone.
+    document.querySelectorAll('[data-laravel-toast] .close').forEach(function(btn) {
         btn.addEventListener('click', function(event) {
-            var el = btn.closest('.alert');
+            var el = btn.closest('[data-laravel-toast]');
             if (!el) return;
             event.preventDefault();
             event.stopPropagation();

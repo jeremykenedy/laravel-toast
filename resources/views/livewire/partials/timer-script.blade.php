@@ -1,9 +1,9 @@
 {{--
     Auto-dismiss timers for the Livewire container.
 
-    Livewire swaps DOM on every round trip, so binding once on DOMContentLoaded
-    misses every toast dispatched after first paint. This registers once per
-    page and re-scans after each morph.
+    Rendered on every pass, including the empty one. A script morphed in later
+    does not execute, so emitting this only alongside the first toast would
+    leave that toast without a timer.
 --}}
 <script>
 (function () {
@@ -16,17 +16,25 @@
     var reduceMotion = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
     var hooked = false;
 
-    // Removing the node alone leaves the toast in the component's $toasts, and
-    // the next morph renders it straight back. Dismiss through the component so
-    // the server drops it too.
-    function drop(el) {
+    // Livewire morphs against server markup, which would strip a data attribute
+    // used as a bound flag and let the next scan add a second timer.
+    var bound = new WeakSet();
+
+    function componentFor(el) {
         var root = el.closest('[wire\\:id]');
-        var component = root && window.Livewire && typeof window.Livewire.find === 'function'
+
+        return root && window.Livewire && typeof window.Livewire.find === 'function'
             ? window.Livewire.find(root.getAttribute('wire:id'))
             : null;
+    }
 
-        if (component) {
-            component.call('dismiss', el.id.replace('lw-toast-', ''));
+    // Removing the node alone leaves the toast in the component's $toasts and
+    // the next morph renders it straight back, so go through the component.
+    function drop(el, component) {
+        var live = component || componentFor(el);
+
+        if (live) {
+            live.call('dismiss', el.id.replace('lw-toast-', ''));
 
             return;
         }
@@ -38,21 +46,29 @@
         if (el.dataset.toastDismissing === 'true') return;
         el.dataset.toastDismissing = 'true';
 
+        // Resolved now, because a morph can detach the node before the exit
+        // animation finishes and closest() would then find nothing.
+        var component = componentFor(el);
+
+        // The node lingers until the server responds, so stop it intercepting
+        // clicks while it is on its way out.
+        el.style.pointerEvents = 'none';
+
         var exitAnim = el.dataset.exitAnimation || 'none';
         var exitDur = parseFloat(el.dataset.exitDuration) || 0.5;
 
         if (exitAnim !== 'none' && !reduceMotion) {
             el.style.animation = 'toast-' + exitAnim + ' ' + exitDur + 's ease forwards';
-            setTimeout(function () { drop(el); }, exitDur * 1000);
+            setTimeout(function () { drop(el, component); }, exitDur * 1000);
         } else {
             el.style.opacity = '0';
-            setTimeout(function () { drop(el); }, 200);
+            setTimeout(function () { drop(el, component); }, 200);
         }
     }
 
     function bind(el) {
-        if (el.dataset.toastBound === 'true') return;
-        el.dataset.toastBound = 'true';
+        if (bound.has(el)) return;
+        bound.add(el);
 
         // A duration of 0 means the toast stays until it is dismissed by hand.
         var duration = parseInt(el.dataset.duration, 10);
@@ -99,8 +115,6 @@
         document.querySelectorAll('[data-laravel-toast="livewire"][data-auto-dismiss="true"]').forEach(bind);
     }
 
-    // This partial first renders with the opening toast, which can be well after
-    // livewire:initialized has fired, so try the hook now as well as on the event.
     function registerHook() {
         if (hooked || !window.Livewire || typeof window.Livewire.hook !== 'function') return;
         hooked = true;

@@ -100,8 +100,9 @@ it('dismisses a livewire toast through the component rather than the dom alone',
 
     // Dropping only the node leaves the toast in $toasts, and the next morph
     // renders it straight back with a fresh timer.
-    expect($source)->toContain("component.call('dismiss'")
-        ->and($source)->toContain('wire\\\\:id');
+    expect($source)->toContain(".call('dismiss'")
+        ->and($source)->toContain('wire\\\\:id')
+        ->and($source)->toContain('componentFor(el)');
 });
 
 it('registers the livewire morph hook even when livewire already booted', function () {
@@ -171,3 +172,68 @@ it('marks livewire toasts with the livewire value', function (string $view) {
     'bootstrap5/toast-container.blade.php',
     'bootstrap4/toast-container.blade.php',
 ]);
+
+it('honours stack and per toast position in every javascript renderer', function (string $file) {
+    $source = file_get_contents(dirname(__DIR__, 2).'/'.$file);
+
+    // A flat list ignores stack: false and each payload's own position, which
+    // the Blade and Livewire renderers both apply before rendering.
+    expect($source)->toContain('stack')
+        ->and($source)->toContain('toast.position')
+        ->and($source)->toMatch('/group|grouped/');
+})->with([
+    'resources/js/vue/pages/ToastContainer.vue',
+    'resources/js/react/pages/ToastContainer.jsx',
+    'resources/js/svelte/pages/ToastContainer.svelte',
+]);
+
+it('pairs every tailwind focus ring with a dark variant', function (string $file) {
+    $source = file_get_contents(dirname(__DIR__, 2).'/'.$file);
+
+    preg_match_all('/(?<!dark:)focus-visible:ring-(green|red|amber|blue)-\d{3}/', $source, $matches);
+
+    foreach (array_unique($matches[0]) as $token) {
+        expect($source)->toContain('dark:'.str_replace('-500', '-400', $token));
+    }
+})->with([
+    'resources/views/tailwind/blade/toasts.blade.php',
+    'resources/views/livewire/toast-container.blade.php',
+]);
+
+it('keeps the data-duration hook on every livewire progress bar', function (string $view) {
+    $source = file_get_contents(dirname(__DIR__, 2)."/resources/views/livewire/{$view}");
+
+    // v1 shipped this on both bars and consumers query
+    // .toast-progress-bar[data-duration].
+    preg_match_all('/class="toast-progress-bar[^>]*>/', $source, $bars);
+
+    expect($bars[0])->toHaveCount(2);
+
+    foreach ($bars[0] as $bar) {
+        expect($bar)->toContain('data-duration');
+    }
+})->with([
+    'toast-container.blade.php',
+    'bootstrap5/toast-container.blade.php',
+    'bootstrap4/toast-container.blade.php',
+]);
+
+it('renders the livewire timer script even with no toasts', function () {
+    $source = file_get_contents(dirname(__DIR__, 2).'/resources/views/livewire/toast-container.blade.php');
+
+    // A script morphed in later never executes, so it cannot sit behind the
+    // @if that guards the toast markup.
+    $endif = strrpos($source, '@endif');
+    $include = strpos($source, "@include('toast-livewire::partials.timer-script')");
+
+    expect($include)->toBeGreaterThan($endif);
+});
+
+it('keeps the livewire bound flag out of morph managed markup', function () {
+    $source = file_get_contents(dirname(__DIR__, 2).'/resources/views/livewire/partials/timer-script.blade.php');
+
+    // Livewire morphs against server markup and would strip a data attribute
+    // used as the flag, letting the next scan add a second timer.
+    expect($source)->toContain('new WeakSet()')
+        ->and($source)->not->toContain('toastBound');
+});

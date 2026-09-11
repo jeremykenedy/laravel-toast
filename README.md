@@ -59,11 +59,16 @@ cp vendor/jeremykenedy/laravel-toast/resources/js/vue/pages/ToastContainer.vue \
    resources/js/Components/ToastContainer.vue
 ```
 
-Keep the keyframe import pointing at the package so animations still resolve:
+The component's own `../../../css/toast-animations.css` import will not resolve
+from your source tree, so point it at the package instead:
 
 ```js
 import '../../../vendor/jeremykenedy/laravel-toast/resources/css/toast-animations.css'
 ```
+
+Adjust the depth to match where you put the file. Publishing the stylesheet with
+`--tag=toast-css` is only useful if you would rather `@import` it from your own
+CSS entry point; it does not fix the copied component's relative import.
 
 Every combination shares the same `ToastManager`, the same payload, the same
 config and the same animations. The gap is styling only, and only for Bootstrap

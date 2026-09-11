@@ -34,7 +34,7 @@ function ToastIcon({ type, className }) {
     return <svg className={`h-5 w-5 ${className}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d={paths[type] || paths.info} /></svg>
 }
 
-export default function ToastContainer({ initialToasts = [], position = 'top-right', dismissLabel = 'Dismiss' }) {
+export default function ToastContainer({ initialToasts = [], position = 'top-right', stack = true, dismissLabel = 'Dismiss' }) {
     const [toasts, setToasts] = useState([])
     // State drives the render, the refs let the animation frame read current
     // values without the callbacks going stale or rerunning the effect.
@@ -149,16 +149,28 @@ export default function ToastContainer({ initialToasts = [], position = 'top-rig
     if (!toasts.length) return null
 
     const s = (toast) => styles[toast.type] || styles.info
-    const posStyle = positionMap[position] || positionMap['top-right']
 
-    return (
+    // Each toast may carry its own position, and stack: false shows only the
+    // newest per position. The Blade and Livewire renderers already do this.
+    const grouped = {}
+    for (const toast of toasts) {
+        const key = positionMap[toast.position] ? toast.position : position
+        const at = positionMap[key] ? key : 'top-right'
+        ;(grouped[at] = grouped[at] || []).push(toast)
+    }
+    if (!stack) {
+        for (const key of Object.keys(grouped)) grouped[key] = grouped[key].slice(-1)
+    }
+
+    return Object.entries(grouped).map(([at, group]) => (
         <div
-            style={{ position: 'fixed', zIndex: 9999, width: '24rem', maxWidth: 'calc(100vw - 1rem)', display: 'flex', flexDirection: 'column', gap: '0.75rem', pointerEvents: 'none', ...posStyle }}
+            key={at}
+            style={{ position: 'fixed', zIndex: 9999, width: '24rem', maxWidth: 'calc(100vw - 1rem)', display: 'flex', flexDirection: 'column', gap: '0.75rem', pointerEvents: 'none', ...positionMap[at] }}
             role="status"
             aria-live="polite"
             aria-atomic="false"
         >
-            {toasts.map(toast => {
+            {group.map(toast => {
                 const ts = s(toast)
                 const enterStyle = (toast.enter_animation && toast.enter_animation !== 'none')
                     ? { animation: `toast-enter-${toast.enter_animation} ${toast.enter_duration || 0.5}s ease forwards` }
@@ -201,5 +213,5 @@ export default function ToastContainer({ initialToasts = [], position = 'top-rig
                 )
             })}
         </div>
-    )
+    ))
 }

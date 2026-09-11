@@ -7,8 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-No breaking changes. Every public method, config key, view path, CSS class, data
-attribute and container id from v1.0.0 behaves as it did before.
+No breaking changes to the public API. Every public method, config key, view
+name, published path, `data-` attribute and container id from v1.0.0 behaves as
+it did before, and the toast payload keys are identical.
+
+The Tailwind renderers do emit different utility classes, because that is what
+the visual refresh is: `rounded-lg` became `rounded-xl` and `flex-shrink-0`
+became `shrink-0`. Structural hooks are untouched, so `.toast-progress-bar`,
+`[data-toast-id]`, `#toast-container-*`, `.text-bg-*` and `.alert-*` all still
+match. An application that styled against a Tailwind utility token in the
+packaged markup should publish the views and keep its own copy.
 
 ### Fixed
 
@@ -54,6 +62,30 @@ attribute and container id from v1.0.0 behaves as it did before.
 - The Livewire morph hook was only registered inside the `livewire:initialized`
   listener. When the container first renders with a later toast that event has
   already fired, so no hook was attached and subsequent toasts got no timers.
+- `stack` and each payload's own `position` were ignored by the Vue, React and
+  Svelte components. They rendered one flat list from a single position prop,
+  while Blade and Livewire grouped by position and applied the stack rule. All
+  three now group the same way.
+- The Livewire timer marked bound elements with a `data-` attribute, which the
+  next morph could strip, letting a second timer attach to the same toast. It
+  uses a `WeakSet` now.
+- The Livewire timer script only rendered alongside the first toast. A script
+  morphed into the DOM never executes, so that toast started without a timer.
+  It renders on every pass, including the empty one.
+- A Livewire toast dismissed on a timer resolved its component after the exit
+  animation, by which point a morph could have detached the node, leaving the
+  toast in `$toasts`. The component is captured before the animation starts.
+- A Livewire toast awaiting its dismiss round trip kept `pointer-events: auto`
+  while invisible, so a slow response left it swallowing clicks.
+- The Livewire progress bars lost the `data-duration` attribute v1 shipped,
+  which consumers query as `.toast-progress-bar[data-duration]`. Restored.
+- A published pre-parity `livewire/toast-container.blade.php` override, which is
+  Tailwind only, resolved ahead of the packaged Bootstrap views, so upgraded
+  Bootstrap installs kept rendering Tailwind markup.
+- `max_visible` passed per toast was stored in the payload but never applied;
+  trimming always read the global config.
+- Tailwind focus ring colours had no `dark:` counterpart, unlike every other
+  colour utility in those views.
 - The React mount effect captured `dismiss` while the toast list was still
   empty, so every toast skipped its exit animation.
 - React `resume` started an animation frame inside a `setProgress` updater.
@@ -114,7 +146,7 @@ attribute and container id from v1.0.0 behaves as it did before.
 
 ### Testing and CI
 
-- Suite grew from 164 to 313 tests.
+- Suite grew from 164 to 323 tests.
 - New jobs: install without Livewire, `composer validate`, framework isolation
   (no Bootstrap classes in Tailwind views, no Alpine in Livewire views, and so
   on), and frontend checks that reject application path aliases.

@@ -13,7 +13,7 @@ composer test
 
 ```bash
 composer format   # Pint, Laravel preset
-composer test     # 313 tests
+composer test     # 323 tests
 ```
 
 Both run in CI, along with `composer validate`, an install without Livewire, and
@@ -42,8 +42,12 @@ as public API and do not change them without a major version:
 - Config keys in `config/toast.php`
 - View names (`toast::toasts`, `toast-livewire::toast-container`) and the
   published view paths
-- CSS class names, `data-` attributes and container ids that applications style
-  or query against
+- `data-` attributes, container ids and structural class hooks that applications
+  query against, such as `.toast-progress-bar`, `.text-bg-*` and `.alert-*`
+
+Tailwind utility classes inside a view are presentation, not API, and may change
+with a visual refresh. Applications that need them frozen should publish the
+views.
 
 Adding is fine. Renaming and removing is not.
 

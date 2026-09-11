@@ -57,7 +57,7 @@
          data-exit-animation="{{ $toast['exit_animation'] ?? 'none' }}"
          data-exit-duration="{{ $toast['exit_duration'] ?? 0.5 }}">
         @if(($toast['auto_dismiss'] ?? true) && ($toast['show_progress'] ?? true) !== false && ($toast['duration'] ?? 0) > 0 && ($toast['progress_position'] ?? 'top') === 'top')
-        <div style="height:3px;background:rgba(0,0,0,0.1);margin:-.75rem -1.25rem .5rem;"><div class="toast-progress-bar" style="height:100%;width:100%;background:rgba(0,0,0,0.25);transition:none;{{ ($toast['progress_direction'] ?? 'rtl') === 'rtl' ? 'margin-left:auto;' : '' }}"></div></div>
+        <div style="height:3px;background:rgba(0,0,0,0.1);margin:-.75rem -1.25rem .5rem;"><div class="toast-progress-bar" style="height:100%;width:100%;background:rgba(0,0,0,0.25);transition:none;{{ ($toast['progress_direction'] ?? 'rtl') === 'rtl' ? 'margin-left:auto;' : '' }}" data-duration="{{ $toast['duration'] }}"></div></div>
         @endif
         <div class="d-flex align-items-start">
             @if(($toast['show_icon'] ?? true) !== false)
@@ -72,12 +72,12 @@
         <button type="button" wire:click="dismiss('{{ $toast['id'] }}')" class="close" style="cursor:pointer;" aria-label="{{ __('toast::toast.dismiss') }}"><span aria-hidden="true">&times;</span></button>
         @endif
         @if(($toast['auto_dismiss'] ?? true) && ($toast['show_progress'] ?? true) !== false && ($toast['duration'] ?? 0) > 0 && ($toast['progress_position'] ?? 'top') !== 'top')
-        <div style="height:3px;background:rgba(0,0,0,0.1);margin:.5rem -1.25rem -.75rem;"><div class="toast-progress-bar" style="height:100%;width:100%;background:rgba(0,0,0,0.25);transition:none;{{ ($toast['progress_direction'] ?? 'rtl') === 'rtl' ? 'margin-left:auto;' : '' }}"></div></div>
+        <div style="height:3px;background:rgba(0,0,0,0.1);margin:.5rem -1.25rem -.75rem;"><div class="toast-progress-bar" style="height:100%;width:100%;background:rgba(0,0,0,0.25);transition:none;{{ ($toast['progress_direction'] ?? 'rtl') === 'rtl' ? 'margin-left:auto;' : '' }}" data-duration="{{ $toast['duration'] }}"></div></div>
         @endif
     </div>
     @endforeach
 </div>
 @endforeach
-@include('toast-livewire::partials.timer-script')
 @endif
+@include('toast-livewire::partials.timer-script')
 </div>

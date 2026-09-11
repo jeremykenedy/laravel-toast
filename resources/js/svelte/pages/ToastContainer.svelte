@@ -4,6 +4,7 @@
 
     export let initialToasts = []
     export let position = 'top-right'
+    export let stack = true
     export let dismissLabel = 'Dismiss'
 
     const reduceMotion = typeof window !== 'undefined' && window.matchMedia
@@ -96,7 +97,31 @@
         return anim !== 'none' ? `animation:toast-enter-${anim} ${toast.enter_duration || 0.5}s ease forwards;` : ''
     }
 
-    $: posStyle = positionMap[position] || positionMap['top-right']
+    // Each toast may carry its own position, and stack: false shows only the
+    // newest per position. The Blade and Livewire renderers already do this.
+    $: grouped = groupByPosition(toasts, position, stack)
+
+    function groupByPosition(list, fallback, keepAll) {
+        const groups = {}
+
+        for (const toast of list) {
+            const key = positionMap[toast.position] ? toast.position : fallback
+            const at = positionMap[key] ? key : 'top-right'
+            ;(groups[at] = groups[at] || []).push(toast)
+        }
+
+        if (!keepAll) {
+            for (const key of Object.keys(groups)) {
+                groups[key] = groups[key].slice(-1)
+            }
+        }
+
+        return Object.entries(groups)
+    }
+
+    function positionStyleFor(key) {
+        return positionMap[key] || positionMap['top-right']
+    }
 
     onMount(() => {
         toasts = initialToasts.length ? [...initialToasts] : [...(window.__toasts || [])]
@@ -110,9 +135,9 @@
     onDestroy(() => { Object.values(timers).forEach(id => cancelAnimationFrame(id)) })
 </script>
 
-{#if toasts.length}
-<div style="position:fixed;{posStyle}z-index:9999;width:24rem;max-width:calc(100vw - 1rem);display:flex;flex-direction:column;gap:0.75rem;pointer-events:none;" role="status" aria-live="polite" aria-atomic="false">
-    {#each toasts as toast (toast.id)}
+{#each grouped as [at, group] (at)}
+<div style="position:fixed;{positionStyleFor(at)}z-index:9999;width:24rem;max-width:calc(100vw - 1rem);display:flex;flex-direction:column;gap:0.75rem;pointer-events:none;" role="status" aria-live="polite" aria-atomic="false">
+    {#each group as toast (toast.id)}
         {@const ts = getStyle(toast)}
         <div data-toast-id={toast.id} dir={toast.dir || 'ltr'}
              style="pointer-events:auto;cursor:default;{toast.opacity < 1 ? 'opacity:'+toast.opacity+';' : ''}{enterStyle(toast)}"
@@ -153,4 +178,4 @@
         </div>
     {/each}
 </div>
-{/if}
+{/each}

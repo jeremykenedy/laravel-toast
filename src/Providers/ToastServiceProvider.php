@@ -129,17 +129,21 @@ class ToastServiceProvider extends ServiceProvider
     {
         $paths = [];
 
-        foreach ([$css, ''] as $variant) {
-            $relative = $variant === '' ? 'livewire' : 'livewire/'.$variant;
-            $published = resource_path('views/vendor/toast/'.$relative);
-
-            if (is_dir($published)) {
-                $paths[] = $published;
-            }
+        $publishedVariant = resource_path('views/vendor/toast/livewire/'.$css);
+        if (is_dir($publishedVariant)) {
+            $paths[] = $publishedVariant;
         }
 
+        // Ahead of the published root, which predates the per-framework views
+        // and is Tailwind only, so an upgraded Bootstrap install would keep
+        // rendering Tailwind markup.
         if (is_dir($packagePath.'/'.$css)) {
             $paths[] = $packagePath.'/'.$css;
+        }
+
+        $publishedRoot = resource_path('views/vendor/toast/livewire');
+        if (is_dir($publishedRoot)) {
+            $paths[] = $publishedRoot;
         }
 
         $paths[] = $packagePath;

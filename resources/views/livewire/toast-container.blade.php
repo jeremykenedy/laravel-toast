@@ -49,7 +49,7 @@
          aria-atomic="true">
         @if(($toast['auto_dismiss'] ?? true) && ($toast['show_progress'] ?? true) !== false && ($toast['duration'] ?? 0) > 0 && ($toast['progress_position'] ?? 'top') === 'top')
         <div class="h-1 w-full @switch($toast['type']) @case('success') bg-green-200 dark:bg-green-900 @break @case('error') bg-red-200 dark:bg-red-900 @break @case('warning') bg-amber-200 dark:bg-amber-900 @break @default bg-blue-200 dark:bg-blue-900 @endswitch">
-            <div class="toast-progress-bar h-full @switch($toast['type']) @case('success') bg-green-500 dark:bg-green-400 @break @case('error') bg-red-500 dark:bg-red-400 @break @case('warning') bg-amber-500 dark:bg-amber-400 @break @default bg-blue-500 dark:bg-blue-400 @endswitch" style="width:100%;transition:none;{{ ($toast['progress_direction'] ?? 'rtl') === 'rtl' ? 'margin-left:auto;' : '' }}"></div>
+            <div class="toast-progress-bar h-full @switch($toast['type']) @case('success') bg-green-500 dark:bg-green-400 @break @case('error') bg-red-500 dark:bg-red-400 @break @case('warning') bg-amber-500 dark:bg-amber-400 @break @default bg-blue-500 dark:bg-blue-400 @endswitch" style="width:100%;transition:none;{{ ($toast['progress_direction'] ?? 'rtl') === 'rtl' ? 'margin-left:auto;' : '' }}" data-duration="{{ $toast['duration'] }}"></div>
         </div>
         @endif
         <div class="p-4 flex items-start gap-3">
@@ -71,20 +71,20 @@
                 <p class="text-sm leading-relaxed break-words">{{ $toast['message'] }}</p>
             </div>
             @if(($toast['show_close'] ?? true) !== false)
-            <button type="button" wire:click="dismiss('{{ $toast['id'] }}')" class="shrink-0 rounded-md p-1 opacity-60 hover:opacity-100 transition-opacity cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-transparent @switch($toast['type']) @case('success') focus-visible:ring-green-500 @break @case('error') focus-visible:ring-red-500 @break @case('warning') focus-visible:ring-amber-500 @break @default focus-visible:ring-blue-500 @endswitch" aria-label="{{ __('toast::toast.dismiss') }}">
+            <button type="button" wire:click="dismiss('{{ $toast['id'] }}')" class="shrink-0 rounded-md p-1 opacity-60 hover:opacity-100 transition-opacity cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-transparent @switch($toast['type']) @case('success') focus-visible:ring-green-500 dark:focus-visible:ring-green-400 @break @case('error') focus-visible:ring-red-500 dark:focus-visible:ring-red-400 @break @case('warning') focus-visible:ring-amber-500 dark:focus-visible:ring-amber-400 @break @default focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 @endswitch" aria-label="{{ __('toast::toast.dismiss') }}">
                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
             </button>
             @endif
         </div>
         @if(($toast['auto_dismiss'] ?? true) && ($toast['show_progress'] ?? true) !== false && ($toast['duration'] ?? 0) > 0 && ($toast['progress_position'] ?? 'top') !== 'top')
         <div class="h-1 w-full @switch($toast['type']) @case('success') bg-green-200 dark:bg-green-900 @break @case('error') bg-red-200 dark:bg-red-900 @break @case('warning') bg-amber-200 dark:bg-amber-900 @break @default bg-blue-200 dark:bg-blue-900 @endswitch">
-            <div class="toast-progress-bar h-full @switch($toast['type']) @case('success') bg-green-500 dark:bg-green-400 @break @case('error') bg-red-500 dark:bg-red-400 @break @case('warning') bg-amber-500 dark:bg-amber-400 @break @default bg-blue-500 dark:bg-blue-400 @endswitch" style="width:100%;transition:none;{{ ($toast['progress_direction'] ?? 'rtl') === 'rtl' ? 'margin-left:auto;' : '' }}"></div>
+            <div class="toast-progress-bar h-full @switch($toast['type']) @case('success') bg-green-500 dark:bg-green-400 @break @case('error') bg-red-500 dark:bg-red-400 @break @case('warning') bg-amber-500 dark:bg-amber-400 @break @default bg-blue-500 dark:bg-blue-400 @endswitch" style="width:100%;transition:none;{{ ($toast['progress_direction'] ?? 'rtl') === 'rtl' ? 'margin-left:auto;' : '' }}" data-duration="{{ $toast['duration'] }}"></div>
         </div>
         @endif
     </div>
     @endforeach
 </div>
 @endforeach
-@include('toast-livewire::partials.timer-script')
 @endif
+@include('toast-livewire::partials.timer-script')
 </div>

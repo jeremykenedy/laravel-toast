@@ -42,7 +42,7 @@ class ToastContainer extends Component
         $this->toasts[] = $toast;
 
         // Mirrors ToastManager::add() so a dispatch loop cannot grow unbounded.
-        $max = (int) config('toast.max_visible', 5);
+        $max = (int) $toast['max_visible'];
         if ($max > 0 && count($this->toasts) > $max) {
             $this->toasts = array_slice($this->toasts, -$max);
         }

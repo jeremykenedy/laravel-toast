@@ -5,6 +5,7 @@ import '../../../css/toast-animations.css'
 const props = defineProps({
     initialToasts: { type: Array, default: () => [] },
     position: { type: String, default: 'top-right' },
+    stack: { type: Boolean, default: true },
     dismissLabel: { type: String, default: 'Dismiss' },
 })
 
@@ -30,7 +31,29 @@ const positionMap = {
     'bottom-center': 'bottom:0.5rem;left:50%;transform:translateX(-50%);',
 }
 
-const positionStyle = computed(() => positionMap[props.position] || positionMap['top-right'])
+// Each toast may carry its own position, and stack: false shows only the
+// newest per position. The Blade and Livewire renderers already do this.
+const grouped = computed(() => {
+    const groups = {}
+
+    for (const toast of toasts.value) {
+        const key = positionMap[toast.position] ? toast.position : props.position
+        const at = positionMap[key] ? key : 'top-right'
+        ;(groups[at] = groups[at] || []).push(toast)
+    }
+
+    if (!props.stack) {
+        for (const key of Object.keys(groups)) {
+            groups[key] = groups[key].slice(-1)
+        }
+    }
+
+    return groups
+})
+
+function positionStyleFor(key) {
+    return positionMap[key] || positionMap['top-right']
+}
 
 const typeStyles = {
     success: { bg: 'bg-green-50 text-green-800 dark:bg-green-950 dark:text-green-200', border: 'border-green-200 dark:border-green-800', icon: 'text-green-500 dark:text-green-400', bar: 'bg-green-500 dark:bg-green-400', barBg: 'bg-green-200 dark:bg-green-900' },
@@ -106,8 +129,8 @@ onUnmounted(() => { Object.values(timers).forEach(id => cancelAnimationFrame(id)
 </script>
 
 <template>
-    <div v-if="toasts.length" :style="'position:fixed;' + positionStyle + 'z-index:9999;width:24rem;max-width:calc(100vw - 1rem);display:flex;flex-direction:column;gap:0.75rem;pointer-events:none;'" role="status" aria-live="polite" aria-atomic="false">
-        <div v-for="toast in toasts" :key="toast.id" :data-toast-id="toast.id"
+    <div v-for="(group, at) in grouped" :key="at" :style="'position:fixed;' + positionStyleFor(at) + 'z-index:9999;width:24rem;max-width:calc(100vw - 1rem);display:flex;flex-direction:column;gap:0.75rem;pointer-events:none;'" role="status" aria-live="polite" aria-atomic="false">
+        <div v-for="toast in group" :key="toast.id" :data-toast-id="toast.id"
              :dir="toast.dir || 'ltr'"
              :style="'pointer-events:auto;' + (toast.opacity < 1 ? 'opacity:'+toast.opacity+';' : '') + 'cursor:default;' + enterStyle(toast)"
              @mouseenter="toast.pause_on_hover && hold(toast.id, 'hover')"

@@ -74,10 +74,12 @@ class ToastManager
         $key = $this->sessionKey();
         $toasts = Session::get($key, []);
 
-        $toasts[] = $this->build($type, $message, $title, $duration, $options);
+        $toast = $this->build($type, $message, $title, $duration, $options);
+        $toasts[] = $toast;
 
-        $max = (int) config('toast.max_visible', 5);
-        if (count($toasts) > $max) {
+        // The payload already resolved this, so a per-toast override counts.
+        $max = (int) $toast['max_visible'];
+        if ($max > 0 && count($toasts) > $max) {
             $toasts = array_slice($toasts, -$max);
         }
 

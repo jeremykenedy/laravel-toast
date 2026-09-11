@@ -5,7 +5,7 @@ All notable changes to `jeremykenedy/laravel-toast` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## [Unreleased]
+## [v2.0.0] - 2026-09-11
 
 No breaking changes to the public API. Every public method, config key, view
 name, published path, `data-` attribute and container id from v1.0.0 behaves as
@@ -155,5 +155,5 @@ packaged markup should publish the views and keep its own copy.
 
 Initial release.
 
-[Unreleased]: https://github.com/jeremykenedy/laravel-toast/compare/v1.0.0...HEAD
+[v2.0.0]: https://github.com/jeremykenedy/laravel-toast/compare/v1.0.0...v2.0.0
 [v1.0.0]: https://github.com/jeremykenedy/laravel-toast/releases/tag/v1.0.0

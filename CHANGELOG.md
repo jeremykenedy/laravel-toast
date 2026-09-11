@@ -69,6 +69,10 @@ attribute and container id from v1.0.0 behaves as it did before.
 - `toast:install --no-interaction` validated its options only when both `--css`
   and `--frontend` were given, so a single invalid value was written to `.env`
   and reported as a success.
+- A `toast-js` publish tag added during this cycle copied the components to
+  `resources/js/vendor/toast`, where their stylesheet import resolved to
+  `resources/js/vendor/css` and failed the bundler. The tag is gone; copy the
+  component out of `vendor/` instead, which keeps the import correct.
 
 ### Added
 
@@ -108,7 +112,7 @@ attribute and container id from v1.0.0 behaves as it did before.
 
 ### Testing and CI
 
-- Suite grew from 164 to 306 tests.
+- Suite grew from 164 to 308 tests.
 - New jobs: install without Livewire, `composer validate`, framework isolation
   (no Bootstrap classes in Tailwind views, no Alpine in Livewire views, and so
   on), and frontend checks that reject application path aliases.

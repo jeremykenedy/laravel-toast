@@ -2,7 +2,9 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\ServiceProvider;
 use Jeremykenedy\LaravelToast\Providers\ToastServiceProvider;
+use Jeremykenedy\LaravelToast\Support\ToastAnimations;
 use Jeremykenedy\LaravelToast\Services\ToastManager;
 
 /**
@@ -94,4 +96,26 @@ it('falls back to the packaged view when nothing is published', function () {
     app(ToastManager::class)->success('From the package');
 
     expect(view('toast::toasts')->render())->toContain('From the package');
+});
+
+it('publishes only tags whose contents still resolve where they land', function () {
+    $groups = ServiceProvider::$publishGroups;
+
+    // A `toast-js` tag published the components to resources/js/vendor/toast,
+    // where their '../../../css/toast-animations.css' import resolved to
+    // resources/js/vendor/css and broke the consuming bundler build.
+    expect(array_keys($groups))
+        ->toContain('toast-config', 'toast-views', 'toast-lang', 'toast-css')
+        ->and(array_keys($groups))->not->toContain('toast-js');
+});
+
+it('keeps the published stylesheet reachable from the documented copy path', function () {
+    $groups = ServiceProvider::$publishGroups;
+
+    expect($groups['toast-css'])->toHaveCount(1);
+
+    $source = array_key_first($groups['toast-css']);
+
+    expect(is_file($source))->toBeTrue()
+        ->and(realpath($source))->toBe(realpath(ToastAnimations::path()));
 });

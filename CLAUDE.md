@@ -49,7 +49,7 @@ Before writing ANY view file, ask yourself:
 composer install
 
 # Run tests
-./vendor/bin/pest --ci               # Full suite (306 tests)
+./vendor/bin/pest --ci               # Full suite (308 tests)
 ./vendor/bin/pest --filter=ToastManager  # Filter by name
 ./vendor/bin/pest tests/Unit         # Unit tests only
 ./vendor/bin/pest tests/Feature      # Feature tests only

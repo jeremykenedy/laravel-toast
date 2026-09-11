@@ -13,7 +13,7 @@ composer test
 
 ```bash
 composer format   # Pint, Laravel preset
-composer test     # 250 tests
+composer test     # 292 tests
 ```
 
 Both run in CI, along with `composer validate`, an install without Livewire, and

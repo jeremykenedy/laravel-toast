@@ -91,7 +91,7 @@ attribute and container id from v1.0.0 behaves as it did before.
 
 ### Testing and CI
 
-- Suite grew from 164 to 250 tests.
+- Suite grew from 164 to 292 tests.
 - New jobs: install without Livewire, `composer validate`, framework isolation
   (no Bootstrap classes in Tailwind views, no Alpine in Livewire views, and so
   on), and frontend checks that reject application path aliases.

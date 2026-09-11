@@ -101,6 +101,7 @@ class ToastManager
      *     opacity?: float,
      *     max_visible?: int,
      * }  $options  All props are optional; defaults come from config/toast.php.
+     *
      * @return array<string, mixed>
      */
     public function build(string $type, string $message, ?string $title = null, ?int $duration = null, array $options = []): array

@@ -64,8 +64,8 @@ it('renders all 98 keyframes from every livewire view', function (string $css) {
 })->with('css frameworks');
 
 dataset('javascript components', [
-    'vue' => 'resources/js/vue/pages/ToastContainer.vue',
-    'react' => 'resources/js/react/pages/ToastContainer.jsx',
+    'vue'    => 'resources/js/vue/pages/ToastContainer.vue',
+    'react'  => 'resources/js/react/pages/ToastContainer.jsx',
     'svelte' => 'resources/js/svelte/pages/ToastContainer.svelte',
 ]);
 

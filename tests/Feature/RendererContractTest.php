@@ -14,13 +14,13 @@ function rendererSources(): array
     $root = dirname(__DIR__, 2);
 
     return [
-        'tailwind blade' => $root.'/resources/views/tailwind/blade/toasts.blade.php',
+        'tailwind blade'   => $root.'/resources/views/tailwind/blade/toasts.blade.php',
         'bootstrap5 blade' => $root.'/resources/views/bootstrap5/blade/toasts.blade.php',
         'bootstrap4 blade' => $root.'/resources/views/bootstrap4/blade/toasts.blade.php',
-        'livewire timer' => $root.'/resources/views/livewire/partials/timer-script.blade.php',
-        'vue' => $root.'/resources/js/vue/pages/ToastContainer.vue',
-        'react' => $root.'/resources/js/react/pages/ToastContainer.jsx',
-        'svelte' => $root.'/resources/js/svelte/pages/ToastContainer.svelte',
+        'livewire timer'   => $root.'/resources/views/livewire/partials/timer-script.blade.php',
+        'vue'              => $root.'/resources/js/vue/pages/ToastContainer.vue',
+        'react'            => $root.'/resources/js/react/pages/ToastContainer.jsx',
+        'svelte'           => $root.'/resources/js/svelte/pages/ToastContainer.svelte',
     ];
 }
 

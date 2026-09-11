@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-Powerful, highly configurable toast notifications for Laravel with 49 animations,<br>19 per-toast props, RTL support, dark mode, and full CSS/frontend framework parity.
+Powerful, highly configurable toast notifications for Laravel with 49 animations,<br>19 per-toast props, RTL support, and dark mode.
 </p>
 
 <p align="center">
@@ -20,7 +20,7 @@ Powerful, highly configurable toast notifications for Laravel with 49 animations
 
 ## Table of Contents
 
-- [Framework Support](#framework-support-matrix)
+- [Framework Support](#framework-support)
 - [Installation](#installation)
 - [Quick Start](#quick-start)
 - [Choosing Your Frameworks](#choosing-your-frameworks)
@@ -40,15 +40,34 @@ Powerful, highly configurable toast notifications for Laravel with 49 animations
 
 ## Framework Support
 
-Every CSS and frontend combination is fully supported with identical features:
-
-|                 | Blade + Alpine.js  |     Livewire 3     |       Vue 3        |      React 18      |      Svelte 4      |
+|                 | Blade + Alpine.js  |   Livewire 3 / 4   |       Vue 3        |      React 18      |      Svelte 4      |
 | --------------- | :----------------: | :----------------: | :----------------: | :----------------: | :----------------: |
 | **Tailwind v4** | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| **Bootstrap 5** | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| **Bootstrap 4** | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
+| **Bootstrap 5** | :white_check_mark: | :white_check_mark: |     :wrench:       |     :wrench:       |     :wrench:       |
+| **Bootstrap 4** | :white_check_mark: | :white_check_mark: |     :wrench:       |     :wrench:       |     :wrench:       |
 
-**15 combinations. Zero feature gaps.**
+:white_check_mark: Styled out of the box. All 49 animations, all 19 props, dark
+mode, and RTL, with the markup shipped for that CSS framework.
+
+:wrench: Works, but the markup is Tailwind. The Vue, React and Svelte components
+ship one Tailwind class map, so pairing them with Bootstrap gives you the right
+behavior with the wrong classes. Copy the component into your own source tree and
+restyle it:
+
+```bash
+cp vendor/jeremykenedy/laravel-toast/resources/js/vue/pages/ToastContainer.vue \
+   resources/js/Components/ToastContainer.vue
+```
+
+Keep the keyframe import pointing at the package so animations still resolve:
+
+```js
+import '../../../vendor/jeremykenedy/laravel-toast/resources/css/toast-animations.css'
+```
+
+Every combination shares the same `ToastManager`, the same payload, the same
+config and the same animations. The gap is styling only, and only for Bootstrap
+paired with a JavaScript frontend.
 
 ## Requirements
 
@@ -56,6 +75,7 @@ Every CSS and frontend combination is fully supported with identical features:
 - Laravel 10, 11, 12 or 13 (continuous integration covers 12 and 13)
 - One CSS framework: Tailwind v4, Bootstrap 5, or Bootstrap 4
 - One frontend: Blade + Alpine.js, Livewire 3 or 4, Vue 3, React 18, or Svelte 4
+- See [Framework Support](#framework-support) for which pairings ship styled
 
 ## Installation
 
@@ -195,7 +215,8 @@ toast()->success('Saved!', 'Done', 3000, [
 ## Animations
 
 49 animation styles, plus `none`, available for both `enter_animation` and `exit_animation`.
-Every style ships an enter and an exit keyframe, and all of them work in all 15 combinations.
+Every style ships an enter and an exit keyframe, and all of them work in every
+CSS framework and frontend.
 Directionless names (e.g., `slide`, `bounce`) use a sensible default (typically center or right):
 
 | Style                | Enter                                          | Exit                                  |

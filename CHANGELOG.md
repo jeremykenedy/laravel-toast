@@ -88,6 +88,10 @@ attribute and container id from v1.0.0 behaves as it did before.
 - `php` constraint simplified from `^8.2|^8.3` to the equivalent `^8.2`.
 - `livewire/livewire` added to `require-dev` so the Livewire component is
   covered by tests. It is not a runtime dependency.
+- The README framework matrix now reflects what actually ships styled. The Vue,
+  React and Svelte components carry a single Tailwind class map, so pairing them
+  with Bootstrap gives correct behavior with Tailwind markup. That was true
+  before this release too; the matrix simply claimed otherwise.
 
 ### Testing and CI
 

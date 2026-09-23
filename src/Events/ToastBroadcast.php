@@ -11,7 +11,9 @@ class ToastBroadcast implements ShouldBroadcast
 {
     public bool $afterCommit = true;
 
-    public function __construct(private string $channel, private array $toast) {}
+    public function __construct(private string $channel, private array $toast)
+    {
+    }
 
     public function broadcastOn(): array
     {

@@ -4,8 +4,8 @@ declare(strict_types=1);
 
 namespace Jeremykenedy\LaravelToast\Services;
 
-use Illuminate\Support\Facades\Session;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Session;
 use Jeremykenedy\LaravelToast\Events\ToastBroadcast;
 use Jeremykenedy\LaravelToast\Providers\ToastServiceProvider;
 

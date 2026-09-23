@@ -2,10 +2,10 @@
 
 declare(strict_types=1);
 
+use Illuminate\Support\Facades\Auth;
 use Jeremykenedy\LaravelToast\Livewire\ToastContainer;
 use Jeremykenedy\LaravelToast\Services\ToastManager;
 use Livewire\Livewire;
-use Illuminate\Support\Facades\Auth;
 
 it('registers the toast-container component', function () {
     expect(Livewire::new('toast-container'))->toBeInstanceOf(ToastContainer::class);

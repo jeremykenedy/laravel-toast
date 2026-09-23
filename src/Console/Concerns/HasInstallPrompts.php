@@ -262,6 +262,11 @@ trait HasInstallPrompts
         $this->line("  \033[90mCSS:\033[0m       {$cssLabel}");
         $this->line("  \033[90mFrontend:\033[0m  {$feLabel}");
         $this->newLine();
+        if ($css === 'tailwind') {
+            $this->line('  Add this source to resources/css/app.css:');
+            $this->line('  @source "../../vendor/jeremykenedy/laravel-toast/resources";');
+            $this->newLine();
+        }
         $this->line("  Run: \033[33mnpm run build\033[0m");
         $this->newLine();
     }

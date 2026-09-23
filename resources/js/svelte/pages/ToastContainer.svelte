@@ -1,10 +1,16 @@
 <script>
     import { onMount, onDestroy } from 'svelte'
     import '../../../css/toast-animations.css'
+    import '../../../css/toast-themes.css'
+    import '../../../css/toast-components.css'
+    import { appendToast, bootstrapStyle, toastFramework, listenForToasts } from '../../toast-options.js'
 
     export let initialToasts = []
     export let position = 'top-right'
-    export let stack = true
+    export let stack = undefined
+    export let cssFramework = undefined
+    export let echo = undefined
+    export let channel = null
     export let dismissLabel = 'Dismiss'
 
     const reduceMotion = typeof window !== 'undefined' && window.matchMedia
@@ -36,8 +42,12 @@
     let pausedMap = {}
     let holders = {}
     let exiting = {}
+    const exitTimers = {}
+    const seen = new Set()
+    let mounted = false
+    let unsubscribe = () => {}
 
-    function getStyle(toast) { return styles[toast.type] || styles.info }
+    function getStyle(toast, framework) { return bootstrapStyle(toast, framework) || styles[toast.type] || styles.info }
 
     function dismiss(id) {
         const toast = toasts.find(t => t.id === id)
@@ -45,15 +55,18 @@
         if (timers[id]) { cancelAnimationFrame(timers[id]); delete timers[id] }
         delete pausedMap[id]
         const anim = toast.exit_animation || 'none'
-        const dur = toast.exit_duration || 0.5
+        const dur = toast.exit_duration ?? 0.5
         if (anim === 'none' || reduceMotion) { remove(id); return }
         exiting[id] = true
         const el = document.querySelector(`[data-toast-id="${id}"]`)
         if (el) { el.style.animation = `toast-${anim} ${dur}s ease forwards` }
-        setTimeout(() => remove(id), dur * 1000)
+        exitTimers[id] = setTimeout(() => remove(id), dur * 1000)
     }
 
     function remove(id) {
+        cancelAnimationFrame(timers[id])
+        clearTimeout(exitTimers[id])
+        delete timers[id]; delete exitTimers[id]; delete pausedMap[id]
         delete progress[id]
         delete exiting[id]
         delete holders[id]
@@ -94,14 +107,12 @@
 
     function enterStyle(toast) {
         const anim = toast.enter_animation || 'none'
-        return anim !== 'none' ? `animation:toast-enter-${anim} ${toast.enter_duration || 0.5}s ease forwards;` : ''
+        return anim !== 'none' ? `animation:toast-enter-${anim} ${toast.enter_duration ?? 0.5}s ease forwards;` : ''
     }
 
-    // Each toast may carry its own position, and stack: false shows only the
-    // newest per position. The Blade and Livewire renderers already do this.
-    $: grouped = groupByPosition(toasts, position, stack)
+    $: grouped = groupByPosition(toasts, position)
 
-    function groupByPosition(list, fallback, keepAll) {
+    function groupByPosition(list, fallback) {
         const groups = {}
 
         for (const toast of list) {
@@ -110,11 +121,6 @@
             ;(groups[at] = groups[at] || []).push(toast)
         }
 
-        if (!keepAll) {
-            for (const key of Object.keys(groups)) {
-                groups[key] = groups[key].slice(-1)
-            }
-        }
 
         return Object.entries(groups)
     }
@@ -123,57 +129,82 @@
         return positionMap[key] || positionMap['top-right']
     }
 
-    onMount(() => {
-        toasts = initialToasts.length ? [...initialToasts] : [...(window.__toasts || [])]
-        toasts.forEach(toast => {
+    function receive(incoming) {
+        for (const toast of incoming || []) {
+            if (!toast?.id || seen.has(toast.id)) continue
+            seen.add(toast.id)
+            const next = appendToast(toasts, toast, stack)
+            for (const previous of toasts) {
+                if (!next.some(item => item.id === previous.id)) remove(previous.id)
+            }
+            toasts = next
             progress[toast.id] = 100
             startTimer(toast, toast.duration)
-        })
+        }
         progress = progress
+        return toasts
+    }
+
+    function connect(client, name) {
+        unsubscribe()
+        unsubscribe = listenForToasts(client || window.Echo, name, toast => receive([toast]))
+    }
+
+    $: if (mounted) toasts = receive(initialToasts)
+    $: if (mounted) connect(echo, channel)
+
+    onMount(() => {
+        mounted = true
+        receive(initialToasts.length ? initialToasts : (window.__toasts || []))
     })
 
-    onDestroy(() => { Object.values(timers).forEach(id => cancelAnimationFrame(id)) })
+    onDestroy(() => {
+        mounted = false
+        unsubscribe()
+        Object.values(timers).forEach(id => cancelAnimationFrame(id))
+        Object.values(exitTimers).forEach(id => clearTimeout(id))
+    })
 </script>
 
 {#each grouped as [at, group] (at)}
 <div style="position:fixed;{positionStyleFor(at)}z-index:9999;width:24rem;max-width:calc(100vw - 1rem);display:flex;flex-direction:column;gap:0.75rem;pointer-events:none;" role="status" aria-live="polite" aria-atomic="false">
     {#each group as toast (toast.id)}
-        {@const ts = getStyle(toast)}
-        <div data-toast-id={toast.id} dir={toast.dir || 'ltr'}
-             style="pointer-events:auto;cursor:default;{toast.opacity < 1 ? 'opacity:'+toast.opacity+';' : ''}{enterStyle(toast)}"
+        {@const ts = getStyle(toast, cssFramework)}
+        <div data-toast-id={toast.id} data-laravel-toast="component" data-css-framework={toastFramework(toast, cssFramework)} dir={toast.dir || 'ltr'}
+             style="pointer-events:auto;cursor:default;{toast.show_border === false ? 'border:0;' : ''}{toast.opacity < 1 ? 'opacity:'+toast.opacity+';' : ''}{enterStyle(toast)}"
              on:mouseenter={() => toast.pause_on_hover && hold(toast.id, 'hover')}
              on:mouseleave={() => toast.pause_on_hover && release(toast.id, 'hover')}
              on:focusin={() => toast.pause_on_hover && hold(toast.id, 'focus')}
              on:focusout={() => toast.pause_on_hover && release(toast.id, 'focus')}
-             class="rounded-xl shadow-lg shadow-black/5 ring-1 ring-black/5 dark:shadow-black/40 dark:ring-white/10 overflow-hidden {ts.bg} {toast.show_border !== false ? 'border ' + ts.border : ''}"
+             class="laravel-toast-item {ts.bg} {toast.show_border !== false ? 'border ' + ts.border : ''}"
              role="alert"
              aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
              aria-atomic="true">
             {#if toast.auto_dismiss && toast.show_progress !== false && toast.duration > 0 && toast.progress_position === 'top'}
-            <div class="h-1 w-full {ts.barBg}"><div class="h-full {ts.bar}" style="width:{progress[toast.id] ?? 100}%;transition:none;{toast.progress_direction === 'rtl' ? 'margin-left:auto;' : ''}"></div></div>
+            <div class="laravel-toast-progress {ts.barBg}"><div class="{ts.bar}" style="width:{progress[toast.id] ?? 100}%;transition:none;{toast.progress_direction === 'rtl' ? 'margin-left:auto;' : ''}"></div></div>
             {/if}
-            <div class="p-4 flex items-start gap-3">
+            <div class="laravel-toast-body">
                 {#if toast.show_icon !== false}
-                <div class="shrink-0 mt-0.5">
+                <div class="laravel-toast-icon">
                     {#if toast.custom_icon}
                         {@html toast.custom_icon}
                     {:else}
-                        <svg class="h-5 w-5 {ts.icon}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d={iconPaths[toast.type] || iconPaths.info} /></svg>
+                        <svg class="{ts.icon}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d={iconPaths[toast.type] || iconPaths.info} /></svg>
                     {/if}
                 </div>
                 {/if}
-                <div class="flex-1 min-w-0" style="cursor:default;">
-                    {#if toast.title}<p class="text-sm font-semibold tracking-tight">{toast.title}</p>{/if}
-                    <p class="text-sm leading-relaxed break-words">{toast.message}</p>
+                <div class="laravel-toast-content" style="cursor:default;">
+                    {#if toast.title}<p class="laravel-toast-title">{toast.title}</p>{/if}
+                    <p class="laravel-toast-message">{toast.message}</p>
                 </div>
                 {#if toast.show_close !== false}
-                <button type="button" on:click={() => dismiss(toast.id)} class="shrink-0 rounded-md p-1 opacity-60 hover:opacity-100 transition-opacity cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-transparent" aria-label={dismissLabel}>
-                    <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
+                <button type="button" on:click={() => dismiss(toast.id)} class="laravel-toast-close" aria-label={dismissLabel}>
+                    <svg  fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" /></svg>
                 </button>
                 {/if}
             </div>
             {#if toast.auto_dismiss && toast.show_progress !== false && toast.duration > 0 && toast.progress_position !== 'top'}
-            <div class="h-1 w-full {ts.barBg}"><div class="h-full {ts.bar}" style="width:{progress[toast.id] ?? 100}%;transition:none;{toast.progress_direction === 'rtl' ? 'margin-left:auto;' : ''}"></div></div>
+            <div class="laravel-toast-progress {ts.barBg}"><div class="{ts.bar}" style="width:{progress[toast.id] ?? 100}%;transition:none;{toast.progress_direction === 'rtl' ? 'margin-left:auto;' : ''}"></div></div>
             {/if}
         </div>
     {/each}

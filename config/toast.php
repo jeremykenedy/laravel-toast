@@ -103,7 +103,7 @@ return [
     // Real-time broadcasting
     'broadcast' => [
         'enabled' => (bool) env('TOAST_BROADCAST_ENABLED', false),
-        'channel' => 'toast.{userId}',
+        'channel' => env('TOAST_BROADCAST_CHANNEL', 'toast.{userId}'),
     ],
 
 ];

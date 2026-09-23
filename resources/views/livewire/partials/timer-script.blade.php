@@ -19,6 +19,7 @@
     // Livewire morphs against server markup, which would strip a data attribute
     // used as a bound flag and let the next scan add a second timer.
     var bound = new WeakSet();
+    var dismissing = new WeakSet();
 
     function componentFor(el) {
         var root = el.closest('[wire\\:id]');
@@ -43,7 +44,8 @@
     }
 
     function dismiss(el) {
-        if (el.dataset.toastDismissing === 'true') return;
+        if (dismissing.has(el)) return;
+        dismissing.add(el);
         el.dataset.toastDismissing = 'true';
 
         // Resolved now, because a morph can detach the node before the exit
@@ -77,13 +79,13 @@
         var pauseOnHover = el.dataset.pauseOnHover === 'true';
         var bar = el.querySelector('.toast-progress-bar');
         var start = Date.now(), elapsed = 0, pausedAt = 0;
-        var running = true, hovered = false, focused = false;
+        var running = true, hovered = false, focused = false, frame = null;
 
         function tick() {
             if (!running || el.dataset.toastDismissing === 'true' || !el.isConnected) return;
             var e = Date.now() - start - elapsed;
             if (bar) bar.style.width = Math.max(0, 100 - (e / duration * 100)) + '%';
-            if (e >= duration) dismiss(el); else requestAnimationFrame(tick);
+            if (e >= duration) dismiss(el); else frame = requestAnimationFrame(tick);
         }
 
         // Hover and focus are tracked apart so leaving one does not restart the
@@ -91,6 +93,8 @@
         function pause() {
             if (!running) return;
             running = false;
+            cancelAnimationFrame(frame);
+            frame = null;
             pausedAt = Date.now();
         }
 
@@ -98,7 +102,7 @@
             if (running || hovered || focused) return;
             elapsed += Date.now() - pausedAt;
             running = true;
-            requestAnimationFrame(tick);
+            frame = requestAnimationFrame(tick);
         }
 
         if (pauseOnHover) {
@@ -108,7 +112,7 @@
             el.addEventListener('focusout', function () { focused = false; resume(); });
         }
 
-        requestAnimationFrame(tick);
+        frame = requestAnimationFrame(tick);
     }
 
     function scan() {
@@ -122,6 +126,14 @@
     }
 
     window.__laravelToastTimers = scan;
+
+    document.addEventListener('click', function (event) {
+        var button = event.target.closest('[data-toast-dismiss]');
+        var el = button && button.closest('[data-laravel-toast="livewire"]');
+        if (!el) return;
+        event.preventDefault();
+        dismiss(el);
+    });
 
     document.addEventListener('DOMContentLoaded', scan);
     document.addEventListener('livewire:navigated', scan);

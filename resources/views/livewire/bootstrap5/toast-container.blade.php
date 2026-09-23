@@ -2,14 +2,13 @@
     use Jeremykenedy\LaravelToast\Support\ToastAnimations;
 
     $globalPosition = config('toast.position', 'top-right');
-    $stack = config('toast.stack', true);
     $positionMap = [
         'top-left'=>'top:0.5rem;left:0.5rem;','top-center'=>'top:0.5rem;left:50%;transform:translateX(-50%);',
         'top-right'=>'top:0.5rem;right:0.5rem;','bottom-right'=>'bottom:0.5rem;right:0.5rem;',
         'bottom-left'=>'bottom:0.5rem;left:0.5rem;','bottom-center'=>'bottom:0.5rem;left:50%;transform:translateX(-50%);',
     ];
     $grouped = [];
-    $displayToasts = $stack ? $toasts : (count($toasts) ? [end($toasts)] : []);
+    $displayToasts = $toasts;
     foreach ($displayToasts as $t) {
         $pos = $t['position'] ?? $globalPosition;
         if (!isset($positionMap[$pos])) $pos = 'top-right';
@@ -25,14 +24,7 @@
 @endphp
 <div>
 @if(count($displayToasts) > 0)
-{!! ToastAnimations::styleTag() !!}
-<style id="toast-bs5-theme">
-[data-bs-theme=dark] .text-bg-success,.dark .text-bg-success{background-color:#064e3b!important;color:#d1fae5!important}
-[data-bs-theme=dark] .text-bg-danger,.dark .text-bg-danger{background-color:#7f1d1d!important;color:#fee2e2!important}
-[data-bs-theme=dark] .text-bg-warning,.dark .text-bg-warning{background-color:#78350f!important;color:#fef3c7!important}
-[data-bs-theme=dark] .text-bg-info,.dark .text-bg-info{background-color:#1e3a5f!important;color:#dbeafe!important}
-@media(prefers-color-scheme:dark){.text-bg-success{background-color:#064e3b!important;color:#d1fae5!important}.text-bg-danger{background-color:#7f1d1d!important;color:#fee2e2!important}.text-bg-warning{background-color:#78350f!important;color:#fef3c7!important}.text-bg-info{background-color:#1e3a5f!important;color:#dbeafe!important}}
-</style>
+{!! ToastAnimations::styleTag('bootstrap5') !!}
 @foreach($grouped as $pos => $posToasts)
 <div class="position-fixed" style="{{ $positionMap[$pos] }} z-index:9999; width:min(400px, calc(100vw - 1rem)); pointer-events:none;">
     <div class="toast-container">
@@ -45,7 +37,7 @@
         @endphp
         <div wire:key="{{ $toast['id'] }}"
              id="lw-toast-{{ $toast['id'] }}"
-         data-laravel-toast="livewire"
+         data-laravel-toast="livewire" data-css-framework="bootstrap5"
              class="toast show align-items-center mb-2 w-100 text-bg-{{ $bsType }} overflow-hidden rounded-3 shadow{{ $borderClass }}"
              role="alert" aria-live="{{ $toast['type'] === 'error' ? 'assertive' : 'polite' }}" aria-atomic="true"
              dir="{{ $toast['dir'] ?? 'ltr' }}"
@@ -69,7 +61,7 @@
                     </div>
                 </div>
                 @if(($toast['show_close'] ?? true) !== false)
-                <button type="button" wire:click="dismiss('{{ $toast['id'] }}')" class="btn-close btn-close-white me-2 m-auto flex-shrink-0" style="cursor:pointer;" aria-label="{{ __('toast::toast.dismiss') }}"></button>
+                <button type="button" data-toast-dismiss class="btn-close btn-close-white me-2 m-auto flex-shrink-0" style="cursor:pointer;" aria-label="{{ __('toast::toast.dismiss') }}"></button>
                 @endif
             </div>
             @if(($toast['auto_dismiss'] ?? true) && ($toast['show_progress'] ?? true) !== false && ($toast['duration'] ?? 0) > 0 && ($toast['progress_position'] ?? 'top') !== 'top')

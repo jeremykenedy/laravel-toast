@@ -7,7 +7,6 @@
     }
     $toasts = $toastManager->get();
     $globalPosition = $toastManager->position();
-    $stack = config('toast.stack', true);
 
     $positionMap = [
         'top-left' => 'top: 0.5rem; left: 0.5rem;',
@@ -25,11 +24,6 @@
         $grouped[$pos][] = $t;
     }
 
-    if (!$stack) {
-        foreach ($grouped as $pos => $items) {
-            $grouped[$pos] = [end($items)];
-        }
-    }
 @endphp
 @if(count($toasts) > 0)
 {!! ToastAnimations::styleTag() !!}

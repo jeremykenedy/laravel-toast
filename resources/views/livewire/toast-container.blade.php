@@ -2,14 +2,13 @@
     use Jeremykenedy\LaravelToast\Support\ToastAnimations;
 
     $globalPosition = config('toast.position', 'top-right');
-    $stack = config('toast.stack', true);
     $positionMap = [
         'top-left'=>'top:0.5rem;left:0.5rem;','top-center'=>'top:0.5rem;left:50%;transform:translateX(-50%);',
         'top-right'=>'top:0.5rem;right:0.5rem;','bottom-right'=>'bottom:0.5rem;right:0.5rem;',
         'bottom-left'=>'bottom:0.5rem;left:0.5rem;','bottom-center'=>'bottom:0.5rem;left:50%;transform:translateX(-50%);',
     ];
     $grouped = [];
-    $displayToasts = $stack ? $toasts : (count($toasts) ? [end($toasts)] : []);
+    $displayToasts = $toasts;
     foreach ($displayToasts as $t) {
         $pos = $t['position'] ?? $globalPosition;
         if (!isset($positionMap[$pos])) $pos = 'top-right';
@@ -71,7 +70,7 @@
                 <p class="text-sm leading-relaxed break-words">{{ $toast['message'] }}</p>
             </div>
             @if(($toast['show_close'] ?? true) !== false)
-            <button type="button" wire:click="dismiss('{{ $toast['id'] }}')" class="shrink-0 rounded-md p-1 opacity-60 hover:opacity-100 transition-opacity cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-transparent @switch($toast['type']) @case('success') focus-visible:ring-green-500 dark:focus-visible:ring-green-400 @break @case('error') focus-visible:ring-red-500 dark:focus-visible:ring-red-400 @break @case('warning') focus-visible:ring-amber-500 dark:focus-visible:ring-amber-400 @break @default focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 @endswitch" aria-label="{{ __('toast::toast.dismiss') }}">
+            <button type="button" data-toast-dismiss class="shrink-0 rounded-md p-1 opacity-60 hover:opacity-100 transition-opacity cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-transparent @switch($toast['type']) @case('success') focus-visible:ring-green-500 dark:focus-visible:ring-green-400 @break @case('error') focus-visible:ring-red-500 dark:focus-visible:ring-red-400 @break @case('warning') focus-visible:ring-amber-500 dark:focus-visible:ring-amber-400 @break @default focus-visible:ring-blue-500 dark:focus-visible:ring-blue-400 @endswitch" aria-label="{{ __('toast::toast.dismiss') }}">
                 <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
             </button>
             @endif

@@ -112,7 +112,12 @@ it('publishes only tags whose contents still resolve where they land', function 
 it('keeps the published stylesheet reachable from the documented copy path', function () {
     $groups = ServiceProvider::$publishGroups;
 
-    expect($groups['toast-css'])->toHaveCount(1);
+    expect($groups['toast-css'])->toHaveCount(3);
+
+    foreach ($groups['toast-css'] as $source => $target) {
+        expect(is_file($source))->toBeTrue()
+            ->and(dirname($target))->toBe(resource_path('css/vendor/toast'));
+    }
 
     $source = array_key_first($groups['toast-css']);
 

@@ -5,6 +5,7 @@ declare(strict_types=1);
 use Jeremykenedy\LaravelToast\Livewire\ToastContainer;
 use Jeremykenedy\LaravelToast\Services\ToastManager;
 use Livewire\Livewire;
+use Illuminate\Support\Facades\Auth;
 
 it('registers the toast-container component', function () {
     expect(Livewire::new('toast-container'))->toBeInstanceOf(ToastContainer::class);
@@ -170,3 +171,38 @@ it('never puts alpine directives in a livewire view', function (string $file) {
     'bootstrap5/toast-container.blade.php',
     'bootstrap4/toast-container.blade.php',
 ]);
+
+it('honors a per toast replacement without restoring old session toasts', function () {
+    $component = Livewire::test(ToastContainer::class)
+        ->dispatch('toast', message: 'Old', options: ['position' => 'top-left'])
+        ->dispatch('toast', message: 'New', options: ['position' => 'bottom-right', 'stack' => false])
+        ->assertCount('toasts', 1)
+        ->assertSet('toasts.0.message', 'New');
+
+    $component->call('dismiss', $component->get('toasts')[0]['id'])->assertCount('toasts', 0);
+});
+
+it('subscribes to the authenticated users configured private channel', function () {
+    config(['toast.broadcast.enabled' => true, 'toast.broadcast.channel' => 'notifications.{userId}']);
+    Auth::shouldReceive('id')->andReturn(42);
+
+    expect(Livewire::test(ToastContainer::class)->instance()->getListeners())
+        ->toBe(['echo-private:notifications.42,.toast' => 'receiveBroadcast']);
+});
+
+it('does not subscribe a guest to broadcasts', function () {
+    config(['toast.broadcast.enabled' => true]);
+    Auth::shouldReceive('id')->andReturn(null);
+
+    expect(Livewire::test(ToastContainer::class)->instance()->getListeners())->toBe([]);
+});
+
+it('receives a broadcast with its identity and ignores duplicates', function () {
+    $payload = app(ToastManager::class)->build('success', 'Broadcast payload', options: ['stack' => false]);
+    Livewire::test(ToastContainer::class)
+        ->call('receiveBroadcast', ['toast' => $payload])
+        ->call('receiveBroadcast', ['toast' => $payload])
+        ->assertCount('toasts', 1)
+        ->assertSet('toasts.0.id', $payload['id'])
+        ->assertSee('Broadcast payload');
+});

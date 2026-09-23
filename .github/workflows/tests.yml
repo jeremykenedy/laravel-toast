@@ -13,18 +13,16 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        php: ['8.2', '8.3', '8.4']
-        laravel: ['12.*', '13.*']
-        exclude:
-          - php: '8.2'
-            laravel: '13.*'
         include:
-          - laravel: '12.*'
-            testbench: '10.*'
-          - laravel: '13.*'
-            testbench: '11.*'
+          - { php: '8.2', laravel: '10.*', testbench: '8.*', livewire: '3.*' }
+          - { php: '8.3', laravel: '11.*', testbench: '9.*', livewire: '3.*' }
+          - { php: '8.2', laravel: '12.*', testbench: '10.*', livewire: '3.*' }
+          - { php: '8.4', laravel: '12.*', testbench: '10.*', livewire: '4.*' }
+          - { php: '8.3', laravel: '13.*', testbench: '11.*', livewire: '4.*' }
+          - { php: '8.4', laravel: '13.*', testbench: '11.*', livewire: '4.*' }
+          - { php: '8.5', laravel: '13.*', testbench: '11.*', livewire: '4.*' }
 
-    name: PHP ${{ matrix.php }} / Laravel ${{ matrix.laravel }}
+    name: PHP ${{ matrix.php }} / Laravel ${{ matrix.laravel }} / Livewire ${{ matrix.livewire }}
 
     steps:
       - name: Checkout
@@ -41,7 +39,7 @@ jobs:
       - name: Install dependencies
         run: |
           composer config allow-plugins.pestphp/pest-plugin true
-          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" --no-interaction --no-update --dev
+          composer require "laravel/framework:${{ matrix.laravel }}" "orchestra/testbench:${{ matrix.testbench }}" "livewire/livewire:${{ matrix.livewire }}" --no-interaction --no-update --dev
           composer update --prefer-dist --no-interaction
 
       - name: Tests
@@ -115,53 +113,29 @@ jobs:
 
   js-check:
     runs-on: ubuntu-latest
-    name: Frontend components
+    name: Frontend behavior
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Verify Vue component
-        run: test -f resources/js/vue/pages/ToastContainer.vue
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: npm
 
-      - name: Verify React component
-        run: test -f resources/js/react/pages/ToastContainer.jsx
+      - name: Install dependencies
+        run: npm ci
 
-      - name: Verify Svelte component
-        run: test -f resources/js/svelte/pages/ToastContainer.svelte
+      - name: Component and timer tests
+        run: npm test
 
-      - name: Check all props in Vue
-        run: |
-          for prop in dir show_border show_close progress_position enter_animation exit_animation pause_on_hover opacity auto_dismiss; do
-            grep -q "$prop" resources/js/vue/pages/ToastContainer.vue || (echo "Vue missing: $prop" && exit 1)
-          done
+      - name: Install Chromium
+        run: npx playwright install --with-deps chromium
 
-      - name: Check all props in React
-        run: |
-          for prop in dir show_border show_close progress_position enter_animation exit_animation pause_on_hover opacity auto_dismiss; do
-            grep -q "$prop" resources/js/react/pages/ToastContainer.jsx || (echo "React missing: $prop" && exit 1)
-          done
-
-      - name: Check all props in Svelte
-        run: |
-          for prop in dir show_border show_close progress_position enter_animation exit_animation pause_on_hover opacity auto_dismiss; do
-            grep -q "$prop" resources/js/svelte/pages/ToastContainer.svelte || (echo "Svelte missing: $prop" && exit 1)
-          done
-
-      # An application alias such as "@/i18n/translator" does not resolve inside
-      # this package and breaks the consuming bundler build.
-      - name: Reject application path aliases
-        run: |
-          if grep -rn "from \"@/\|from '@/" resources/js/; then
-            echo "Components must not import through an application alias"
-            exit 1
-          fi
-
-      - name: Verify each component imports the shared keyframes
-        run: |
-          for file in resources/js/vue/pages/ToastContainer.vue resources/js/react/pages/ToastContainer.jsx resources/js/svelte/pages/ToastContainer.svelte; do
-            grep -q "css/toast-animations.css" "$file" || (echo "$file does not import the shared keyframes" && exit 1)
-          done
+      - name: Browser and CSS tests
+        run: npm run test:browser
 
   framework-isolation:
     runs-on: ubuntu-latest

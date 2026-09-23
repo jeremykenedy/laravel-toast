@@ -66,9 +66,13 @@ final class ToastAnimations
         return self::$css = trim((string) preg_replace('/\n{2,}/', "\n", $css));
     }
 
-    public static function styleTag(): string
+    public static function styleTag(?string $framework = null): string
     {
-        return '<style id="toast-animations">'.self::css().'</style>';
+        $theme = in_array($framework, ['bootstrap4', 'bootstrap5'], true)
+            ? (string) file_get_contents(dirname(self::path()).'/toast-themes.css')
+            : '';
+
+        return '<style id="toast-animations">'.self::css().$theme.'</style>';
     }
 
     public static function flush(): void

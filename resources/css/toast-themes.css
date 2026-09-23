@@ -1,0 +1,32 @@
+:where(.dark, [data-bs-theme="dark"]) [data-laravel-toast][data-css-framework="bootstrap4"].alert-success:not([data-bs-theme="light"] *):not(.light *) {background-color:#064e3b!important;border-color:#047857!important;color:#d1fae5!important}
+@media (prefers-color-scheme: dark) {
+    [data-laravel-toast][data-css-framework="bootstrap4"].alert-success:not([data-bs-theme="light"] *):not(.light *):not([data-bs-theme] *) {background-color:#064e3b!important;border-color:#047857!important;color:#d1fae5!important}
+}
+:where(.dark, [data-bs-theme="dark"]) [data-laravel-toast][data-css-framework="bootstrap4"].alert-danger:not([data-bs-theme="light"] *):not(.light *) {background-color:#7f1d1d!important;border-color:#b91c1c!important;color:#fee2e2!important}
+@media (prefers-color-scheme: dark) {
+    [data-laravel-toast][data-css-framework="bootstrap4"].alert-danger:not([data-bs-theme="light"] *):not(.light *):not([data-bs-theme] *) {background-color:#7f1d1d!important;border-color:#b91c1c!important;color:#fee2e2!important}
+}
+:where(.dark, [data-bs-theme="dark"]) [data-laravel-toast][data-css-framework="bootstrap4"].alert-warning:not([data-bs-theme="light"] *):not(.light *) {background-color:#78350f!important;border-color:#b45309!important;color:#fef3c7!important}
+@media (prefers-color-scheme: dark) {
+    [data-laravel-toast][data-css-framework="bootstrap4"].alert-warning:not([data-bs-theme="light"] *):not(.light *):not([data-bs-theme] *) {background-color:#78350f!important;border-color:#b45309!important;color:#fef3c7!important}
+}
+:where(.dark, [data-bs-theme="dark"]) [data-laravel-toast][data-css-framework="bootstrap4"].alert-info:not([data-bs-theme="light"] *):not(.light *) {background-color:#1e3a5f!important;border-color:#1d4ed8!important;color:#dbeafe!important}
+@media (prefers-color-scheme: dark) {
+    [data-laravel-toast][data-css-framework="bootstrap4"].alert-info:not([data-bs-theme="light"] *):not(.light *):not([data-bs-theme] *) {background-color:#1e3a5f!important;border-color:#1d4ed8!important;color:#dbeafe!important}
+}
+:where(.dark, [data-bs-theme="dark"]) [data-laravel-toast][data-css-framework="bootstrap5"].text-bg-success:not([data-bs-theme="light"] *):not(.light *) {background-color:#064e3b!important;border-color:#047857!important;color:#d1fae5!important}
+@media (prefers-color-scheme: dark) {
+    [data-laravel-toast][data-css-framework="bootstrap5"].text-bg-success:not([data-bs-theme="light"] *):not(.light *):not([data-bs-theme] *) {background-color:#064e3b!important;border-color:#047857!important;color:#d1fae5!important}
+}
+:where(.dark, [data-bs-theme="dark"]) [data-laravel-toast][data-css-framework="bootstrap5"].text-bg-danger:not([data-bs-theme="light"] *):not(.light *) {background-color:#7f1d1d!important;border-color:#b91c1c!important;color:#fee2e2!important}
+@media (prefers-color-scheme: dark) {
+    [data-laravel-toast][data-css-framework="bootstrap5"].text-bg-danger:not([data-bs-theme="light"] *):not(.light *):not([data-bs-theme] *) {background-color:#7f1d1d!important;border-color:#b91c1c!important;color:#fee2e2!important}
+}
+:where(.dark, [data-bs-theme="dark"]) [data-laravel-toast][data-css-framework="bootstrap5"].text-bg-warning:not([data-bs-theme="light"] *):not(.light *) {background-color:#78350f!important;border-color:#b45309!important;color:#fef3c7!important}
+@media (prefers-color-scheme: dark) {
+    [data-laravel-toast][data-css-framework="bootstrap5"].text-bg-warning:not([data-bs-theme="light"] *):not(.light *):not([data-bs-theme] *) {background-color:#78350f!important;border-color:#b45309!important;color:#fef3c7!important}
+}
+:where(.dark, [data-bs-theme="dark"]) [data-laravel-toast][data-css-framework="bootstrap5"].text-bg-info:not([data-bs-theme="light"] *):not(.light *) {background-color:#1e3a5f!important;border-color:#1d4ed8!important;color:#dbeafe!important}
+@media (prefers-color-scheme: dark) {
+    [data-laravel-toast][data-css-framework="bootstrap5"].text-bg-info:not([data-bs-theme="light"] *):not(.light *):not([data-bs-theme] *) {background-color:#1e3a5f!important;border-color:#1d4ed8!important;color:#dbeafe!important}
+}

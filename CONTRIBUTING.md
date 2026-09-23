@@ -13,10 +13,13 @@ composer test
 
 ```bash
 composer format   # Pint, Laravel preset
-composer test     # 323 tests
+composer test
+npm ci
+npm test
+npm run test:browser
 ```
 
-Both run in CI, along with `composer validate`, an install without Livewire, and
+These run in CI, along with `composer validate`, an install without Livewire, and
 the framework isolation checks.
 
 ## The one rule that matters most

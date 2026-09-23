@@ -1,0 +1,25 @@
+[data-laravel-toast="component"] {
+    border-radius: .75rem;
+    overflow: hidden;
+    box-shadow: 0 8px 24px rgb(0 0 0 / .12);
+    margin: 0;
+    padding: 0;
+    width: 100%;
+    max-width: 100%;
+    font-size: .875rem;
+}
+[data-laravel-toast="component"] .laravel-toast-body { padding: 1rem; display: flex; align-items: flex-start; gap: .75rem; }
+[data-laravel-toast="component"] .laravel-toast-icon { flex-shrink: 0; margin-top: .125rem; }
+[data-laravel-toast="component"] .laravel-toast-icon svg { width: 1.25rem; height: 1.25rem; }
+[data-laravel-toast="component"] .laravel-toast-content { flex: 1; min-width: 0; }
+[data-laravel-toast="component"] p { margin: 0; }
+[data-laravel-toast="component"] .laravel-toast-title { font-weight: 600; letter-spacing: -.01em; }
+[data-laravel-toast="component"] .laravel-toast-message { line-height: 1.6; overflow-wrap: anywhere; }
+[data-laravel-toast="component"] .laravel-toast-close { flex-shrink: 0; border: 0; border-radius: .25rem; padding: .25rem; opacity: .7; cursor: pointer; color: inherit; background: transparent; line-height: 1; }
+[data-laravel-toast="component"] .laravel-toast-close:hover { opacity: 1; }
+[data-laravel-toast="component"] .laravel-toast-close:focus-visible { outline: 2px solid currentColor; outline-offset: 2px; }
+[data-laravel-toast="component"] .laravel-toast-close svg { width: 1rem; height: 1rem; }
+[data-laravel-toast="component"] .laravel-toast-progress { height: .25rem; width: 100%; }
+[data-laravel-toast="component"] .laravel-toast-progress > div { height: 100%; }
+[data-laravel-toast="component"] .laravel-toast-track { background: rgb(0 0 0 / .1); }
+[data-laravel-toast="component"] .laravel-toast-bar { background: currentColor; }

@@ -5,6 +5,33 @@ All notable changes to `jeremykenedy/laravel-toast` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+
+Applications with published views should merge the updated templates to receive
+the dismissal and theme fixes.
+
+### Fixed
+
+- SPA containers accept later notification props and retain dismissed IDs until unmount.
+- Replacing a stack discards superseded notifications across positions in every renderer.
+- Toast payloads include the resolved position, stacking preference, and CSS framework.
+- Converted flash messages display once and ignore non-string values consistently.
+- Framework commands update an existing toast override when ui-kit is also installed.
+- Bootstrap dark colors are scoped to package toasts and respect explicit light mode.
+- Livewire manual dismissal runs the exit animation before removing server state.
+- Bootstrap and Livewire pause/resume cancel pending frames to avoid duplicate countdowns.
+- SPA unmount and replacement cancel both countdowns and pending exit callbacks.
+- Installation documents Tailwind source registration and reports the required source path.
+
+### Added
+
+- Bootstrap 4 and Bootstrap 5 styles for Vue, React, and Svelte components.
+- Optional queued private broadcasts with explicit recipients, Livewire subscriptions,
+  and Echo subscriptions for JavaScript components.
+- Mounted component tests, executable timer tests, and Chromium checks for all nine
+  SPA/CSS pairings and Bootstrap theme isolation.
+- CI selections for Laravel 10 through 13, Livewire 3 and 4, and PHP 8.5.
+
 ## [v2.0.0] - 2026-09-11
 
 No breaking changes to the public API. Every public method, config key, view

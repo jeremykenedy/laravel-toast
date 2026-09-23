@@ -1,5 +1,10 @@
 import React, { useState, useEffect, useCallback, useRef } from 'react'
 import '../../../css/toast-animations.css'
+import '../../../css/toast-themes.css'
+import '../../../css/toast-components.css'
+import { appendToast, bootstrapStyle, toastFramework, listenForToasts } from '../../toast-options.js'
+
+const emptyToasts = []
 
 const styles = {
     success: { bg: 'bg-green-50 text-green-800 dark:bg-green-950 dark:text-green-200', border: 'border-green-200 dark:border-green-800', icon: 'text-green-500 dark:text-green-400', bar: 'bg-green-500 dark:bg-green-400', barBg: 'bg-green-200 dark:bg-green-900' },
@@ -31,10 +36,10 @@ function ToastIcon({ type, className }) {
         info: 'M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z',
     }
 
-    return <svg className={`h-5 w-5 ${className}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d={paths[type] || paths.info} /></svg>
+    return <svg className={`${className}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d={paths[type] || paths.info} /></svg>
 }
 
-export default function ToastContainer({ initialToasts = [], position = 'top-right', stack = true, dismissLabel = 'Dismiss' }) {
+export default function ToastContainer({ initialToasts = emptyToasts, position = 'top-right', stack, cssFramework, echo, channel, dismissLabel = 'Dismiss' }) {
     const [toasts, setToasts] = useState([])
     // State drives the render, the refs let the animation frame read current
     // values without the callbacks going stale or rerunning the effect.
@@ -45,6 +50,8 @@ export default function ToastContainer({ initialToasts = [], position = 'top-rig
     const paused = useRef({})
     const holders = useRef({})
     const exiting = useRef({})
+    const exitTimers = useRef({})
+    const seen = useRef(new Set())
 
     const writeToasts = useCallback((next) => {
         toastsRef.current = next
@@ -57,6 +64,9 @@ export default function ToastContainer({ initialToasts = [], position = 'top-rig
     }, [])
 
     const remove = useCallback((id) => {
+        cancelAnimationFrame(timers.current[id])
+        clearTimeout(exitTimers.current[id])
+        delete exitTimers.current[id]
         delete timers.current[id]
         delete paused.current[id]
         delete holders.current[id]
@@ -76,14 +86,14 @@ export default function ToastContainer({ initialToasts = [], position = 'top-rig
 
         const toast = toastsRef.current.find(t => t.id === id)
         const anim = toast?.exit_animation || 'none'
-        const dur = toast?.exit_duration || 0.5
+        const dur = toast?.exit_duration ?? 0.5
 
         if (anim === 'none' || prefersReducedMotion()) { remove(id); return }
 
         exiting.current[id] = true
         const el = document.querySelector(`[data-toast-id="${id}"]`)
         if (el) { el.style.animation = `toast-${anim} ${dur}s ease forwards` }
-        setTimeout(() => remove(id), dur * 1000)
+        exitTimers.current[id] = setTimeout(() => remove(id), dur * 1000)
     }, [remove])
 
     const startTimer = useCallback((toast, remaining) => {
@@ -129,37 +139,43 @@ export default function ToastContainer({ initialToasts = [], position = 'top-rig
         startTimer(toast, (progressRef.current[id] ?? 100) / 100 * toast.duration)
     }, [startTimer])
 
+    const receive = useCallback((incoming) => {
+        for (const toast of incoming || []) {
+            if (!toast?.id || seen.current.has(toast.id)) continue
+            seen.current.add(toast.id)
+            const next = appendToast(toastsRef.current, toast, stack)
+            for (const previous of toastsRef.current) {
+                if (!next.some(item => item.id === previous.id)) remove(previous.id)
+            }
+            writeToasts(next)
+            writeProgress(toast.id, 100)
+            startTimer(toast, toast.duration)
+        }
+    }, [stack, remove, writeToasts, writeProgress, startTimer])
+
     useEffect(() => {
-        const initial = initialToasts.length ? initialToasts : (typeof window !== 'undefined' ? window.__toasts || [] : [])
-
-        writeToasts(initial)
-
-        const seeded = Object.fromEntries(initial.map(t => [t.id, 100]))
-        progressRef.current = seeded
-        setProgress(seeded)
-
-        initial.forEach(toast => startTimer(toast, toast.duration))
-
-        const frames = timers.current
-
-        return () => { Object.values(frames).forEach(cancelAnimationFrame) }
-        // eslint-disable-next-line react-hooks/exhaustive-deps
+        receive(initialToasts.length ? initialToasts : (window.__toasts || []))
+        return () => {
+            Object.values(timers.current).forEach(cancelAnimationFrame)
+            Object.values(exitTimers.current).forEach(clearTimeout)
+            timers.current = {}; exitTimers.current = {}; paused.current = {}; holders.current = {}; exiting.current = {}
+            seen.current.clear()
+            toastsRef.current = []
+        }
     }, [])
+
+    useEffect(() => { receive(initialToasts) }, [initialToasts, receive])
+    useEffect(() => listenForToasts(echo || window.Echo, channel, toast => receive([toast])), [echo, channel, receive])
 
     if (!toasts.length) return null
 
-    const s = (toast) => styles[toast.type] || styles.info
+    const s = (toast) => bootstrapStyle(toast, cssFramework) || styles[toast.type] || styles.info
 
-    // Each toast may carry its own position, and stack: false shows only the
-    // newest per position. The Blade and Livewire renderers already do this.
     const grouped = {}
     for (const toast of toasts) {
         const key = positionMap[toast.position] ? toast.position : position
         const at = positionMap[key] ? key : 'top-right'
         ;(grouped[at] = grouped[at] || []).push(toast)
-    }
-    if (!stack) {
-        for (const key of Object.keys(grouped)) grouped[key] = grouped[key].slice(-1)
     }
 
     return Object.entries(grouped).map(([at, group]) => (
@@ -173,41 +189,41 @@ export default function ToastContainer({ initialToasts = [], position = 'top-rig
             {group.map(toast => {
                 const ts = s(toast)
                 const enterStyle = (toast.enter_animation && toast.enter_animation !== 'none')
-                    ? { animation: `toast-enter-${toast.enter_animation} ${toast.enter_duration || 0.5}s ease forwards` }
+                    ? { animation: `toast-enter-${toast.enter_animation} ${toast.enter_duration ?? 0.5}s ease forwards` }
                     : {}
 
                 return (
-                    <div key={toast.id} data-toast-id={toast.id} dir={toast.dir || 'ltr'}
-                         style={{ cursor: 'default', pointerEvents: 'auto', ...(toast.opacity < 1 ? { opacity: toast.opacity } : {}), ...enterStyle }}
+                    <div key={toast.id} data-toast-id={toast.id} data-laravel-toast="component" data-css-framework={toastFramework(toast, cssFramework)} dir={toast.dir || 'ltr'}
+                         style={{ cursor: 'default', pointerEvents: 'auto', ...(toast.show_border === false ? { border: 0 } : {}), ...(toast.opacity < 1 ? { opacity: toast.opacity } : {}), ...enterStyle }}
                          onMouseEnter={() => hold(toast, 'hover')}
                          onMouseLeave={() => release(toast, 'hover')}
                          onFocus={() => hold(toast, 'focus')}
                          onBlur={() => release(toast, 'focus')}
-                         className={`rounded-xl shadow-lg shadow-black/5 ring-1 ring-black/5 dark:shadow-black/40 dark:ring-white/10 overflow-hidden ${ts.bg} ${toast.show_border !== false ? 'border ' + ts.border : ''}`}
+                         className={`laravel-toast-item ${ts.bg} ${toast.show_border !== false ? 'border ' + ts.border : ''}`}
                          role="alert"
                          aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
                          aria-atomic="true">
                         {toast.auto_dismiss && toast.show_progress !== false && toast.duration > 0 && toast.progress_position === 'top' && (
-                            <div className={`h-1 w-full ${ts.barBg}`}><div className={`h-full ${ts.bar}`} style={{ width: `${progress[toast.id] ?? 100}%`, transition: 'none', ...(toast.progress_direction === 'rtl' ? { marginLeft: 'auto' } : {}) }} /></div>
+                            <div className={`laravel-toast-progress ${ts.barBg}`}><div className={`${ts.bar}`} style={{ width: `${progress[toast.id] ?? 100}%`, transition: 'none', ...(toast.progress_direction === 'rtl' ? { marginLeft: 'auto' } : {}) }} /></div>
                         )}
-                        <div className="p-4 flex items-start gap-3">
+                        <div className="laravel-toast-body">
                             {toast.show_icon !== false && (
-                                <div className="shrink-0 mt-0.5">
+                                <div className="laravel-toast-icon">
                                     {toast.custom_icon ? <span dangerouslySetInnerHTML={{ __html: toast.custom_icon }} /> : <ToastIcon type={toast.type} className={ts.icon} />}
                                 </div>
                             )}
-                            <div className="flex-1 min-w-0" style={{ cursor: 'default' }}>
-                                {toast.title && <p className="text-sm font-semibold tracking-tight">{toast.title}</p>}
-                                <p className="text-sm leading-relaxed break-words">{toast.message}</p>
+                            <div className="laravel-toast-content" style={{ cursor: 'default' }}>
+                                {toast.title && <p className="laravel-toast-title">{toast.title}</p>}
+                                <p className="laravel-toast-message">{toast.message}</p>
                             </div>
                             {toast.show_close !== false && (
-                                <button type="button" onClick={() => dismiss(toast.id)} className="shrink-0 rounded-md p-1 opacity-60 hover:opacity-100 transition-opacity cursor-pointer focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-1 dark:focus-visible:ring-offset-transparent" aria-label={dismissLabel}>
-                                    <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
+                                <button type="button" onClick={() => dismiss(toast.id)} className="laravel-toast-close" aria-label={dismissLabel}>
+                                    <svg  fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" /></svg>
                                 </button>
                             )}
                         </div>
                         {toast.auto_dismiss && toast.show_progress !== false && toast.duration > 0 && toast.progress_position !== 'top' && (
-                            <div className={`h-1 w-full ${ts.barBg}`}><div className={`h-full ${ts.bar}`} style={{ width: `${progress[toast.id] ?? 100}%`, transition: 'none', ...(toast.progress_direction === 'rtl' ? { marginLeft: 'auto' } : {}) }} /></div>
+                            <div className={`laravel-toast-progress ${ts.barBg}`}><div className={`${ts.bar}`} style={{ width: `${progress[toast.id] ?? 100}%`, transition: 'none', ...(toast.progress_direction === 'rtl' ? { marginLeft: 'auto' } : {}) }} /></div>
                         )}
                     </div>
                 )

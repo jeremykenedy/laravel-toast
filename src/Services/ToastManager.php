@@ -4,7 +4,10 @@ declare(strict_types=1);
 
 namespace Jeremykenedy\LaravelToast\Services;
 
+use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Session;
+use Jeremykenedy\LaravelToast\Events\ToastBroadcast;
+use Jeremykenedy\LaravelToast\Providers\ToastServiceProvider;
 
 class ToastManager
 {
@@ -75,15 +78,7 @@ class ToastManager
         $toasts = Session::get($key, []);
 
         $toast = $this->build($type, $message, $title, $duration, $options);
-        $toasts[] = $toast;
-
-        // The payload already resolved this, so a per-toast override counts.
-        $max = (int) $toast['max_visible'];
-        if ($max > 0 && count($toasts) > $max) {
-            $toasts = array_slice($toasts, -$max);
-        }
-
-        Session::flash($key, $toasts);
+        Session::flash($key, $this->append($toasts, $toast));
 
         return $this;
     }
@@ -116,7 +111,9 @@ class ToastManager
             'message'            => $message,
             'title'              => $title,
             'duration'           => $duration ?? (int) config('toast.duration', 5000),
-            'position'           => $options['position'] ?? null,
+            'position'           => $options['position'] ?? $this->position(),
+            'stack'              => $options['stack'] ?? (bool) config('toast.stack', true),
+            'css_framework'      => ToastServiceProvider::cssFramework(),
             'auto_dismiss'       => $options['auto_dismiss'] ?? (bool) config('toast.auto_dismiss', true),
             'pause_on_hover'     => $options['pause_on_hover'] ?? (bool) config('toast.pause_on_hover', true),
             'show_icon'          => $options['show_icon'] ?? (bool) config('toast.show_icons', true),
@@ -139,7 +136,27 @@ class ToastManager
 
     public function get(): array
     {
-        return Session::get($this->sessionKey(), []);
+        return array_reduce(Session::get($this->sessionKey(), []), $this->append(...), []);
+    }
+
+    public function append(array $toasts, array $toast): array
+    {
+        $toasts = ($toast['stack'] ?? config('toast.stack', true)) ? [...$toasts, $toast] : [$toast];
+        $max = (int) ($toast['max_visible'] ?? config('toast.max_visible', 5));
+
+        return $max > 0 ? array_slice($toasts, -$max) : $toasts;
+    }
+
+    public function broadcast(string|int $userId, string $message, string $type = 'info', ?string $title = null, ?int $duration = null, array $options = []): static
+    {
+        if (config('toast.broadcast.enabled', false)) {
+            Event::dispatch(new ToastBroadcast(
+                str_replace('{userId}', (string) $userId, config('toast.broadcast.channel', 'toast.{userId}')),
+                $this->build($type, $message, $title, $duration, $options),
+            ));
+        }
+
+        return $this;
     }
 
     public function clear(): static
@@ -158,20 +175,23 @@ class ToastManager
 
     public function convertFlashMessages(): void
     {
-        if (session('success')) {
-            $this->success(session('success'));
+        $toasts = $this->get();
+        $converted = false;
+
+        foreach (['success', 'error', 'warning', 'info', 'status'] as $key) {
+            $message = Session::get($key);
+
+            if (!is_string($message) || $message === '') {
+                continue;
+            }
+
+            Session::forget($key);
+            $toasts = $this->append($toasts, $this->build($key === 'status' ? 'info' : $key, $message));
+            $converted = true;
         }
-        if (session('error')) {
-            $this->error(session('error'));
-        }
-        if (session('warning')) {
-            $this->warning(session('warning'));
-        }
-        if (session('info') && is_string(session('info'))) {
-            $this->info(session('info'));
-        }
-        if (session('status') && is_string(session('status'))) {
-            $this->info(session('status'));
+
+        if ($converted) {
+            Session::now($this->sessionKey(), $toasts);
         }
     }
 

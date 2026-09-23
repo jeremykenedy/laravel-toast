@@ -7,7 +7,7 @@
 </p>
 
 <p align="center">
-Powerful, highly configurable toast notifications for Laravel with 49 animations,<br>19 per-toast props, RTL support, and dark mode.
+Toast notifications for Laravel with five frontends, three CSS frameworks, 49 animations, and private broadcasts.
 </p>
 
 <p align="center">
@@ -21,18 +21,35 @@ Powerful, highly configurable toast notifications for Laravel with 49 animations
 ## Table of Contents
 
 - [Framework Support](#framework-support)
+- [Requirements](#requirements)
 - [Installation](#installation)
+  - [Tailwind Setup](#tailwind-setup)
+  - [Bootstrap Setup](#bootstrap-setup)
+  - [Livewire Setup](#livewire-setup)
 - [Quick Start](#quick-start)
-- [Choosing Your Frameworks](#choosing-your-frameworks)
+  - [Blade](#blade)
+  - [Livewire](#livewire)
+  - [Sharing Toasts with Inertia](#sharing-toasts-with-inertia)
+  - [Vue](#vue)
+  - [React](#react)
+  - [Svelte](#svelte)
+- [Features](#features)
 - [Configuration](#configuration)
-- [Props Reference](#props-reference)
+  - [Per-Toast Options](#per-toast-options)
+  - [JavaScript Container Props](#javascript-container-props)
 - [Animations](#animations)
-- [Animations Outside Blade](#animations-outside-blade)
-- [Dark Mode](#dark-mode)
-- [Customizing Colors](#customizing-colors)
+- [Styles and Dark Mode](#styles-and-dark-mode)
+  - [Customizing Colors](#customizing-colors)
 - [Usage](#usage)
+  - [Facade and Trait](#facade-and-trait)
+  - [Livewire Events](#livewire-events)
+  - [Broadcasting](#broadcasting)
 - [Changing Frameworks](#changing-frameworks)
+  - [Update](#update)
+  - [Switch](#switch)
 - [Artisan Commands](#artisan-commands)
+  - [Install Options](#install-options)
+  - [Publishing Assets](#publishing-assets)
 - [Testing](#testing)
 - [Contributing](#contributing)
 - [Changelog](#changelog)
@@ -40,47 +57,23 @@ Powerful, highly configurable toast notifications for Laravel with 49 animations
 
 ## Framework Support
 
-|                 | Blade + Alpine.js  |   Livewire 3 / 4   |       Vue 3        |      React 18      |      Svelte 4      |
-| --------------- | :----------------: | :----------------: | :----------------: | :----------------: | :----------------: |
-| **Tailwind v4** | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: | :white_check_mark: |
-| **Bootstrap 5** | :white_check_mark: | :white_check_mark: |     :wrench:       |     :wrench:       |     :wrench:       |
-| **Bootstrap 4** | :white_check_mark: | :white_check_mark: |     :wrench:       |     :wrench:       |     :wrench:       |
+| CSS framework | Blade + Alpine.js | Livewire 3 / 4 | Vue 3 | React 18 | Svelte 4 |
+|---------------|-------------------|----------------|-------|----------|----------|
+| Tailwind v4 | Yes | Yes | Yes | Yes | Yes |
+| Bootstrap 5.2+ | Yes | Yes | Yes | Yes | Yes |
+| Bootstrap 4 | Yes | Yes | Yes | Yes | Yes |
 
-:white_check_mark: Styled out of the box. All 49 animations, all 19 props, dark
-mode, and RTL, with the markup shipped for that CSS framework.
-
-:wrench: Works, but the markup is Tailwind. The Vue, React and Svelte components
-ship one Tailwind class map, so pairing them with Bootstrap gives you the right
-behavior with the wrong classes. Copy the component into your own source tree and
-restyle it:
-
-```bash
-cp vendor/jeremykenedy/laravel-toast/resources/js/vue/pages/ToastContainer.vue \
-   resources/js/Components/ToastContainer.vue
-```
-
-The component's own `../../../css/toast-animations.css` import will not resolve
-from your source tree, so point it at the package instead:
-
-```js
-import '../../../vendor/jeremykenedy/laravel-toast/resources/css/toast-animations.css'
-```
-
-Adjust the depth to match where you put the file. Publishing the stylesheet with
-`--tag=toast-css` is only useful if you would rather `@import` it from your own
-CSS entry point; it does not fix the copied component's relative import.
-
-Every combination shares the same `ToastManager`, the same payload, the same
-config and the same animations. The gap is styling only, and only for Bootstrap
-paired with a JavaScript frontend.
+Every pairing ships framework-appropriate colors and supports the same toast payload. JavaScript components select their classes from the payload's `css_framework`, or from an explicit `cssFramework` prop.
 
 ## Requirements
 
 - PHP 8.2+
-- Laravel 10, 11, 12 or 13 (continuous integration covers 12 and 13)
-- One CSS framework: Tailwind v4, Bootstrap 5, or Bootstrap 4
-- One frontend: Blade + Alpine.js, Livewire 3 or 4, Vue 3, React 18, or Svelte 4
-- See [Framework Support](#framework-support) for which pairings ship styled
+- Laravel 10, 11, 12, or 13
+- Tailwind v4, Bootstrap 5.2+, or Bootstrap 4 CSS
+- Alpine.js for Tailwind Blade; Livewire 3 or 4 for the Livewire container; or Vue 3, React 18, or Svelte 4
+- Laravel broadcasting, a queue worker, and Laravel Echo for optional real-time delivery
+
+Bootstrap Blade toasts work without jQuery or the Bootstrap JavaScript bundle. CI selects Laravel 10 through 13 and both supported Livewire majors.
 
 ## Installation
 
@@ -89,67 +82,170 @@ composer require jeremykenedy/laravel-toast
 php artisan toast:install
 ```
 
-Add to your layout before `</body>`:
+The installer publishes `config/toast.php` and records your framework choices in `.env`. If configuration already exists, it detects the installation and asks before reinstalling. Use `toast:update` or `toast:switch` to preserve customized configuration. `--force` permits reinstalling and replacing the configuration; published views are retained.
 
-```blade
-@include('toast::toasts')
+### Tailwind Setup
+
+Register the package templates and components in `resources/css/app.css`:
+
+```css
+@import "tailwindcss";
+@source "../../vendor/jeremykenedy/laravel-toast/resources";
 ```
 
-Or with the directive: `@toasts`
+Tailwind does not automatically scan ignored dependency directories. Keep your application's other imports and sources, and run `npm run build` after adding this source.
 
-For Livewire: `<livewire:toast-container />`
+For Tailwind Blade, load Alpine.js once in your application. If it is not already installed:
+
+```bash
+npm install alpinejs
+```
+
+```js
+import Alpine from 'alpinejs'
+
+window.Alpine = Alpine
+Alpine.start()
+```
+
+Livewire provides its own Alpine instance. Do not start a second instance in a Livewire application.
+
+### Bootstrap Setup
+
+Load the selected Bootstrap stylesheet in your application and choose the matching toast framework:
+
+```bash
+php artisan toast:switch --css=bootstrap5
+npm run build
+```
+
+### Livewire Setup
+
+If Livewire is not already installed:
+
+```bash
+composer require livewire/livewire
+```
+
+Use the Livewire container shown below and follow Livewire's normal application asset setup.
 
 ## Quick Start
 
+Create notifications with the helper or facade:
+
 ```php
-// In any controller, service, or middleware
+use Jeremykenedy\LaravelToast\Facades\Toast;
+
 toast('Settings saved.');
 toast('Upload failed.', 'error', 'Error');
-toast('Heads up!', 'warning', null, 3000);
-
-// Fluent chaining
-toast()->success('Step 1 done.')->info('Starting step 2...');
-
-// Facade
-Toast::success('Created!');
-Toast::error('Denied.', 'Access Error');
+Toast::warning('Low storage.', duration: 3000);
+Toast::success('Step 1 done.')->info('Starting step 2.');
 ```
 
-Existing flash messages work automatically:
+### Blade
+
+Place the directive before `</body>` in your layout:
+
+```blade
+@toasts
+```
+
+`@include('toast::toasts')` is equivalent. Standard string flash messages are converted automatically and shown once:
 
 ```php
 return back()->with('success', 'Profile updated.');
-// Displays as a success toast with no code changes
 ```
 
-## Choosing Your Frameworks
+### Livewire
 
-`toast:install` writes your choice to `.env`. You can also set it by hand:
-
-```env
-TOAST_CSS=bootstrap5
-TOAST_FRONTEND=livewire
+```blade
+<livewire:toast-container />
 ```
 
-| Setting | Values | Default | Effect |
-|---------|--------|---------|--------|
-| `TOAST_CSS` | `tailwind`, `bootstrap5`, `bootstrap4` | `tailwind` | Selects the view directory that renders |
-| `TOAST_FRONTEND` | `blade`, `livewire`, `vue`, `react`, `svelte` | `blade` | Records your setup for the install and switch commands |
+From another Livewire component:
 
-`TOAST_FRONTEND` does not select anything while rendering. Blade and Livewire
-resolve their own views, and the Vue, React and Svelte components are imported
-directly in your own code, so how you mount the toasts is already decided by
-what you import.
+```php
+$this->dispatch('toast', message: 'Saved!', type: 'success');
+$this->dispatch('toast-error', message: 'Upload failed.');
+```
 
-If you also run [jeremykenedy/laravel-ui-kit](https://github.com/jeremykenedy/laravel-ui-kit),
-`config('ui-kit.css_framework')` keeps control so one switch still moves every
-package together. `toast:install` and `toast:switch` detect the kit and write
-`UI_KIT_CSS` rather than `TOAST_CSS` in that case, so toast is never pinned
-behind a later kit-wide switch. `TOAST_CSS` only takes over when you set it
-yourself.
+### Sharing Toasts with Inertia
 
-Anything unrecognised falls back to `tailwind` and `blade` rather than failing to
-resolve a view.
+Share the payload on each response from your Inertia middleware's `share()` method:
+
+```php
+use Jeremykenedy\LaravelToast\Facades\Toast;
+
+return array_merge(parent::share($request), [
+    'toasts' => function () {
+        if (config('toast.convert_flash', true)) {
+            Toast::convertFlashMessages();
+        }
+
+        return Toast::get();
+    },
+]);
+```
+
+Mount one container in your layout. The examples below assume that the layout file lives in `resources/js/Layouts/`; adjust the relative import if needed. Updated `initialToasts` arrays enqueue new IDs without replaying dismissed messages.
+
+### Vue
+
+```vue
+<script setup>
+import ToastContainer from '../../../vendor/jeremykenedy/laravel-toast/resources/js/vue/pages/ToastContainer.vue'
+
+defineProps({ toasts: { type: Array, default: () => [] } })
+</script>
+
+<template>
+    <slot />
+    <ToastContainer :initial-toasts="toasts" />
+</template>
+```
+
+### React
+
+```jsx
+import ToastContainer from '../../../vendor/jeremykenedy/laravel-toast/resources/js/react/pages/ToastContainer.jsx'
+
+export default function AppLayout({ children, toasts = [] }) {
+    return <>{children}<ToastContainer initialToasts={toasts} /></>
+}
+```
+
+### Svelte
+
+```svelte
+<script>
+    import ToastContainer from '../../../vendor/jeremykenedy/laravel-toast/resources/js/svelte/pages/ToastContainer.svelte'
+    export let toasts = []
+</script>
+
+<slot />
+<ToastContainer initialToasts={toasts} />
+```
+
+The JavaScript containers also accept `window.__toasts` as an initial fallback:
+
+```blade
+<script>
+    window.__toasts = {{ Illuminate\Support\Js::from(Toast::get()) }};
+</script>
+```
+
+Later updates should use `initialToasts` or a broadcast subscription. Changing `window.__toasts` after mounting does not enqueue notifications.
+
+## Features
+
+- Four notification types with optional titles and custom SVG icons
+- All 15 CSS/frontend combinations, including Bootstrap JavaScript components
+- Reactive SPA notifications with ID deduplication and bounded visible stacks
+- Global defaults and per-toast options
+- Enter and exit animations, reduced-motion support, and manual dismissal
+- Hover and keyboard-focus pause, progress bars, RTL, and dark mode
+- Session flash conversion and optional private broadcasts
+- Translations for 42 locales and a `dismissLabel` prop for JavaScript frontends
 
 ## Configuration
 
@@ -157,73 +253,87 @@ resolve a view.
 php artisan vendor:publish --tag=toast-config
 ```
 
-Every config option is also an ENV variable and a per-toast prop override:
+All environment settings are optional. Configure them in your application's `.env` or edit the published configuration. When configuration is cached, run `php artisan config:cache` after changing environment values.
 
-```env
-TOAST_CSS=tailwind
-TOAST_FRONTEND=blade
-TOAST_POSITION=top-right
-TOAST_DIR=ltr
-TOAST_DURATION=5000
-TOAST_AUTO_DISMISS=true
-TOAST_PAUSE_ON_HOVER=true
-TOAST_STACK=true
-TOAST_SHOW_ICONS=true
-TOAST_SHOW_BORDER=true
-TOAST_SHOW_CLOSE=true
-TOAST_SHOW_PROGRESS=true
-TOAST_PROGRESS_DIRECTION=rtl
-TOAST_PROGRESS_POSITION=top
-TOAST_OPACITY=1
-TOAST_ENTER_ANIMATION=none
-TOAST_ENTER_DURATION=0.5
-TOAST_EXIT_ANIMATION=none
-TOAST_EXIT_DURATION=0.5
-TOAST_MAX_VISIBLE=5
-```
+| Config key | Environment variable | Default |
+|------------|----------------------|---------|
+| `css_framework` | `TOAST_CSS` | `null`, defers to ui-kit or Tailwind |
+| `frontend` | `TOAST_FRONTEND` | `null`, defers to ui-kit or Blade |
+| `position` | `TOAST_POSITION` | `top-right` |
+| `dir` | `TOAST_DIR` | `ltr` |
+| `duration` | `TOAST_DURATION` | `5000` milliseconds |
+| `max_visible` | `TOAST_MAX_VISIBLE` | `5`; nonpositive means unlimited |
+| `auto_dismiss` | `TOAST_AUTO_DISMISS` | `true` |
+| `pause_on_hover` | `TOAST_PAUSE_ON_HOVER` | `true` |
+| `stack` | `TOAST_STACK` | `true` |
+| `show_icons` | `TOAST_SHOW_ICONS` | `true` |
+| `show_border` | `TOAST_SHOW_BORDER` | `true` |
+| `show_close` | `TOAST_SHOW_CLOSE` | `true` |
+| `show_progress` | `TOAST_SHOW_PROGRESS` | `true` |
+| `progress_direction` | `TOAST_PROGRESS_DIRECTION` | `rtl` |
+| `progress_position` | `TOAST_PROGRESS_POSITION` | `top` |
+| `opacity` | `TOAST_OPACITY` | `1` |
+| `enter_animation` | `TOAST_ENTER_ANIMATION` | `none` |
+| `enter_duration` | `TOAST_ENTER_DURATION` | `0.5` seconds |
+| `exit_animation` | `TOAST_EXIT_ANIMATION` | `none` |
+| `exit_duration` | `TOAST_EXIT_DURATION` | `0.5` seconds |
+| `broadcast.enabled` | `TOAST_BROADCAST_ENABLED` | `false` |
+| `broadcast.channel` | `TOAST_BROADCAST_CHANNEL` | `toast.{userId}` |
+| `session_key` | Config only | `toast_notifications` |
+| `convert_flash` | Config only | `true` |
 
-## Props Reference
+`TOAST_FRONTEND` records the setup for Artisan commands. Your layout decides which frontend renders. `TOAST_CSS` selects Blade/Livewire views and supplies the JavaScript payload's CSS framework.
 
-All props work as global config defaults AND per-toast overrides.
+When [laravel-ui-kit](https://github.com/jeremykenedy/laravel-ui-kit) is installed and toast has no explicit override, commands update `UI_KIT_CSS` and `UI_KIT_FRONTEND`. An existing `TOAST_CSS` or `TOAST_FRONTEND` override is updated directly, so the command changes the setting that actually controls toast. Clear those overrides to resume following the kit.
 
-| Prop                 | Default     | Options                                                                          |
-| -------------------- | ----------- | -------------------------------------------------------------------------------- |
-| `position`           | `top-right` | `top-left` `top-right` `top-center` `bottom-left` `bottom-right` `bottom-center` |
-| `dir`                | `ltr`       | `ltr` `rtl`                                                                      |
-| `duration`           | `5000`      | Milliseconds (0 = no auto-dismiss)                                               |
-| `auto_dismiss`       | `true`      | `true` `false`                                                                   |
-| `pause_on_hover`     | `true`      | `true` `false`                                                                   |
-| `stack`              | `true`      | `true` (accumulate) `false` (replace)                                            |
-| `max_visible`        | `5`         | Any integer                                                                      |
-| `show_icon`          | `true`      | `true` `false`                                                                   |
-| `custom_icon`        | `null`      | Raw SVG HTML string                                                              |
-| `show_border`        | `true`      | `true` `false`                                                                   |
-| `show_close`         | `true`      | `true` `false`                                                                   |
-| `show_progress`      | `true`      | `true` `false`                                                                   |
-| `progress_direction` | `rtl`       | `rtl` `ltr`                                                                      |
-| `progress_position`  | `top`       | `top` `bottom`                                                                   |
-| `opacity`            | `1`         | `0` to `1`                                                                       |
-| `enter_animation`    | `none`      | See [Animations](#animations)                                                    |
-| `enter_duration`     | `0.5`       | Seconds                                                                          |
-| `exit_animation`     | `none`      | See [Animations](#animations)                                                    |
-| `exit_duration`      | `0.5`       | Seconds                                                                          |
+### Per-Toast Options
 
-### Per-Toast Override
+| Option | Default | Values |
+|--------|---------|--------|
+| `position` | Global position | `top-left`, `top-center`, `top-right`, `bottom-left`, `bottom-center`, `bottom-right` |
+| `dir` | `ltr` | `ltr`, `rtl` |
+| `auto_dismiss` | `true` | Boolean |
+| `pause_on_hover` | `true` | Boolean; also pauses while focus is inside the toast |
+| `stack` | `true` | `false` replaces the entire current list across positions |
+| `max_visible` | `5` | Positive integer cap; nonpositive means unlimited |
+| `show_icon` | Global `show_icons` | Boolean |
+| `custom_icon` | `null` | Trusted SVG HTML supplied by your application |
+| `show_border` | `true` | Boolean |
+| `show_close` | `true` | Boolean |
+| `show_progress` | `true` | Boolean |
+| `progress_direction` | `rtl` | `rtl`, `ltr` |
+| `progress_position` | `top` | `top`, `bottom` |
+| `opacity` | `1` | Number from 0 to 1 |
+| `enter_animation` | `none` | Animation name below |
+| `enter_duration` | `0.5` | Seconds |
+| `exit_animation` | `none` | Animation name below |
+| `exit_duration` | `0.5` | Seconds |
+
+`duration` is a separate method argument in milliseconds; `0` keeps the toast until manual dismissal. Configuration-only settings such as broadcasting and session storage are not per-toast options.
 
 ```php
 toast()->success('Saved!', 'Done', 3000, [
-    'position'           => 'bottom-right',
-    'dir'                => 'rtl',
-    'show_border'        => false,
-    'show_close'         => false,
-    'enter_animation'    => 'slide-right',
-    'enter_duration'     => 0.3,
-    'exit_animation'     => 'bounce-left',
-    'exit_duration'      => 0.5,
-    'progress_position'  => 'bottom',
-    'opacity'            => 0.9,
+    'position' => 'bottom-right',
+    'dir' => 'rtl',
+    'stack' => false,
+    'show_border' => false,
+    'enter_animation' => 'slide-right',
+    'exit_animation' => 'fade',
+    'progress_position' => 'bottom',
 ]);
 ```
+
+### JavaScript Container Props
+
+| Prop | Purpose |
+|------|---------|
+| `initialToasts` | Initial and subsequent arrays of payloads; unseen IDs are enqueued |
+| `position` | Fallback for legacy payloads without a position |
+| `stack` | Optional container override; otherwise honors each payload |
+| `cssFramework` | Optional `tailwind`, `bootstrap5`, or `bootstrap4` override |
+| `dismissLabel` | Translated close-button label; defaults to `Dismiss` |
+| `echo` | Optional Laravel Echo instance; defaults to `window.Echo` |
+| `channel` | Private channel name without the `private-` prefix |
 
 ## Animations
 
@@ -296,139 +406,46 @@ Directionless names (e.g., `slide`, `bounce`) use a sensible default (typically 
 
 Enter and exit animations have independent duration controls (`enter_duration`, `exit_duration`).
 
-## Animations Outside Blade
+## Styles and Dark Mode
 
-Blade and Livewire inline the keyframes for you, so there is nothing to wire up.
+Blade and Livewire inline the package keyframes and the selected Bootstrap theme. JavaScript components import the shared animation, theme, and layout styles themselves. Importing components directly from `vendor/` keeps those relative imports intact. If you copy a component into your application, update its stylesheet imports and its `toast-options.js` import to their package paths.
 
-The Vue, React and Svelte components import the same stylesheet directly:
+`toast-css` publishes all three stylesheets for applications that prefer their own CSS entry points.
 
-```js
-import '../../../css/toast-animations.css'
-```
+Tailwind uses your application's `dark:` variant configuration. Bootstrap supports `.dark` or `data-bs-theme="dark"` on an ancestor, and the operating-system preference when no Bootstrap theme is selected. An explicit `data-bs-theme="light"` or `.light` ancestor prevents automatic dark colors. All Bootstrap theme overrides are scoped to the package's toast markers.
 
-That resolves on its own when you import the component from the package:
+### Customizing Colors
 
-```js
-import ToastContainer from '../../vendor/jeremykenedy/laravel-toast/resources/js/vue/pages/ToastContainer.vue'
-```
-
-If you copy the component into your own source tree instead, publish the stylesheet
-and point the import at it:
-
-```bash
-php artisan vendor:publish --tag=toast-css
-```
-
-## Dark Mode
-
-All three CSS frameworks support dark mode:
-
-**Tailwind v4** uses `dark:` variant classes automatically. No extra setup needed.
-
-**Bootstrap 5** uses `text-bg-*` classes that respect `[data-bs-theme="dark"]`. Add to your `<html>` tag:
-
-```html
-<html data-bs-theme="dark"></html>
-```
-
-**Bootstrap 4** uses inline styles for dark mode. The toast views detect `.dark` on the body class or `prefers-color-scheme: dark` media query.
-
-## Customizing Colors
-
-### Tailwind v4
-
-Override toast colors via your `app.css` with theme accent variables or direct utility overrides:
-
-```css
-/* Light mode */
-.toast-success {
-    @apply bg-emerald-50 text-emerald-900 border-emerald-300;
-}
-.toast-error {
-    @apply bg-rose-50 text-rose-900 border-rose-300;
-}
-
-/* Dark mode */
-.dark .toast-success {
-    @apply bg-emerald-950 text-emerald-100 border-emerald-700;
-}
-.dark .toast-error {
-    @apply bg-rose-950 text-rose-100 border-rose-700;
-}
-```
-
-Or publish and edit the views directly:
+Publish the Blade/Livewire views and edit their actual classes:
 
 ```bash
 php artisan vendor:publish --tag=toast-views
-# Edit resources/views/vendor/toast/tailwind/blade/toasts.blade.php
 ```
 
-### Bootstrap 5
-
-Override Bootstrap contextual colors in your stylesheet:
+For JavaScript components, override the scoped classes in your stylesheet after loading the package:
 
 ```css
-/* Light mode */
-.toast.text-bg-success {
-    background-color: #d1fae5 !important;
-    color: #065f46 !important;
-}
-.toast.text-bg-danger {
-    background-color: #fee2e2 !important;
-    color: #991b1b !important;
+[data-laravel-toast="component"].bg-green-50 {
+    background-color: #d1fae5;
+    color: #065f46;
 }
 
-/* Dark mode */
-[data-bs-theme="dark"] .toast.text-bg-success {
+[data-laravel-toast][data-css-framework="bootstrap4"].alert-success {
+    background-color: #d1fae5;
+    color: #065f46;
+}
+
+[data-bs-theme="dark"] [data-laravel-toast].alert-success {
     background-color: #064e3b !important;
     color: #d1fae5 !important;
 }
-[data-bs-theme="dark"] .toast.text-bg-danger {
-    background-color: #7f1d1d !important;
-    color: #fee2e2 !important;
-}
 ```
 
-### Bootstrap 4
-
-Override Bootstrap 4 alert colors:
-
-```css
-/* Light mode */
-.alert-success {
-    background-color: #d1fae5;
-    border-color: #6ee7b7;
-    color: #065f46;
-}
-.alert-danger {
-    background-color: #fee2e2;
-    border-color: #fca5a5;
-    color: #991b1b;
-}
-
-/* Dark mode */
-.dark .alert-success,
-@media (prefers-color-scheme: dark) {
-    .alert-success {
-        background-color: #064e3b;
-        border-color: #047857;
-        color: #d1fae5;
-    }
-}
-.dark .alert-danger,
-@media (prefers-color-scheme: dark) {
-    .alert-danger {
-        background-color: #7f1d1d;
-        border-color: #b91c1c;
-        color: #fee2e2;
-    }
-}
-```
+Use `.text-bg-success` instead of `.alert-success` for Bootstrap 5. Keep selectors scoped so other application alerts and badges retain their colors.
 
 ## Usage
 
-### Facade
+### Facade and Trait
 
 ```php
 use Jeremykenedy\LaravelToast\Facades\Toast;
@@ -440,105 +457,113 @@ Toast::info('Update available.');
 Toast::clear();
 ```
 
-### HasToasts Trait
-
-```php
-use Jeremykenedy\LaravelToast\Traits\HasToasts;
-
-class UserController extends Controller
-{
-    use HasToasts;
-
-    public function update(Request $request, User $user)
-    {
-        $user->update($request->validated());
-        $this->toastSuccess('User updated.');
-        return back();
-    }
-}
-```
+Controllers may use `Jeremykenedy\LaravelToast\Traits\HasToasts` for `toastSuccess()`, `toastError()`, `toastWarning()`, and `toastInfo()`.
 
 ### Livewire Events
 
 ```php
-// From any Livewire component
-$this->dispatch('toast', message: 'Saved!', type: 'success');
+$this->dispatch('toast', message: 'Saved!', type: 'success', duration: 3000);
 $this->dispatch('toast-success', message: 'Created!');
 $this->dispatch('toast-error', message: 'Failed!');
+$this->dispatch('toast-warning', message: 'Low storage.');
+$this->dispatch('toast-info', message: 'Update available.');
 
-// With per-toast options
 $this->dispatch('toast', message: 'RTL toast', type: 'info', options: [
     'dir' => 'rtl',
     'exit_animation' => 'slide-left',
 ]);
 ```
 
-### Vue / React / Svelte
+### Broadcasting
 
-Pass toasts via Inertia props or `window.__toasts`:
+Configure Laravel's broadcast connection and Echo, and run a queue worker. Toast broadcasts are queued after the current database transaction commits. See [Laravel broadcasting setup](https://laravel.com/docs/12.x/broadcasting).
+
+```env
+TOAST_BROADCAST_ENABLED=true
+TOAST_BROADCAST_CHANNEL=toast.{userId}
+```
+
+Authorize the private channel in your application's `routes/channels.php`:
 
 ```php
-// Controller
-return Inertia::render('Dashboard', [
-    'toasts' => app(ToastManager::class)->get(),
-]);
+use Illuminate\Support\Facades\Broadcast;
+
+Broadcast::channel('toast.{userId}', function ($user, $userId) {
+    return (string) $user->getAuthIdentifier() === (string) $userId;
+});
 ```
 
-```html
-<!-- Or in Blade layout -->
-<script>
-    window.__toasts = @json(app(ToastManager::class)->get());
-</script>
+If you customize the channel template, change the authorization pattern and client subscription accordingly. The package does not register application authentication routes or authorization policies.
+
+Send a notification to an explicit recipient from a controller, service, or job:
+
+```php
+use Jeremykenedy\LaravelToast\Facades\Toast;
+
+Toast::broadcast($user->getAuthIdentifier(), 'Your export is ready.', 'success');
 ```
+
+`broadcast()` does not write a session toast and is inactive when `broadcast.enabled` is false. Ordinary `success()`, `error()`, and other session methods remain session-only.
+
+The Livewire container subscribes to the authenticated user's channel when broadcasting is enabled and Echo is available. On Blade pages requiring live updates, use `<livewire:toast-container />` instead of the session-only `@toasts` directive.
+
+For Vue, React, or Svelte, set the container's `channel` prop to `toast.{actualUserId}` and provide `echo` if your instance is not `window.Echo`:
+
+```jsx
+<ToastContainer initialToasts={toasts} channel={`toast.${user.id}`} echo={echo} />
+```
+
+Each container removes its own listener on unmount or a channel change. For a custom frontend, import `listenForToasts` from `resources/js/toast-options.js` in the package and provide your own callback. It returns an unsubscribe function.
 
 ## Changing Frameworks
 
-After installation, use **update** or **switch** to change frameworks without losing configuration.
+Use **update** or **switch** after installation to preserve customized configuration and views. An existing toast-specific override remains in control and is updated directly; otherwise the ui-kit setting is updated when available.
 
-### Update (Interactive)
-
-The update command walks through framework selection with an interactive menu:
+### Update
 
 ```bash
 php artisan toast:update
+php artisan toast:update --css=bootstrap5 --frontend=vue
 ```
 
-Or pass options directly:
+The interactive flow offers framework selection and confirmation. Passing flags updates the specified settings without replacing the configuration file.
+
+| Option | Values | Description |
+|--------|--------|-------------|
+| `--css` | `tailwind`, `bootstrap5`, `bootstrap4` | Change CSS framework |
+| `--frontend` | `blade`, `livewire`, `vue`, `react`, `svelte` | Record frontend selection |
+
+### Switch
 
 ```bash
-php artisan toast:update --css=bootstrap5 --frontend=vue
+php artisan toast:switch --css=bootstrap5
+php artisan toast:switch --frontend=livewire
 ```
 
 | Option | Values | Description |
 |--------|--------|-------------|
 | `--css` | `tailwind`, `bootstrap5`, `bootstrap4` | Change CSS framework |
-| `--frontend` | `blade`, `livewire`, `vue`, `react`, `svelte` | Change frontend framework |
+| `--frontend` | `blade`, `livewire`, `vue`, `react`, `svelte` | Record frontend selection |
 
-### Switch (Quick)
-
-```bash
-php artisan toast:switch --css=bootstrap5
-php artisan toast:switch --frontend=livewire
-php artisan toast:switch --css=tailwind --frontend=vue
-```
-
-After switching, run `npm run build`.
+After switching, load the selected framework's CSS, use the corresponding layout component, and run `npm run build`. When switching to Tailwind, register the package source described in Installation.
 
 ## Artisan Commands
 
-| Command | Description |
-|---------|-------------|
-| `toast:install` | Fresh install with interactive prompts. Detects existing installation. |
-| `toast:update` | Update framework selection interactively. Does not overwrite config. |
-| `toast:switch` | Quick framework switch via flags. |
+| Command | Description | Flags |
+|---------|-------------|-------|
+| `toast:install` | Publish configuration and choose frameworks; detects existing installations | `--css`, `--frontend`, `--force` |
+| `toast:update` | Update framework choices interactively while preserving configuration | `--css`, `--frontend` |
+| `toast:switch` | Change framework choices using flags | `--css`, `--frontend` |
 
 ### Install Options
 
 | Flag | Description |
 |------|-------------|
-| `--css=` | CSS framework: `tailwind`, `bootstrap5`, `bootstrap4` |
-| `--frontend=` | Frontend: `blade`, `livewire`, `vue`, `react`, `svelte` |
-| `--force` | Skip reinstall confirmation when already installed |
+| `--css=` | `tailwind`, `bootstrap5`, or `bootstrap4` |
+| `--frontend=` | `blade`, `livewire`, `vue`, `react`, or `svelte` |
+| `--force` | Skip reinstall confirmation and replace published configuration |
+
+All commands accept Artisan's `--no-interaction` flag. A noninteractive reinstall requires `--force`.
 
 ### Publishing Assets
 
@@ -549,26 +574,27 @@ php artisan vendor:publish --tag=toast-lang
 php artisan vendor:publish --tag=toast-css
 ```
 
-| Tag | Publishes to |
-|-----|--------------|
+| Tag | Destination |
+|-----|-------------|
 | `toast-config` | `config/toast.php` |
 | `toast-views` | `resources/views/vendor/toast/` |
 | `toast-lang` | `lang/vendor/toast/` |
-| `toast-css` | `resources/css/vendor/toast/toast-animations.css` |
+| `toast-css` | Animation, theme, and component styles in `resources/css/vendor/toast/` |
 
 ## Testing
 
 ```bash
-composer test          # ./vendor/bin/pest --ci
-composer lint          # ./vendor/bin/pint --test
-composer format        # ./vendor/bin/pint
+composer test
+composer lint
+npm ci
+npm test
+npx playwright install chromium
+npm run test:browser
 ```
 
-The suite has zero database dependencies. `tests/TestCase.php` forces SQLite
-`:memory:`, nullifies every real connection, and fails in `setUp()` if anything
-else is configured.
+PHP tests use a protected in-memory database configuration and perform no database operations. Frontend tests compile and mount Vue, React, and Svelte, execute Blade/Livewire timers, and exercise updates, replacement, broadcasting, animations, and cleanup. Chromium tests cover all nine SPA/CSS combinations, a Tailwind build with explicit package sources, and Bootstrap theme isolation.
 
-Livewire tests are grouped so the package can be verified without it installed:
+Run PHP tests that do not require Livewire with:
 
 ```bash
 ./vendor/bin/pest --ci --exclude-group livewire
@@ -576,8 +602,7 @@ Livewire tests are grouped so the package can be verified without it installed:
 
 ## Contributing
 
-See [CONTRIBUTING.md](CONTRIBUTING.md). Security issues go through
-[SECURITY.md](SECURITY.md), never a public issue.
+See [CONTRIBUTING.md](CONTRIBUTING.md). Report security issues through [SECURITY.md](SECURITY.md).
 
 ## Changelog
 

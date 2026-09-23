@@ -9,5 +9,8 @@ Thumbs.db
 *.swp
 *.swo
 composer.lock
-package-lock.json
 .env
+
+/test-results
+/playwright-report
+/tests/Browser/tailwind.generated.css

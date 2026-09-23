@@ -36,11 +36,11 @@ trait HandlesFrameworkSetup
 
     protected function updateEnvValue(string $key, string $value): void
     {
-        if (app()->runningUnitTests()) {
+        if ($this->laravel->runningUnitTests()) {
             return;
         }
 
-        $path = base_path('.env');
+        $path = $this->laravel->environmentFilePath();
 
         if (!file_exists($path)) {
             return;
@@ -63,14 +63,9 @@ trait HandlesFrameworkSetup
         file_put_contents($path, $content);
     }
 
-    /**
-     * Writing TOAST_CSS in a ui-kit application would pin toast to whatever it
-     * was set to and leave it behind on the next kit wide switch, because
-     * `toast.css_framework` takes precedence. So only one of the two is written.
-     */
     protected function setCssFramework(string $css): void
     {
-        if ($this->uiKitIsInstalled()) {
+        if ($this->uiKitIsInstalled() && !config('toast.css_framework')) {
             $this->updateEnvValue('UI_KIT_CSS', $css);
             config(['ui-kit.css_framework' => $css]);
         } else {
@@ -83,7 +78,7 @@ trait HandlesFrameworkSetup
 
     protected function setFrontendFramework(string $frontend): void
     {
-        if ($this->uiKitIsInstalled()) {
+        if ($this->uiKitIsInstalled() && !config('toast.frontend')) {
             $this->updateEnvValue('UI_KIT_FRONTEND', $frontend);
             config(['ui-kit.frontend' => $frontend]);
         } else {

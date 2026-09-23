@@ -5,6 +5,7 @@
   "scripts": {
     "test": "vitest run",
     "test:browser": "npm run build:test-css && playwright test",
+    "screenshots": "npm run build:test-css && node scripts/capture-screenshots.mjs",
     "build:test-css": "tailwindcss -i tests/Browser/tailwind.css -o tests/Browser/tailwind.generated.css --minify"
   },
   "devDependencies": {

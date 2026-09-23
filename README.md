@@ -21,6 +21,7 @@ Toast notifications for Laravel with five frontends, three CSS frameworks, 49 an
 ## Table of Contents
 
 - [Framework Support](#framework-support)
+- [Screenshots](#screenshots)
 - [Requirements](#requirements)
 - [Installation](#installation)
   - [Tailwind Setup](#tailwind-setup)
@@ -51,6 +52,7 @@ Toast notifications for Laravel with five frontends, three CSS frameworks, 49 an
   - [Install Options](#install-options)
   - [Publishing Assets](#publishing-assets)
 - [Testing](#testing)
+- [File Tree](#file-tree)
 - [Contributing](#contributing)
 - [Changelog](#changelog)
 - [License](#license)
@@ -64,6 +66,24 @@ Toast notifications for Laravel with five frontends, three CSS frameworks, 49 an
 | Bootstrap 4 | Yes | Yes | Yes | Yes | Yes |
 
 Every pairing ships framework-appropriate colors and supports the same toast payload. JavaScript components select their classes from the payload's `css_framework`, or from an explicit `cssFramework` prop.
+
+## Screenshots
+
+The React container renders success, error, warning, and info notifications below using each supported CSS framework. Screenshots show the package's default colors in light and dark mode, with auto-dismiss disabled. Select an image to view it at full size.
+
+| CSS framework | Light mode | Dark mode |
+|---------------|------------|-----------|
+| Tailwind v4 | [![Tailwind light mode: success, error, warning, and info toasts](art/screenshots/tailwind-light.png)](art/screenshots/tailwind-light.png) | [![Tailwind dark mode: success, error, warning, and info toasts](art/screenshots/tailwind-dark.png)](art/screenshots/tailwind-dark.png) |
+| Bootstrap 5.2+ | [![Bootstrap 5 light mode: success, error, warning, and info toasts](art/screenshots/bootstrap5-light.png)](art/screenshots/bootstrap5-light.png) | [![Bootstrap 5 dark mode: success, error, warning, and info toasts](art/screenshots/bootstrap5-dark.png)](art/screenshots/bootstrap5-dark.png) |
+| Bootstrap 4 | [![Bootstrap 4 light mode: success, error, warning, and info toasts](art/screenshots/bootstrap4-light.png)](art/screenshots/bootstrap4-light.png) | [![Bootstrap 4 dark mode: success, error, warning, and info toasts](art/screenshots/bootstrap4-dark.png)](art/screenshots/bootstrap4-dark.png) |
+
+To refresh these screenshots from the actual components, install the development dependencies and Chromium, then run:
+
+```bash
+npm ci
+npx playwright install chromium
+npm run screenshots
+```
 
 ## Requirements
 
@@ -598,6 +618,70 @@ Run PHP tests that do not require Livewire with:
 
 ```bash
 ./vendor/bin/pest --ci --exclude-group livewire
+```
+
+## File Tree
+
+Main package files and directories, with translation and test files grouped by directory:
+
+```text
+laravel-toast/
+├── .github/workflows/tests.yml       # PHP, frontend, browser, and style checks
+├── art/
+│   ├── banner-dark.svg
+│   ├── banner-light.svg
+│   └── screenshots/                 # Light and dark previews for each CSS framework
+├── config/toast.php                 # Package defaults and environment settings
+├── resources/
+│   ├── css/
+│   │   ├── toast-animations.css
+│   │   ├── toast-components.css
+│   │   └── toast-themes.css
+│   ├── js/
+│   │   ├── react/pages/ToastContainer.jsx
+│   │   ├── svelte/pages/ToastContainer.svelte
+│   │   ├── vue/pages/ToastContainer.vue
+│   │   └── toast-options.js         # Shared options and Echo subscriptions
+│   ├── lang/                       # Translations grouped by locale
+│   └── views/
+│       ├── bootstrap4/blade/toasts.blade.php
+│       ├── bootstrap5/blade/toasts.blade.php
+│       ├── livewire/
+│       │   ├── bootstrap4/toast-container.blade.php
+│       │   ├── bootstrap5/toast-container.blade.php
+│       │   ├── partials/timer-script.blade.php
+│       │   └── toast-container.blade.php
+│       └── tailwind/blade/toasts.blade.php
+├── scripts/capture-screenshots.mjs
+├── src/
+│   ├── Console/                    # Install, update, and switch commands
+│   ├── Events/ToastBroadcast.php
+│   ├── Facades/Toast.php
+│   ├── Livewire/ToastContainer.php
+│   ├── Providers/ToastServiceProvider.php
+│   ├── Services/ToastManager.php
+│   ├── Support/ToastAnimations.php
+│   ├── Traits/HasToasts.php
+│   └── helpers.php
+├── tests/
+│   ├── Browser/                    # Browser fixture and Chromium checks
+│   ├── Feature/                    # Laravel and Livewire integration tests
+│   ├── Frontend/                   # Mounted components and timer tests
+│   ├── Unit/                       # Payload, animation, and database safety tests
+│   ├── Pest.php
+│   └── TestCase.php
+├── CHANGELOG.md
+├── CONTRIBUTING.md
+├── LICENSE
+├── README.md
+├── SECURITY.md
+├── composer.json
+├── package.json
+├── phpunit.xml
+├── pint.json
+├── playwright.config.js
+├── vite.config.js
+└── vitest.config.js
 ```
 
 ## Contributing

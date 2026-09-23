@@ -3,7 +3,7 @@ import { createRoot } from 'react-dom/client'
 import { createApp, reactive, h } from 'vue'
 import ReactToasts from '../../resources/js/react/pages/ToastContainer.jsx'
 import VueToasts from '../../resources/js/vue/pages/ToastContainer.vue'
-import SvelteToasts from '../../resources/js/svelte/pages/ToastContainer.svelte'
+import { mountSvelteToasts } from '../Frontend/mount-svelte.svelte.js'
 
 const params = new URLSearchParams(location.search)
 const cssFramework = params.get('css') || 'tailwind'
@@ -21,7 +21,7 @@ if (frontend === 'react') {
     createApp({ render: () => h(VueToasts, props) }).mount(target)
     window.setToasts = initialToasts => { props.initialToasts = initialToasts }
 } else {
-    const component = new SvelteToasts({ target, props: { initialToasts: [], cssFramework } })
-    window.setToasts = initialToasts => component.$set({ initialToasts })
+    const component = mountSvelteToasts(target, { initialToasts: [], cssFramework })
+    window.setToasts = initialToasts => component.update({ initialToasts })
 }
 window.setToasts([])

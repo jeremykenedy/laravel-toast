@@ -4,6 +4,9 @@ Thanks for taking the time to help.
 
 ## Getting set up
 
+Frontend development uses Node.js 22 (22.12 or newer), 24, or 26+ and the versions pinned in
+`package-lock.json`. Install Chromium before running the browser tests.
+
 ```bash
 composer install
 composer test
@@ -15,6 +18,7 @@ composer test
 composer format   # Pint, Laravel preset
 composer test
 npm ci
+npx playwright install chromium
 npm test
 npm run test:browser
 ```

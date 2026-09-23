@@ -6,7 +6,7 @@ import { nextTick } from 'vue'
 import { tick } from 'svelte'
 import VueToasts from '../../resources/js/vue/pages/ToastContainer.vue'
 import ReactToasts from '../../resources/js/react/pages/ToastContainer.jsx'
-import SvelteToasts from '../../resources/js/svelte/pages/ToastContainer.svelte'
+import { mountSvelteToasts } from './mount-svelte.svelte.js'
 
 const toast = (id, options = {}) => ({
     id, message: id, type: 'success', position: 'top-right', stack: true,
@@ -44,14 +44,19 @@ const adapters = {
     },
     svelte: async props => {
         const target = document.createElement('div'); document.body.append(target)
-        const component = new SvelteToasts({ target, props })
+        const component = mountSvelteToasts(target, props)
         await tick()
         return {
             element: target,
-            update: async props => { component.$set(props); await tick() },
-            event: async (el, name) => { el.dispatchEvent(new Event(name, { bubbles: true })); await tick() },
+            update: async props => { component.update(props); await tick() },
+            event: async (el, name) => {
+                el.dispatchEvent(new Event(name, { bubbles: true }))
+                await tick()
+                // Svelte releases its delegated event reference in a zero-delay task.
+                if (vi.isFakeTimers()) await vi.advanceTimersByTimeAsync(0)
+            },
             advance: async ms => { await vi.advanceTimersByTimeAsync(ms); await tick() },
-            close: () => { component.$destroy(); target.remove() },
+            close: () => { component.close(); target.remove() },
         }
     },
 }

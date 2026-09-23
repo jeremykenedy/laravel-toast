@@ -59,7 +59,7 @@ Toast notifications for Laravel with five frontends, three CSS frameworks, 49 an
 
 ## Framework Support
 
-| CSS framework | Blade + Alpine.js | Livewire 3 / 4 | Vue 3 | React 18 | Svelte 4 |
+| CSS framework | Blade + Alpine.js | Livewire 3 / 4 | Vue 3 | React 18 | Svelte 4 / 5 |
 |---------------|-------------------|----------------|-------|----------|----------|
 | Tailwind v4 | Yes | Yes | Yes | Yes | Yes |
 | Bootstrap 5.2+ | Yes | Yes | Yes | Yes | Yes |
@@ -90,7 +90,7 @@ npm run screenshots
 - PHP 8.2+
 - Laravel 10, 11, 12, or 13
 - Tailwind v4, Bootstrap 5.2+, or Bootstrap 4 CSS
-- Alpine.js for Tailwind Blade; Livewire 3 or 4 for the Livewire container; or Vue 3, React 18, or Svelte 4
+- Alpine.js for Tailwind Blade; Livewire 3 or 4 for the Livewire container; or Vue 3, React 18, or Svelte 4 / 5
 - Laravel broadcasting, a queue worker, and Laravel Echo for optional real-time delivery
 
 Bootstrap Blade toasts work without jQuery or the Bootstrap JavaScript bundle. CI selects Laravel 10 through 13 and both supported Livewire majors.
@@ -602,6 +602,9 @@ php artisan vendor:publish --tag=toast-css
 | `toast-css` | Animation, theme, and component styles in `resources/css/vendor/toast/` |
 
 ## Testing
+
+Frontend tests and screenshot capture require Node.js 22 (22.12 or newer), 24, or 26+. The
+Svelte component retains Svelte 4 syntax and is tested with Svelte 5's mounting API.
 
 ```bash
 composer test

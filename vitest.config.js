@@ -5,7 +5,7 @@ import { svelte } from '@sveltejs/vite-plugin-svelte'
 
 export default defineConfig({
     resolve: { conditions: ['browser'] },
-    plugins: [vue(), react(), svelte({ hot: false })],
+    plugins: [vue(), react(), svelte()],
     test: {
         environment: 'jsdom',
         include: ['tests/Frontend/**/*.test.{js,jsx}'],

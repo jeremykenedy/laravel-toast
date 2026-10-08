@@ -11,14 +11,20 @@ Toast notifications for Laravel with five frontends, three CSS frameworks, 49 an
 </p>
 
 <p align="center">
-    <a href="https://github.com/jeremykenedy"><img src="https://img.shields.io/github/followers/jeremykenedy?label=Follow&amp;style=social" alt="Follow @jeremykenedy"></a>
-    <a href="https://github.com/jeremykenedy/laravel-toast/stargazers"><img src="https://img.shields.io/github/stars/jeremykenedy/laravel-toast?style=social" alt="Star laravel-toast on GitHub"></a>
-    <a href="https://github.com/sponsors/jeremykenedy"><img src="https://img.shields.io/static/v1?label=Sponsor&amp;message=%E2%9D%A4&amp;logo=GitHub&amp;color=%23fe8e86" alt="Sponsor me on GitHub"></a>
+    
+    
+    
     <a href="https://packagist.org/packages/jeremykenedy/laravel-toast"><img src="https://poser.pugx.org/jeremykenedy/laravel-toast/d/total.svg" alt="Total Downloads"></a>
     <a href="https://packagist.org/packages/jeremykenedy/laravel-toast"><img src="https://poser.pugx.org/jeremykenedy/laravel-toast/v/stable.svg" alt="Latest Stable Version"></a>
     <a href="https://github.com/jeremykenedy/laravel-toast/actions"><img src="https://github.com/jeremykenedy/laravel-toast/actions/workflows/tests.yml/badge.svg" alt="Tests"></a>
     <a href="https://github.styleci.io/repos/1195049143?branch=main"><img src="https://github.styleci.io/repos/1195049143/shield?branch=main" alt="StyleCI"></a>
     <a href="https://opensource.org/licenses/MIT"><img src="https://img.shields.io/badge/License-MIT-yellow.svg" alt="License: MIT"></a>
+</p>
+
+<p align="center">
+    <a href="https://github.com/jeremykenedy"><img src="https://img.shields.io/github/followers/jeremykenedy?label=Follow&amp;style=social" alt="Follow @jeremykenedy"></a>
+    <a href="https://github.com/jeremykenedy/laravel-toast/stargazers"><img src="https://img.shields.io/github/stars/jeremykenedy/laravel-toast?style=social" alt="Star laravel-toast on GitHub"></a>
+    <a href="https://github.com/sponsors/jeremykenedy"><img src="https://img.shields.io/static/v1?label=Sponsor&amp;message=%E2%9D%A4&amp;logo=GitHub&amp;color=%23fe8e86" alt="Sponsor me on GitHub"></a>
 </p>
 
 ## Table of Contents

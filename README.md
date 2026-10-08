@@ -11,9 +11,6 @@ Toast notifications for Laravel with five frontends, three CSS frameworks, 49 an
 </p>
 
 <p align="center">
-    
-    
-    
     <a href="https://packagist.org/packages/jeremykenedy/laravel-toast"><img src="https://poser.pugx.org/jeremykenedy/laravel-toast/d/total.svg" alt="Total Downloads"></a>
     <a href="https://packagist.org/packages/jeremykenedy/laravel-toast"><img src="https://poser.pugx.org/jeremykenedy/laravel-toast/v/stable.svg" alt="Latest Stable Version"></a>
     <a href="https://github.com/jeremykenedy/laravel-toast/actions"><img src="https://github.com/jeremykenedy/laravel-toast/actions/workflows/tests.yml/badge.svg" alt="Tests"></a>

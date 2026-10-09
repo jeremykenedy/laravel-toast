@@ -34,6 +34,7 @@ before when no color is configured.
 - Publish tags `toast-settings-migrations` and `toast-settings-page`.
 - Config keys `colors` and `settings.*`, and environment variables `TOAST_SETTINGS_*`.
 - `docs/settings.md` and settings page screenshots.
+- PHPCS, PHPMD, ESLint, Stylelint, markdownlint, and Codacy configuration aligned with Pint and StyleCI.
 
 ### Changed
 
@@ -42,6 +43,12 @@ before when no color is configured.
 - Toast payloads include `colors_css`, an empty string when no colors are set. JavaScript
   components inject it as one `<style id="toast-colors">` tag.
 - `resources/js/toast-options.js` exports `applyToastColors`.
+- Install and update prompts, `UpdateCommand`, and framework setup use smaller methods and early
+  returns. Behavior is unchanged. The banner font is now a trait constant (`FONT`) instead of a
+  static property, so a class that overrides `$font` must define `FONT` instead.
+- The React container moves progress, style, and exit-animation logic into helpers. Behavior is
+  unchanged.
+- The `shivammathur/setup-php` GitHub Action is pinned to a commit SHA.
 
 ### Upgrade notes
 

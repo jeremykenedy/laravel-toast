@@ -39,6 +39,36 @@ function ToastIcon({ type, className }) {
     return <svg className={`${className}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path strokeLinecap="round" strokeLinejoin="round" d={paths[type] || paths.info} /></svg>
 }
 
+function showsProgress(toast) {
+    return toast.auto_dismiss && toast.show_progress !== false && toast.duration > 0
+}
+
+function exitSettings(toast) {
+    return { anim: toast?.exit_animation || 'none', dur: toast?.exit_duration ?? 0.5 }
+}
+
+function toastStyle(toast) {
+    const enter = toast.enter_animation && toast.enter_animation !== 'none'
+        ? { animation: `toast-enter-${toast.enter_animation} ${toast.enter_duration ?? 0.5}s ease forwards` }
+        : {}
+
+    return {
+        cursor: 'default',
+        pointerEvents: 'auto',
+        ...(toast.show_border === false ? { border: 0 } : {}),
+        ...(toast.opacity < 1 ? { opacity: toast.opacity } : {}),
+        ...enter,
+    }
+}
+
+function ProgressBar({ toast, ts, value }) {
+    return (
+        <div data-toast-part="track" className={`laravel-toast-progress ${ts.barBg}`}>
+            <div data-toast-part="bar" className={`${ts.bar}`} style={{ width: `${value ?? 100}%`, transition: 'none', ...(toast.progress_direction === 'rtl' ? { marginLeft: 'auto' } : {}) }} />
+        </div>
+    )
+}
+
 export default function ToastContainer({ initialToasts = emptyToasts, position = 'top-right', stack, cssFramework, echo, channel, dismissLabel = 'Dismiss' }) {
     const [toasts, setToasts] = useState([])
     // State drives the render, the refs let the animation frame read current
@@ -84,9 +114,7 @@ export default function ToastContainer({ initialToasts = emptyToasts, position =
         if (exiting.current[id]) return
         if (timers.current[id]) { cancelAnimationFrame(timers.current[id]); delete timers.current[id] }
 
-        const toast = toastsRef.current.find(t => t.id === id)
-        const anim = toast?.exit_animation || 'none'
-        const dur = toast?.exit_duration ?? 0.5
+        const { anim, dur } = exitSettings(toastsRef.current.find(t => t.id === id))
 
         if (anim === 'none' || prefersReducedMotion()) { remove(id); return }
 
@@ -189,13 +217,10 @@ export default function ToastContainer({ initialToasts = emptyToasts, position =
         >
             {group.map(toast => {
                 const ts = s(toast)
-                const enterStyle = (toast.enter_animation && toast.enter_animation !== 'none')
-                    ? { animation: `toast-enter-${toast.enter_animation} ${toast.enter_duration ?? 0.5}s ease forwards` }
-                    : {}
 
                 return (
                     <div key={toast.id} data-toast-id={toast.id} data-laravel-toast="component" data-toast-type={toast.type} data-css-framework={toastFramework(toast, cssFramework)} dir={toast.dir || 'ltr'}
-                         style={{ cursor: 'default', pointerEvents: 'auto', ...(toast.show_border === false ? { border: 0 } : {}), ...(toast.opacity < 1 ? { opacity: toast.opacity } : {}), ...enterStyle }}
+                         style={toastStyle(toast)}
                          onMouseEnter={() => hold(toast, 'hover')}
                          onMouseLeave={() => release(toast, 'hover')}
                          onFocus={() => hold(toast, 'focus')}
@@ -204,9 +229,7 @@ export default function ToastContainer({ initialToasts = emptyToasts, position =
                          role="alert"
                          aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
                          aria-atomic="true">
-                        {toast.auto_dismiss && toast.show_progress !== false && toast.duration > 0 && toast.progress_position === 'top' && (
-                            <div data-toast-part="track" className={`laravel-toast-progress ${ts.barBg}`}><div data-toast-part="bar" className={`${ts.bar}`} style={{ width: `${progress[toast.id] ?? 100}%`, transition: 'none', ...(toast.progress_direction === 'rtl' ? { marginLeft: 'auto' } : {}) }} /></div>
-                        )}
+                        {showsProgress(toast) && toast.progress_position === 'top' && <ProgressBar toast={toast} ts={ts} value={progress[toast.id]} />}
                         <div className="laravel-toast-body">
                             {toast.show_icon !== false && (
                                 <div data-toast-part="icon" className="laravel-toast-icon">
@@ -223,9 +246,7 @@ export default function ToastContainer({ initialToasts = emptyToasts, position =
                                 </button>
                             )}
                         </div>
-                        {toast.auto_dismiss && toast.show_progress !== false && toast.duration > 0 && toast.progress_position !== 'top' && (
-                            <div data-toast-part="track" className={`laravel-toast-progress ${ts.barBg}`}><div data-toast-part="bar" className={`${ts.bar}`} style={{ width: `${progress[toast.id] ?? 100}%`, transition: 'none', ...(toast.progress_direction === 'rtl' ? { marginLeft: 'auto' } : {}) }} /></div>
-                        )}
+                        {showsProgress(toast) && toast.progress_position !== 'top' && <ProgressBar toast={toast} ts={ts} value={progress[toast.id]} />}
                     </div>
                 )
             })}

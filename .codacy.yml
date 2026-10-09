@@ -29,6 +29,7 @@ engines:
     exclude_paths:
       - "tests/**"
       - "*.config.js"
+      - "resources/js/**"
   eslint:
     exclude_paths:
       - "**/*.vue"

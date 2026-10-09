@@ -10,7 +10,7 @@ use function Laravel\Prompts\select;
 
 trait HasInstallPrompts
 {
-    protected static array $font = [
+    protected const FONT = [
         'A' => ['  ██  ', ' ████ ', '██  ██', '██████', '██  ██'],
         'B' => ['█████ ', '██  ██', '█████ ', '██  ██', '█████ '],
         'C' => [' ████ ', '██    ', '██    ', '██    ', ' ████ '],
@@ -48,7 +48,7 @@ trait HasInstallPrompts
         $lines = ['', '', '', '', ''];
 
         foreach ($chars as $char) {
-            $glyph = self::$font[$char] ?? self::$font[' '];
+            $glyph = self::FONT[$char] ?? self::FONT[' '];
             for ($i = 0; $i < 5; $i++) {
                 $lines[$i] .= $glyph[$i].' ';
             }

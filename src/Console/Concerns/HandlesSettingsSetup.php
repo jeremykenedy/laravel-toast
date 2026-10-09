@@ -158,7 +158,8 @@ trait HandlesSettingsSetup
     }
 
     /**
-     * @param  array<string, mixed>  $settings
+     * @param array<string, mixed> $settings
+     *
      * @return list<string>
      */
     private function settingsPlacementHint(array $settings): array

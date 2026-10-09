@@ -52,6 +52,8 @@ abstract class TestCase extends OrchestraTestCase
         $app['config']->set('toast.max_visible', 5);
         $app['config']->set('toast.session_key', 'toast_notifications');
         $app['config']->set('toast.convert_flash', true);
+        $app['config']->set('toast.settings.enabled', true);
+        $app['config']->set('toast.settings.page', true);
         $app['config']->set('ui-kit.css_framework', 'tailwind');
         $app['config']->set('ui-kit.frontend', 'blade');
 

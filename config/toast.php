@@ -94,6 +94,53 @@ return [
     // Exit animation duration in seconds
     'exit_duration' => (float) env('TOAST_EXIT_DURATION', 0.5),
 
+    // Color overrides. Every part is optional; unset parts keep the framework's
+    // own colors. Types: success, error, warning, info. Modes: light, dark.
+    // Parts: background, text, border, icon, progress, track. Hex values only.
+    //
+    //   'colors' => [
+    //       'success' => [
+    //           'light' => ['background' => '#ecfdf5', 'text' => '#065f46'],
+    //           'dark'  => ['background' => '#064e3b', 'text' => '#d1fae5'],
+    //       ],
+    //   ],
+    //
+    // Values saved from the settings page take precedence over this array.
+    'colors' => [],
+
+    // Settings page. Disabled by default; nothing is created or exposed until
+    // you opt in. Run `php artisan toast:install --settings` or follow the
+    // README to publish the migration, enable it and define the gate.
+    'settings' => [
+        // Turns on the routes, the saved-settings override and the UI.
+        'enabled' => (bool) env('TOAST_SETTINGS_ENABLED', false),
+
+        // Gate that decides who can view and change settings. An undefined
+        // gate denies everyone.
+        'gate' => env('TOAST_SETTINGS_GATE', 'manage-toast-settings'),
+
+        // Database connection and table. Null uses the default connection.
+        'connection' => env('TOAST_SETTINGS_CONNECTION'),
+        'table'      => env('TOAST_SETTINGS_TABLE', 'toast_settings'),
+
+        // Route group. The middleware list runs before the gate.
+        'prefix'     => env('TOAST_SETTINGS_PREFIX', 'toast/settings'),
+        'name'       => 'toast.settings.',
+        'middleware' => array_values(array_filter(array_map('trim', explode(',', (string) env('TOAST_SETTINGS_MIDDLEWARE', 'web,auth'))))),
+
+        // Register the full page route (GET {prefix}). The page renders inside
+        // `layout`, a Blade layout from your app, using `section` as the
+        // section name the layout yields. Null layout uses a standalone page.
+        'page'    => (bool) env('TOAST_SETTINGS_PAGE', false),
+
+        // View the page route renders. Null uses the package page. The install
+        // command publishes your own copy to resources/views/toast/settings.blade.php
+        // and sets this to "toast.settings" so you can edit it freely.
+        'view'    => env('TOAST_SETTINGS_VIEW'),
+        'layout'  => env('TOAST_SETTINGS_LAYOUT'),
+        'section' => env('TOAST_SETTINGS_SECTION', 'content'),
+    ],
+
     // Session key for flash toast data
     'session_key' => 'toast_notifications',
 

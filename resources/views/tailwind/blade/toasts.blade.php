@@ -1,5 +1,6 @@
 @php
     use Jeremykenedy\LaravelToast\Support\ToastAnimations;
+    use Jeremykenedy\LaravelToast\Support\ToastColors;
 
     $toastManager = app(\Jeremykenedy\LaravelToast\Services\ToastManager::class);
     if (config('toast.convert_flash', true)) {
@@ -27,6 +28,7 @@
 @endphp
 @if(count($toasts) > 0)
 {!! ToastAnimations::styleTag() !!}
+{!! ToastColors::styleTag(config('toast.colors')) !!}
 @foreach($grouped as $pos => $posToasts)
 @php $containerId = 'toast-container-' . str_replace(['-', ' '], '_', $pos); @endphp
 <div
@@ -40,6 +42,9 @@
     <template x-for="toast in toasts" :key="toast.id">
         <div
             :data-toast-id="toast.id"
+            data-laravel-toast="blade"
+            data-css-framework="tailwind"
+            :data-toast-type="toast.type"
             x-show="toasts.find(t => t.id === toast.id)"
             x-cloak
             @mouseenter="toast.pause_on_hover && hold(toast.id, 'hover')"
@@ -65,13 +70,13 @@
             aria-atomic="true"
         >
             <template x-if="toast.auto_dismiss && toast.show_progress !== false && toast.duration > 0 && toast.progress_position === 'top'">
-                <div class="h-1 w-full" :class="{ 'bg-green-200 dark:bg-green-900': toast.type === 'success', 'bg-red-200 dark:bg-red-900': toast.type === 'error', 'bg-amber-200 dark:bg-amber-900': toast.type === 'warning', 'bg-blue-200 dark:bg-blue-900': toast.type === 'info' }">
-                    <div class="h-full transition-none" :class="{ 'bg-green-500 dark:bg-green-400': toast.type === 'success', 'bg-red-500 dark:bg-red-400': toast.type === 'error', 'bg-amber-500 dark:bg-amber-400': toast.type === 'warning', 'bg-blue-500 dark:bg-blue-400': toast.type === 'info' }" :style="'width:' + (progress[toast.id] ?? 100) + '%;' + (toast.progress_direction === 'rtl' ? 'margin-left:auto;' : '')"></div>
+                <div class="h-1 w-full" data-toast-part="track" :class="{ 'bg-green-200 dark:bg-green-900': toast.type === 'success', 'bg-red-200 dark:bg-red-900': toast.type === 'error', 'bg-amber-200 dark:bg-amber-900': toast.type === 'warning', 'bg-blue-200 dark:bg-blue-900': toast.type === 'info' }">
+                    <div class="h-full transition-none" data-toast-part="bar" :class="{ 'bg-green-500 dark:bg-green-400': toast.type === 'success', 'bg-red-500 dark:bg-red-400': toast.type === 'error', 'bg-amber-500 dark:bg-amber-400': toast.type === 'warning', 'bg-blue-500 dark:bg-blue-400': toast.type === 'info' }" :style="'width:' + (progress[toast.id] ?? 100) + '%;' + (toast.progress_direction === 'rtl' ? 'margin-left:auto;' : '')"></div>
                 </div>
             </template>
             <div class="p-4 flex items-start gap-3">
                 <template x-if="toast.show_icon !== false">
-                    <div class="shrink-0 mt-0.5">
+                    <div class="shrink-0 mt-0.5" data-toast-part="icon">
                         <template x-if="toast.custom_icon"><span x-html="toast.custom_icon"></span></template>
                         <template x-if="!toast.custom_icon && toast.type === 'success'"><svg class="h-5 w-5 text-green-500 dark:text-green-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></template>
                         <template x-if="!toast.custom_icon && toast.type === 'error'"><svg class="h-5 w-5 text-red-500 dark:text-red-400" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z" /></svg></template>
@@ -90,8 +95,8 @@
                 </template>
             </div>
             <template x-if="toast.auto_dismiss && toast.show_progress !== false && toast.duration > 0 && toast.progress_position !== 'top'">
-                <div class="h-1 w-full" :class="{ 'bg-green-200 dark:bg-green-900': toast.type === 'success', 'bg-red-200 dark:bg-red-900': toast.type === 'error', 'bg-amber-200 dark:bg-amber-900': toast.type === 'warning', 'bg-blue-200 dark:bg-blue-900': toast.type === 'info' }">
-                    <div class="h-full transition-none" :class="{ 'bg-green-500 dark:bg-green-400': toast.type === 'success', 'bg-red-500 dark:bg-red-400': toast.type === 'error', 'bg-amber-500 dark:bg-amber-400': toast.type === 'warning', 'bg-blue-500 dark:bg-blue-400': toast.type === 'info' }" :style="'width:' + (progress[toast.id] ?? 100) + '%;' + (toast.progress_direction === 'rtl' ? 'margin-left:auto;' : '')"></div>
+                <div class="h-1 w-full" data-toast-part="track" :class="{ 'bg-green-200 dark:bg-green-900': toast.type === 'success', 'bg-red-200 dark:bg-red-900': toast.type === 'error', 'bg-amber-200 dark:bg-amber-900': toast.type === 'warning', 'bg-blue-200 dark:bg-blue-900': toast.type === 'info' }">
+                    <div class="h-full transition-none" data-toast-part="bar" :class="{ 'bg-green-500 dark:bg-green-400': toast.type === 'success', 'bg-red-500 dark:bg-red-400': toast.type === 'error', 'bg-amber-500 dark:bg-amber-400': toast.type === 'warning', 'bg-blue-500 dark:bg-blue-400': toast.type === 'info' }" :style="'width:' + (progress[toast.id] ?? 100) + '%;' + (toast.progress_direction === 'rtl' ? 'margin-left:auto;' : '')"></div>
                 </div>
             </template>
         </div>

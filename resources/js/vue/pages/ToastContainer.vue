@@ -3,7 +3,7 @@ import { ref, reactive, onMounted, computed, onUnmounted, watch } from 'vue'
 import '../../../css/toast-animations.css'
 import '../../../css/toast-themes.css'
 import '../../../css/toast-components.css'
-import { appendToast, bootstrapStyle, toastFramework, listenForToasts } from '../../toast-options.js'
+import { appendToast, applyToastColors, bootstrapStyle, toastFramework, listenForToasts } from '../../toast-options.js'
 
 const props = defineProps({
     initialToasts: { type: Array, default: () => [] },
@@ -93,6 +93,7 @@ function receive(incoming) {
     for (const toast of incoming || []) {
         if (!toast?.id || seen.has(toast.id)) continue
         seen.add(toast.id)
+        applyToastColors(toast.colors_css)
         const next = appendToast(toasts.value, toast, props.stack)
         for (const previous of toasts.value) {
             if (!next.some(item => item.id === previous.id)) remove(previous.id)
@@ -165,7 +166,7 @@ onUnmounted(() => {
 
 <template>
     <div v-for="(group, at) in grouped" :key="at" :style="'position:fixed;' + positionStyleFor(at) + 'z-index:9999;width:24rem;max-width:calc(100vw - 1rem);display:flex;flex-direction:column;gap:0.75rem;pointer-events:none;'" role="status" aria-live="polite" aria-atomic="false">
-        <div v-for="toast in group" :key="toast.id" :data-toast-id="toast.id" data-laravel-toast="component" :data-css-framework="toastFramework(toast, cssFramework)"
+        <div v-for="toast in group" :key="toast.id" :data-toast-id="toast.id" data-laravel-toast="component" :data-toast-type="toast.type" :data-css-framework="toastFramework(toast, cssFramework)"
              :dir="toast.dir || 'ltr'"
              :style="'pointer-events:auto;' + (toast.show_border === false ? 'border:0;' : '') + (toast.opacity < 1 ? 'opacity:'+toast.opacity+';' : '') + 'cursor:default;' + enterStyle(toast)"
              @mouseenter="toast.pause_on_hover && hold(toast.id, 'hover')"
@@ -176,11 +177,11 @@ onUnmounted(() => {
              role="alert"
              :aria-live="toast.type === 'error' ? 'assertive' : 'polite'"
              aria-atomic="true">
-            <div v-if="toast.auto_dismiss && toast.show_progress !== false && toast.duration > 0 && toast.progress_position === 'top'" :class="['laravel-toast-progress', getStyle(toast).barBg]">
-                <div :class="[getStyle(toast).bar]" :style="'width:'+(progress[toast.id]??100)+'%;transition:none;'+(toast.progress_direction==='rtl'?'margin-left:auto;':'')"></div>
+            <div v-if="toast.auto_dismiss && toast.show_progress !== false && toast.duration > 0 && toast.progress_position === 'top'" :class="['laravel-toast-progress', getStyle(toast).barBg]" data-toast-part="track">
+                <div data-toast-part="bar" :class="[getStyle(toast).bar]" :style="'width:'+(progress[toast.id]??100)+'%;transition:none;'+(toast.progress_direction==='rtl'?'margin-left:auto;':'')"></div>
             </div>
             <div class="laravel-toast-body">
-                <div v-if="toast.show_icon !== false" class="laravel-toast-icon">
+                <div v-if="toast.show_icon !== false" data-toast-part="icon" class="laravel-toast-icon">
                     <span v-if="toast.custom_icon" v-html="toast.custom_icon"></span>
                     <svg v-else-if="toast.type==='success'" :class="[getStyle(toast).icon]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                     <svg v-else-if="toast.type==='error'" :class="[getStyle(toast).icon]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true"><path stroke-linecap="round" stroke-linejoin="round" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
@@ -195,8 +196,8 @@ onUnmounted(() => {
                     <svg  fill="currentColor" viewBox="0 0 20 20" aria-hidden="true"><path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/></svg>
                 </button>
             </div>
-            <div v-if="toast.auto_dismiss && toast.show_progress !== false && toast.duration > 0 && toast.progress_position !== 'top'" :class="['laravel-toast-progress', getStyle(toast).barBg]">
-                <div :class="[getStyle(toast).bar]" :style="'width:'+(progress[toast.id]??100)+'%;transition:none;'+(toast.progress_direction==='rtl'?'margin-left:auto;':'')"></div>
+            <div v-if="toast.auto_dismiss && toast.show_progress !== false && toast.duration > 0 && toast.progress_position !== 'top'" :class="['laravel-toast-progress', getStyle(toast).barBg]" data-toast-part="track">
+                <div data-toast-part="bar" :class="[getStyle(toast).bar]" :style="'width:'+(progress[toast.id]??100)+'%;transition:none;'+(toast.progress_direction==='rtl'?'margin-left:auto;':'')"></div>
             </div>
         </div>
     </div>

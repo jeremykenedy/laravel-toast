@@ -3,7 +3,7 @@
     import '../../../css/toast-animations.css'
     import '../../../css/toast-themes.css'
     import '../../../css/toast-components.css'
-    import { appendToast, bootstrapStyle, toastFramework, listenForToasts } from '../../toast-options.js'
+    import { appendToast, applyToastColors, bootstrapStyle, toastFramework, listenForToasts } from '../../toast-options.js'
 
     export let initialToasts = []
     export let position = 'top-right'
@@ -133,6 +133,7 @@
         for (const toast of incoming || []) {
             if (!toast?.id || seen.has(toast.id)) continue
             seen.add(toast.id)
+            applyToastColors(toast.colors_css)
             const next = appendToast(toasts, toast, stack)
             for (const previous of toasts) {
                 if (!next.some(item => item.id === previous.id)) remove(previous.id)
@@ -170,7 +171,7 @@
 <div style="position:fixed;{positionStyleFor(at)}z-index:9999;width:24rem;max-width:calc(100vw - 1rem);display:flex;flex-direction:column;gap:0.75rem;pointer-events:none;" role="status" aria-live="polite" aria-atomic="false">
     {#each group as toast (toast.id)}
         {@const ts = getStyle(toast, cssFramework)}
-        <div data-toast-id={toast.id} data-laravel-toast="component" data-css-framework={toastFramework(toast, cssFramework)} dir={toast.dir || 'ltr'}
+        <div data-toast-id={toast.id} data-laravel-toast="component" data-toast-type={toast.type} data-css-framework={toastFramework(toast, cssFramework)} dir={toast.dir || 'ltr'}
              style="pointer-events:auto;cursor:default;{toast.show_border === false ? 'border:0;' : ''}{toast.opacity < 1 ? 'opacity:'+toast.opacity+';' : ''}{enterStyle(toast)}"
              on:mouseenter={() => toast.pause_on_hover && hold(toast.id, 'hover')}
              on:mouseleave={() => toast.pause_on_hover && release(toast.id, 'hover')}
@@ -181,11 +182,11 @@
              aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
              aria-atomic="true">
             {#if toast.auto_dismiss && toast.show_progress !== false && toast.duration > 0 && toast.progress_position === 'top'}
-            <div class="laravel-toast-progress {ts.barBg}"><div class="{ts.bar}" style="width:{progress[toast.id] ?? 100}%;transition:none;{toast.progress_direction === 'rtl' ? 'margin-left:auto;' : ''}"></div></div>
+            <div data-toast-part="track" class="laravel-toast-progress {ts.barBg}"><div data-toast-part="bar" class="{ts.bar}" style="width:{progress[toast.id] ?? 100}%;transition:none;{toast.progress_direction === 'rtl' ? 'margin-left:auto;' : ''}"></div></div>
             {/if}
             <div class="laravel-toast-body">
                 {#if toast.show_icon !== false}
-                <div class="laravel-toast-icon">
+                <div data-toast-part="icon" class="laravel-toast-icon">
                     {#if toast.custom_icon}
                         {@html toast.custom_icon}
                     {:else}
@@ -204,7 +205,7 @@
                 {/if}
             </div>
             {#if toast.auto_dismiss && toast.show_progress !== false && toast.duration > 0 && toast.progress_position !== 'top'}
-            <div class="laravel-toast-progress {ts.barBg}"><div class="{ts.bar}" style="width:{progress[toast.id] ?? 100}%;transition:none;{toast.progress_direction === 'rtl' ? 'margin-left:auto;' : ''}"></div></div>
+            <div data-toast-part="track" class="laravel-toast-progress {ts.barBg}"><div data-toast-part="bar" class="{ts.bar}" style="width:{progress[toast.id] ?? 100}%;transition:none;{toast.progress_direction === 'rtl' ? 'margin-left:auto;' : ''}"></div></div>
             {/if}
         </div>
     {/each}

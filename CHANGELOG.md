@@ -5,7 +5,65 @@ All notable changes to `jeremykenedy/laravel-toast` are documented here.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
-## Unreleased
+## [v3.1.0] - 2026-10-09
+
+Adds an optional notification settings page with color pickers. Nothing changes
+for existing applications until they enable it: the feature is off by default,
+no table is created, no routes are registered, and toasts look exactly as
+before when no color is configured.
+
+### Added
+
+- Color overrides for each toast type (`success`, `error`, `warning`, `info`) in light and
+  dark mode: background, text, border, icon, progress bar, and progress track. Set them with
+  the new `colors` config key or from the settings page. Only values you set produce CSS.
+- Notification settings UI with live light and dark previews for every behavior option and color:
+  `@toastSettings` and `@include('toast::settings')` for Blade, `<livewire:toast-settings />`,
+  and `ToastSettings` components for Vue, React, and Svelte. Blade and Livewire have Tailwind,
+  Bootstrap 5, and Bootstrap 4 views.
+- Optional full page at `/toast/settings` that extends your own Blade layout, with configurable
+  middleware, section, prefix, and view.
+- Saved settings stored in an opt-in `toast_settings` table that overrides config. Routes:
+  `GET /toast/settings/data`, `PUT /toast/settings`, `DELETE /toast/settings`, and
+  `GET /toast/settings` when the page is enabled.
+- Authorization through the `manage-toast-settings` gate (name configurable). An undefined
+  gate denies everyone.
+- `toast:install` and `toast:update` flags: `--settings`, `--settings-page`, `--settings-layout`,
+  `--settings-section`, `--settings-middleware`, and `--settings-gate`. Interactive runs ask
+  whether to add the settings page.
+- Publish tags `toast-settings-migrations` and `toast-settings-page`.
+- Config keys `colors` and `settings.*`, and environment variables `TOAST_SETTINGS_*`.
+- `docs/settings.md` and settings page screenshots.
+
+### Changed
+
+- Every renderer (Blade, Livewire, Vue, React, Svelte, in all three CSS frameworks) marks toasts
+  with `data-toast-type` and the icon, track, and bar with `data-toast-part`. Styling is unchanged.
+- Toast payloads include `colors_css`, an empty string when no colors are set. JavaScript
+  components inject it as one `<style id="toast-colors">` tag.
+- `resources/js/toast-options.js` exports `applyToastColors`.
+
+### Upgrade notes
+
+- No action is required to keep your current behavior.
+- If you published the toast views (`toast-views`), merge the new `data-toast-type` and
+  `data-toast-part` attributes to make colors apply to your overrides. Without them, colors you
+  configure will not reach the published markup.
+- To use the settings page, run `php artisan toast:update --settings` (add `--settings-page` and
+  `--settings-layout=layouts.app` for a page), review and run the published migration, and define
+  the `manage-toast-settings` gate. The commands never run migrations or define the gate.
+
+## [v3.0.1] - 2026-09-22
+
+### Added
+
+- README screenshots and a package file tree.
+
+### Fixed
+
+- Frontend dependency compatibility and security updates.
+
+## [v3.0.0] - 2026-09-22
 
 Applications with published views should merge the updated templates to receive
 the dismissal and theme fixes.

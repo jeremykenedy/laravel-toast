@@ -2,7 +2,7 @@ import React, { useState, useEffect, useCallback, useRef } from 'react'
 import '../../../css/toast-animations.css'
 import '../../../css/toast-themes.css'
 import '../../../css/toast-components.css'
-import { appendToast, bootstrapStyle, toastFramework, listenForToasts } from '../../toast-options.js'
+import { appendToast, applyToastColors, bootstrapStyle, toastFramework, listenForToasts } from '../../toast-options.js'
 
 const emptyToasts = []
 
@@ -143,6 +143,7 @@ export default function ToastContainer({ initialToasts = emptyToasts, position =
         for (const toast of incoming || []) {
             if (!toast?.id || seen.current.has(toast.id)) continue
             seen.current.add(toast.id)
+            applyToastColors(toast.colors_css)
             const next = appendToast(toastsRef.current, toast, stack)
             for (const previous of toastsRef.current) {
                 if (!next.some(item => item.id === previous.id)) remove(previous.id)
@@ -193,7 +194,7 @@ export default function ToastContainer({ initialToasts = emptyToasts, position =
                     : {}
 
                 return (
-                    <div key={toast.id} data-toast-id={toast.id} data-laravel-toast="component" data-css-framework={toastFramework(toast, cssFramework)} dir={toast.dir || 'ltr'}
+                    <div key={toast.id} data-toast-id={toast.id} data-laravel-toast="component" data-toast-type={toast.type} data-css-framework={toastFramework(toast, cssFramework)} dir={toast.dir || 'ltr'}
                          style={{ cursor: 'default', pointerEvents: 'auto', ...(toast.show_border === false ? { border: 0 } : {}), ...(toast.opacity < 1 ? { opacity: toast.opacity } : {}), ...enterStyle }}
                          onMouseEnter={() => hold(toast, 'hover')}
                          onMouseLeave={() => release(toast, 'hover')}
@@ -204,11 +205,11 @@ export default function ToastContainer({ initialToasts = emptyToasts, position =
                          aria-live={toast.type === 'error' ? 'assertive' : 'polite'}
                          aria-atomic="true">
                         {toast.auto_dismiss && toast.show_progress !== false && toast.duration > 0 && toast.progress_position === 'top' && (
-                            <div className={`laravel-toast-progress ${ts.barBg}`}><div className={`${ts.bar}`} style={{ width: `${progress[toast.id] ?? 100}%`, transition: 'none', ...(toast.progress_direction === 'rtl' ? { marginLeft: 'auto' } : {}) }} /></div>
+                            <div data-toast-part="track" className={`laravel-toast-progress ${ts.barBg}`}><div data-toast-part="bar" className={`${ts.bar}`} style={{ width: `${progress[toast.id] ?? 100}%`, transition: 'none', ...(toast.progress_direction === 'rtl' ? { marginLeft: 'auto' } : {}) }} /></div>
                         )}
                         <div className="laravel-toast-body">
                             {toast.show_icon !== false && (
-                                <div className="laravel-toast-icon">
+                                <div data-toast-part="icon" className="laravel-toast-icon">
                                     {toast.custom_icon ? <span dangerouslySetInnerHTML={{ __html: toast.custom_icon }} /> : <ToastIcon type={toast.type} className={ts.icon} />}
                                 </div>
                             )}
@@ -223,7 +224,7 @@ export default function ToastContainer({ initialToasts = emptyToasts, position =
                             )}
                         </div>
                         {toast.auto_dismiss && toast.show_progress !== false && toast.duration > 0 && toast.progress_position !== 'top' && (
-                            <div className={`laravel-toast-progress ${ts.barBg}`}><div className={`${ts.bar}`} style={{ width: `${progress[toast.id] ?? 100}%`, transition: 'none', ...(toast.progress_direction === 'rtl' ? { marginLeft: 'auto' } : {}) }} /></div>
+                            <div data-toast-part="track" className={`laravel-toast-progress ${ts.barBg}`}><div data-toast-part="bar" className={`${ts.bar}`} style={{ width: `${progress[toast.id] ?? 100}%`, transition: 'none', ...(toast.progress_direction === 'rtl' ? { marginLeft: 'auto' } : {}) }} /></div>
                         )}
                     </div>
                 )

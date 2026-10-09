@@ -6,6 +6,7 @@ namespace Jeremykenedy\LaravelToast\Console;
 
 use Illuminate\Console\Command;
 use Jeremykenedy\LaravelToast\Console\Concerns\HandlesFrameworkSetup;
+use Jeremykenedy\LaravelToast\Console\Concerns\HandlesSettingsSetup;
 use Jeremykenedy\LaravelToast\Console\Concerns\HasInstallPrompts;
 
 use function Laravel\Prompts\info;
@@ -13,11 +14,18 @@ use function Laravel\Prompts\info;
 class UpdateCommand extends Command
 {
     use HandlesFrameworkSetup;
+    use HandlesSettingsSetup;
     use HasInstallPrompts;
 
     protected $signature = 'toast:update
         {--css= : CSS framework (tailwind, bootstrap5, bootstrap4)}
-        {--frontend= : Frontend framework (blade, livewire, vue, react, svelte)}';
+        {--frontend= : Frontend framework (blade, livewire, vue, react, svelte)}
+        {--settings : Enable the notification settings (publishes the migration)}
+        {--settings-page : Also publish a full settings page}
+        {--settings-layout= : Blade layout the settings page extends, for example layouts.app}
+        {--settings-section= : Section name that layout yields (default: content)}
+        {--settings-middleware= : Comma separated route middleware (default: web,auth)}
+        {--settings-gate= : Gate that authorizes changes (default: manage-toast-settings)}';
 
     protected $description = 'Update the CSS and/or frontend framework for Laravel Toast';
 
@@ -36,8 +44,9 @@ class UpdateCommand extends Command
 
         $css = $this->option('css');
         $frontend = $this->option('frontend');
+        $interactive = !$css && !$frontend && !$this->settingsRequested();
 
-        if (!$css && !$frontend) {
+        if ($interactive) {
             $result = $this->promptFrameworks();
             if ($result === false) {
                 return self::FAILURE;
@@ -61,6 +70,11 @@ class UpdateCommand extends Command
             }
         }
 
+        $settings = $this->resolveSettingsOptions($interactive);
+        if ($settings === false) {
+            return self::FAILURE;
+        }
+
         if ($css) {
             $this->setCssFramework($css);
             info("CSS framework updated to: {$css}");
@@ -69,6 +83,10 @@ class UpdateCommand extends Command
         if ($frontend) {
             $this->setFrontendFramework($frontend);
             info("Frontend framework updated to: {$frontend}");
+        }
+
+        if ($settings !== null) {
+            $this->applySettings($settings);
         }
 
         info('Run: php artisan view:clear && npm run build');

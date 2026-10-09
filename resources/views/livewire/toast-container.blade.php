@@ -1,5 +1,6 @@
 @php
     use Jeremykenedy\LaravelToast\Support\ToastAnimations;
+    use Jeremykenedy\LaravelToast\Support\ToastColors;
 
     $globalPosition = config('toast.position', 'top-right');
     $positionMap = [
@@ -18,6 +19,7 @@
 <div>
 @if(count($displayToasts) > 0)
 {!! ToastAnimations::styleTag() !!}
+{!! ToastColors::styleTag(config('toast.colors')) !!}
 @foreach($grouped as $pos => $posToasts)
 <div style="position:fixed;{{ $positionMap[$pos] }} z-index:9999; width:24rem; max-width:calc(100vw - 1rem); display:flex; flex-direction:column; gap:0.75rem; pointer-events:none;" role="status" aria-live="polite" aria-atomic="false">
     @foreach($posToasts as $toast)
@@ -27,7 +29,7 @@
     @endphp
     <div wire:key="{{ $toast['id'] }}"
          id="lw-toast-{{ $toast['id'] }}"
-         data-laravel-toast="livewire"
+         data-laravel-toast="livewire" data-toast-type="{{ $toast['type'] }}"
          dir="{{ $toast['dir'] ?? 'ltr' }}"
          style="pointer-events:auto;cursor:default;{{ $opacityStyle }}{{ $enterStyle }}"
          data-auto-dismiss="{{ ($toast['auto_dismiss'] ?? true) ? 'true' : 'false' }}"
@@ -47,13 +49,13 @@
          aria-live="{{ $toast['type'] === 'error' ? 'assertive' : 'polite' }}"
          aria-atomic="true">
         @if(($toast['auto_dismiss'] ?? true) && ($toast['show_progress'] ?? true) !== false && ($toast['duration'] ?? 0) > 0 && ($toast['progress_position'] ?? 'top') === 'top')
-        <div class="h-1 w-full @switch($toast['type']) @case('success') bg-green-200 dark:bg-green-900 @break @case('error') bg-red-200 dark:bg-red-900 @break @case('warning') bg-amber-200 dark:bg-amber-900 @break @default bg-blue-200 dark:bg-blue-900 @endswitch">
-            <div class="toast-progress-bar h-full @switch($toast['type']) @case('success') bg-green-500 dark:bg-green-400 @break @case('error') bg-red-500 dark:bg-red-400 @break @case('warning') bg-amber-500 dark:bg-amber-400 @break @default bg-blue-500 dark:bg-blue-400 @endswitch" style="width:100%;transition:none;{{ ($toast['progress_direction'] ?? 'rtl') === 'rtl' ? 'margin-left:auto;' : '' }}" data-duration="{{ $toast['duration'] }}"></div>
+        <div data-toast-part="track" class="h-1 w-full @switch($toast['type']) @case('success') bg-green-200 dark:bg-green-900 @break @case('error') bg-red-200 dark:bg-red-900 @break @case('warning') bg-amber-200 dark:bg-amber-900 @break @default bg-blue-200 dark:bg-blue-900 @endswitch">
+            <div data-toast-part="bar" class="toast-progress-bar h-full @switch($toast['type']) @case('success') bg-green-500 dark:bg-green-400 @break @case('error') bg-red-500 dark:bg-red-400 @break @case('warning') bg-amber-500 dark:bg-amber-400 @break @default bg-blue-500 dark:bg-blue-400 @endswitch" style="width:100%;transition:none;{{ ($toast['progress_direction'] ?? 'rtl') === 'rtl' ? 'margin-left:auto;' : '' }}" data-duration="{{ $toast['duration'] }}"></div>
         </div>
         @endif
         <div class="p-4 flex items-start gap-3">
             @if(($toast['show_icon'] ?? true) !== false)
-            <div class="shrink-0 mt-0.5">
+            <div data-toast-part="icon" class="shrink-0 mt-0.5">
                 @if($toast['custom_icon'] ?? null) {!! $toast['custom_icon'] !!}
                 @else
                     @switch($toast['type'])
@@ -76,8 +78,8 @@
             @endif
         </div>
         @if(($toast['auto_dismiss'] ?? true) && ($toast['show_progress'] ?? true) !== false && ($toast['duration'] ?? 0) > 0 && ($toast['progress_position'] ?? 'top') !== 'top')
-        <div class="h-1 w-full @switch($toast['type']) @case('success') bg-green-200 dark:bg-green-900 @break @case('error') bg-red-200 dark:bg-red-900 @break @case('warning') bg-amber-200 dark:bg-amber-900 @break @default bg-blue-200 dark:bg-blue-900 @endswitch">
-            <div class="toast-progress-bar h-full @switch($toast['type']) @case('success') bg-green-500 dark:bg-green-400 @break @case('error') bg-red-500 dark:bg-red-400 @break @case('warning') bg-amber-500 dark:bg-amber-400 @break @default bg-blue-500 dark:bg-blue-400 @endswitch" style="width:100%;transition:none;{{ ($toast['progress_direction'] ?? 'rtl') === 'rtl' ? 'margin-left:auto;' : '' }}" data-duration="{{ $toast['duration'] }}"></div>
+        <div data-toast-part="track" class="h-1 w-full @switch($toast['type']) @case('success') bg-green-200 dark:bg-green-900 @break @case('error') bg-red-200 dark:bg-red-900 @break @case('warning') bg-amber-200 dark:bg-amber-900 @break @default bg-blue-200 dark:bg-blue-900 @endswitch">
+            <div data-toast-part="bar" class="toast-progress-bar h-full @switch($toast['type']) @case('success') bg-green-500 dark:bg-green-400 @break @case('error') bg-red-500 dark:bg-red-400 @break @case('warning') bg-amber-500 dark:bg-amber-400 @break @default bg-blue-500 dark:bg-blue-400 @endswitch" style="width:100%;transition:none;{{ ($toast['progress_direction'] ?? 'rtl') === 'rtl' ? 'margin-left:auto;' : '' }}" data-duration="{{ $toast['duration'] }}"></div>
         </div>
         @endif
     </div>

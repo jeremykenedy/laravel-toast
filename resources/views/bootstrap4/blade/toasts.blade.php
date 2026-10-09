@@ -1,5 +1,6 @@
 @php
     use Jeremykenedy\LaravelToast\Support\ToastAnimations;
+    use Jeremykenedy\LaravelToast\Support\ToastColors;
 
     $toastManager = app(\Jeremykenedy\LaravelToast\Services\ToastManager::class);
     if (config('toast.convert_flash', true)) { $toastManager->convertFlashMessages(); }
@@ -27,6 +28,7 @@
 @endphp
 @if(count($displayToasts) > 0)
 {!! ToastAnimations::styleTag('bootstrap4') !!}
+{!! ToastColors::styleTag(config('toast.colors')) !!}
 @foreach($grouped as $pos => $posToasts)
 <div style="position:fixed;{{ $positionMap[$pos] }} z-index:9999; width:min(400px, calc(100vw - 1rem)); pointer-events:none;">
     @foreach($posToasts as $toast)
@@ -46,18 +48,18 @@
          aria-atomic="true"
          dir="{{ $toast['dir'] ?? 'ltr' }}"
          id="toast-{{ $toast['id'] }}"
-         data-laravel-toast="blade" data-css-framework="bootstrap4"
+         data-laravel-toast="blade" data-css-framework="bootstrap4" data-toast-type="{{ $toast['type'] }}"
          data-auto-dismiss="{{ ($toast['auto_dismiss'] ?? true) ? 'true' : 'false' }}"
          data-duration="{{ $toast['duration'] }}"
          data-pause-on-hover="{{ ($toast['pause_on_hover'] ?? true) ? 'true' : 'false' }}"
          data-exit-animation="{{ $toast['exit_animation'] ?? 'none' }}"
          data-exit-duration="{{ $toast['exit_duration'] ?? 0.5 }}">
         @if(($toast['auto_dismiss'] ?? true) && ($toast['show_progress'] ?? true) !== false && $toast['duration'] > 0 && ($toast['progress_position'] ?? 'top') === 'top')
-        <div style="height:3px;background:rgba(0,0,0,0.1);margin:-.75rem -1.25rem .5rem;"><div class="toast-progress-bar" style="height:100%;width:100%;background:rgba(0,0,0,0.25);transition:none;{{ ($toast['progress_direction'] ?? 'rtl') === 'rtl' ? 'margin-left:auto;' : '' }}" data-duration="{{ $toast['duration'] }}"></div></div>
+        <div data-toast-part="track" style="height:3px;background:rgba(0,0,0,0.1);margin:-.75rem -1.25rem .5rem;"><div data-toast-part="bar" class="toast-progress-bar" style="height:100%;width:100%;background:rgba(0,0,0,0.25);transition:none;{{ ($toast['progress_direction'] ?? 'rtl') === 'rtl' ? 'margin-left:auto;' : '' }}" data-duration="{{ $toast['duration'] }}"></div></div>
         @endif
         <div class="d-flex align-items-start">
             @if(($toast['show_icon'] ?? true) !== false)
-                <span class="mr-2 flex-shrink-0">{!! $toast['custom_icon'] ?? ($iconMap[$toast['type']] ?? $iconMap['info']) !!}</span>
+                <span data-toast-part="icon" class="mr-2 flex-shrink-0">{!! $toast['custom_icon'] ?? ($iconMap[$toast['type']] ?? $iconMap['info']) !!}</span>
             @endif
             <div class="flex-grow-1" style="cursor:default;min-width:0;">
                 @if($toast['title']) <strong>{{ $toast['title'] }}</strong><br> @endif
@@ -68,7 +70,7 @@
         <button type="button" class="close" style="cursor:pointer;" data-dismiss="alert" aria-label="{{ __('toast::toast.dismiss') }}"><span aria-hidden="true">&times;</span></button>
         @endif
         @if(($toast['auto_dismiss'] ?? true) && ($toast['show_progress'] ?? true) !== false && $toast['duration'] > 0 && ($toast['progress_position'] ?? 'top') !== 'top')
-        <div style="height:3px;background:rgba(0,0,0,0.1);margin:.5rem -1.25rem -.75rem;"><div class="toast-progress-bar" style="height:100%;width:100%;background:rgba(0,0,0,0.25);transition:none;{{ ($toast['progress_direction'] ?? 'rtl') === 'rtl' ? 'margin-left:auto;' : '' }}" data-duration="{{ $toast['duration'] }}"></div></div>
+        <div data-toast-part="track" style="height:3px;background:rgba(0,0,0,0.1);margin:.5rem -1.25rem -.75rem;"><div data-toast-part="bar" class="toast-progress-bar" style="height:100%;width:100%;background:rgba(0,0,0,0.25);transition:none;{{ ($toast['progress_direction'] ?? 'rtl') === 'rtl' ? 'margin-left:auto;' : '' }}" data-duration="{{ $toast['duration'] }}"></div></div>
         @endif
     </div>
     @endforeach

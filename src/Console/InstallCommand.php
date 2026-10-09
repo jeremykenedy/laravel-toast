@@ -6,17 +6,25 @@ namespace Jeremykenedy\LaravelToast\Console;
 
 use Illuminate\Console\Command;
 use Jeremykenedy\LaravelToast\Console\Concerns\HandlesFrameworkSetup;
+use Jeremykenedy\LaravelToast\Console\Concerns\HandlesSettingsSetup;
 use Jeremykenedy\LaravelToast\Console\Concerns\HasInstallPrompts;
 
 class InstallCommand extends Command
 {
     use HandlesFrameworkSetup;
+    use HandlesSettingsSetup;
     use HasInstallPrompts;
 
     protected $signature = 'toast:install
         {--css= : CSS framework (tailwind, bootstrap5, bootstrap4)}
         {--frontend= : Frontend framework (blade, livewire, vue, react, svelte)}
-        {--force : Skip confirmation when reinstalling}';
+        {--force : Skip confirmation when reinstalling}
+        {--settings : Enable the notification settings (publishes the migration)}
+        {--settings-page : Also publish a full settings page}
+        {--settings-layout= : Blade layout the settings page extends, for example layouts.app}
+        {--settings-section= : Section name that layout yields (default: content)}
+        {--settings-middleware= : Comma separated route middleware (default: web,auth)}
+        {--settings-gate= : Gate that authorizes changes (default: manage-toast-settings)}';
 
     protected $description = 'Install and configure the Laravel Toast package';
 
@@ -59,12 +67,21 @@ class InstallCommand extends Command
             return self::FAILURE;
         }
 
+        $settings = $this->resolveSettingsOptions(true);
+        if ($settings === false) {
+            return self::FAILURE;
+        }
+
         $this->call('vendor:publish', ['--tag' => 'toast-config', '--force' => true]);
 
         $this->setCssFramework($result['css']);
         $this->setFrontendFramework($result['frontend']);
 
         $this->showSummary('Laravel Toast', $result['css'], $result['frontend']);
+
+        if ($settings !== null) {
+            $this->applySettings($settings);
+        }
 
         return self::SUCCESS;
     }

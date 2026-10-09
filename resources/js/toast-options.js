@@ -26,3 +26,13 @@ export function listenForToasts(echo, channel, receive) {
     subscription.listen('.toast', listener)
     return () => subscription.stopListening('.toast', listener)
 }
+
+// Every toast carries the generated color stylesheet, so SPA renderers that
+// never see the Blade views still pick up the colors saved in settings.
+export function applyToastColors(css, doc = typeof document !== 'undefined' ? document : null) {
+    if (!doc) return
+    let tag = doc.getElementById('toast-colors')
+    if (!css) { if (tag) tag.remove(); return }
+    if (!tag) { tag = doc.createElement('style'); tag.id = 'toast-colors'; doc.head.appendChild(tag) }
+    if (tag.textContent !== css) tag.textContent = css
+}

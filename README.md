@@ -28,6 +28,7 @@ Toast notifications for Laravel with five frontends, three CSS frameworks, 49 an
 
 - [Framework Support](#framework-support)
 - [Screenshots](#screenshots)
+  - [Settings Page](#settings-page)
 - [Requirements](#requirements)
 - [Installation](#installation)
   - [Tailwind Setup](#tailwind-setup)
@@ -47,6 +48,8 @@ Toast notifications for Laravel with five frontends, three CSS frameworks, 49 an
 - [Animations](#animations)
 - [Styles and Dark Mode](#styles-and-dark-mode)
   - [Customizing Colors](#customizing-colors)
+- [Notification Settings](#notification-settings)
+  - [Routes](#routes)
 - [Usage](#usage)
   - [Facade and Trait](#facade-and-trait)
   - [Livewire Events](#livewire-events)
@@ -58,6 +61,7 @@ Toast notifications for Laravel with five frontends, three CSS frameworks, 49 an
   - [Install Options](#install-options)
   - [Publishing Assets](#publishing-assets)
 - [Testing](#testing)
+- [Documentation](#documentation)
 - [File Tree](#file-tree)
 - [Contributing](#contributing)
 - [Changelog](#changelog)
@@ -91,6 +95,19 @@ npx playwright install chromium
 npm run screenshots
 ```
 
+### Settings Page
+
+Captured from the settings page running in a Laravel application, with light and dark mode edited for the success and info types and every other color left on Default. The first image in each pair is the color pickers, the second is the live preview. Select an image to view it at full size.
+
+<p align="center">
+    <a href="art/screenshots/settings-tailwind-colors.jpg"><picture><source media="(min-width: 1280px)" srcset="art/screenshots/grid/settings-tailwind-colors-desktop.jpg 2x"><source media="(min-width: 600px)" srcset="art/screenshots/grid/settings-tailwind-colors-tablet.jpg 2x"><img src="art/screenshots/settings-tailwind-colors.jpg" alt="Settings page with Tailwind: color pickers for the success type in light and dark mode" title="Settings page with Tailwind: color pickers"></picture></a>
+    <a href="art/screenshots/settings-bootstrap5-colors.jpg"><picture><source media="(min-width: 1280px)" srcset="art/screenshots/grid/settings-bootstrap5-colors-desktop.jpg 2x"><source media="(min-width: 600px)" srcset="art/screenshots/grid/settings-bootstrap5-colors-tablet.jpg 2x"><img src="art/screenshots/settings-bootstrap5-colors.jpg" alt="Settings page with Bootstrap 5: color pickers for the success type in light and dark mode" title="Settings page with Bootstrap 5: color pickers"></picture></a>
+    <a href="art/screenshots/settings-bootstrap4-colors.jpg"><picture><source media="(min-width: 1280px)" srcset="art/screenshots/grid/settings-bootstrap4-colors-desktop.jpg 2x"><source media="(min-width: 600px)" srcset="art/screenshots/grid/settings-bootstrap4-colors-tablet.jpg 2x"><img src="art/screenshots/settings-bootstrap4-colors.jpg" alt="Settings page with Bootstrap 4: color pickers for the success type in light and dark mode" title="Settings page with Bootstrap 4: color pickers"></picture></a>
+    <a href="art/screenshots/settings-tailwind-preview.jpg"><picture><source media="(min-width: 1280px)" srcset="art/screenshots/grid/settings-tailwind-preview-desktop.jpg 2x"><source media="(min-width: 600px)" srcset="art/screenshots/grid/settings-tailwind-preview-tablet.jpg 2x"><img src="art/screenshots/settings-tailwind-preview.jpg" alt="Settings page with Tailwind: live preview of the four toast types in light and dark mode" title="Settings page with Tailwind: live preview"></picture></a>
+    <a href="art/screenshots/settings-bootstrap5-preview.jpg"><picture><source media="(min-width: 1280px)" srcset="art/screenshots/grid/settings-bootstrap5-preview-desktop.jpg 2x"><source media="(min-width: 600px)" srcset="art/screenshots/grid/settings-bootstrap5-preview-tablet.jpg 2x"><img src="art/screenshots/settings-bootstrap5-preview.jpg" alt="Settings page with Bootstrap 5: live preview of the four toast types in light and dark mode" title="Settings page with Bootstrap 5: live preview"></picture></a>
+    <a href="art/screenshots/settings-bootstrap4-preview.jpg"><picture><source media="(min-width: 1280px)" srcset="art/screenshots/grid/settings-bootstrap4-preview-desktop.jpg 2x"><source media="(min-width: 600px)" srcset="art/screenshots/grid/settings-bootstrap4-preview-tablet.jpg 2x"><img src="art/screenshots/settings-bootstrap4-preview.jpg" alt="Settings page with Bootstrap 4: live preview of the four toast types in light and dark mode" title="Settings page with Bootstrap 4: live preview"></picture></a>
+</p>
+
 ## Requirements
 
 - PHP 8.2+
@@ -98,6 +115,7 @@ npm run screenshots
 - Tailwind v4, Bootstrap 5.2+, or Bootstrap 4 CSS
 - Alpine.js for Tailwind Blade; Livewire 3 or 4 for the Livewire container; or Vue 3, React 18, or Svelte 4 / 5
 - Laravel broadcasting, a queue worker, and Laravel Echo for optional real-time delivery
+- A database table, only if you enable the optional [notification settings](#notification-settings)
 
 Bootstrap Blade toasts work without jQuery or the Bootstrap JavaScript bundle. CI selects Laravel 10 through 13 and both supported Livewire majors.
 
@@ -272,6 +290,7 @@ Later updates should use `initialToasts` or a broadcast subscription. Changing `
 - Hover and keyboard-focus pause, progress bars, RTL, and dark mode
 - Session flash conversion and optional private broadcasts
 - Translations for 42 locales and a `dismissLabel` prop for JavaScript frontends
+- Optional settings page with color pickers, live light and dark previews, and every behavior option, saved to your database and available for Blade, Livewire, Vue, React and Svelte in all three CSS frameworks
 
 ## Configuration
 
@@ -305,6 +324,8 @@ All environment settings are optional. Configure them in your application's `.en
 | `exit_duration` | `TOAST_EXIT_DURATION` | `0.5` seconds |
 | `broadcast.enabled` | `TOAST_BROADCAST_ENABLED` | `false` |
 | `broadcast.channel` | `TOAST_BROADCAST_CHANNEL` | `toast.{userId}` |
+| `colors` | Config only | `[]`, per type, mode and part hex overrides |
+| `settings.*` | `TOAST_SETTINGS_*` | Disabled; see [docs/settings.md](docs/settings.md) |
 | `session_key` | Config only | `toast_notifications` |
 | `convert_flash` | Config only | `true` |
 
@@ -442,7 +463,7 @@ Tailwind uses your application's `dark:` variant configuration. Bootstrap suppor
 
 ### Customizing Colors
 
-Publish the Blade/Livewire views and edit their actual classes:
+The quickest way to change colors is the [notification settings page](#notification-settings), or the `colors` config key. To go further, publish the Blade/Livewire views and edit their actual classes:
 
 ```bash
 php artisan vendor:publish --tag=toast-views
@@ -468,6 +489,44 @@ For JavaScript components, override the scoped classes in your stylesheet after 
 ```
 
 Use `.text-bg-success` instead of `.alert-success` for Bootstrap 5. Keep selectors scoped so other application alerts and badges retain their colors.
+
+## Notification Settings
+
+Let people with the right permission change every notification color and behavior option from the browser, with a live preview, and save the result to your database. It is off by default; nothing is created or exposed until you enable it.
+
+```bash
+php artisan toast:install --settings --settings-page --settings-layout=layouts.app
+php artisan migrate
+```
+
+Define who may use it, in a service provider (an undefined gate denies everyone):
+
+```php
+Gate::define('manage-toast-settings', fn ($user) => $user->can('manage-site'));
+```
+
+Then place the panel wherever you want it, or use the page at `/toast/settings`:
+
+| Frontend | Include |
+|----------|---------|
+| Blade | `@toastSettings` or `@include('toast::settings')` |
+| Livewire | `<livewire:toast-settings />` |
+| Vue | `resources/js/vue/pages/ToastSettings.vue` |
+| React | `resources/js/react/pages/ToastSettings.jsx` |
+| Svelte | `resources/js/svelte/pages/ToastSettings.svelte` |
+
+The page can extend your own Blade layout (`--settings-layout`, `--settings-section`) and run your own middleware (`--settings-middleware`). Colors can also be set without the UI through the `colors` config key. Saved values override `config/toast.php`; anything never saved falls back to config. See [docs/settings.md](docs/settings.md) for the full guide, configuration, request format and security notes.
+
+### Routes
+
+Registered only when `TOAST_SETTINGS_ENABLED=true`. Every route runs `settings.middleware` (default `web`, `auth`) and then the gate.
+
+| Method | URI | Name | Purpose |
+|--------|-----|------|---------|
+| `GET` | `/toast/settings` | `toast.settings.index` | Full page, only when `settings.page` is true |
+| `GET` | `/toast/settings/data` | `toast.settings.show` | Current values, defaults and field definitions as JSON |
+| `PUT` | `/toast/settings` | `toast.settings.update` | Save options and colors |
+| `DELETE` | `/toast/settings` | `toast.settings.destroy` | Remove saved settings |
 
 ## Usage
 
@@ -558,6 +617,7 @@ The interactive flow offers framework selection and confirmation. Passing flags 
 |--------|--------|-------------|
 | `--css` | `tailwind`, `bootstrap5`, `bootstrap4` | Change CSS framework |
 | `--frontend` | `blade`, `livewire`, `vue`, `react`, `svelte` | Record frontend selection |
+| `--settings` and the other `--settings-*` flags | See [Install Options](#install-options) | Enable or change the notification settings page. Does not ask for frameworks. |
 
 ### Switch
 
@@ -577,8 +637,8 @@ After switching, load the selected framework's CSS, use the corresponding layout
 
 | Command | Description | Flags |
 |---------|-------------|-------|
-| `toast:install` | Publish configuration and choose frameworks; detects existing installations | `--css`, `--frontend`, `--force` |
-| `toast:update` | Update framework choices interactively while preserving configuration | `--css`, `--frontend` |
+| `toast:install` | Publish configuration and choose frameworks; detects existing installations | `--css`, `--frontend`, `--force`, `--settings`, `--settings-page`, `--settings-layout`, `--settings-section`, `--settings-middleware`, `--settings-gate` |
+| `toast:update` | Update framework choices interactively while preserving configuration | `--css`, `--frontend`, `--settings`, `--settings-page`, `--settings-layout`, `--settings-section`, `--settings-middleware`, `--settings-gate` |
 | `toast:switch` | Change framework choices using flags | `--css`, `--frontend` |
 
 ### Install Options
@@ -588,6 +648,14 @@ After switching, load the selected framework's CSS, use the corresponding layout
 | `--css=` | `tailwind`, `bootstrap5`, or `bootstrap4` |
 | `--frontend=` | `blade`, `livewire`, `vue`, `react`, or `svelte` |
 | `--force` | Skip reinstall confirmation and replace published configuration |
+| `--settings` | Enable the notification settings and publish the migration once |
+| `--settings-page` | Also publish an editable page view and register the page route |
+| `--settings-layout=` | Blade layout the page extends, for example `layouts.app`; the view must exist |
+| `--settings-section=` | Section the layout yields. Default `content` |
+| `--settings-middleware=` | Comma separated route middleware. Default `web,auth` |
+| `--settings-gate=` | Gate that authorizes changes. Default `manage-toast-settings` |
+
+The settings flags are validated before any file is written. The commands never run migrations and never define the gate. Without a settings flag, an interactive run asks whether to add the settings page; a `--no-interaction` run changes nothing about settings.
 
 All commands accept Artisan's `--no-interaction` flag. A noninteractive reinstall requires `--force`.
 
@@ -598,6 +666,8 @@ php artisan vendor:publish --tag=toast-config
 php artisan vendor:publish --tag=toast-views
 php artisan vendor:publish --tag=toast-lang
 php artisan vendor:publish --tag=toast-css
+php artisan vendor:publish --tag=toast-settings-migrations
+php artisan vendor:publish --tag=toast-settings-page
 ```
 
 | Tag | Destination |
@@ -606,6 +676,8 @@ php artisan vendor:publish --tag=toast-css
 | `toast-views` | `resources/views/vendor/toast/` |
 | `toast-lang` | `lang/vendor/toast/` |
 | `toast-css` | Animation, theme, and component styles in `resources/css/vendor/toast/` |
+| `toast-settings-migrations` | `database/migrations/` (creates the `toast_settings` table) |
+| `toast-settings-page` | `resources/views/toast/settings.blade.php`, an editable page that extends your layout |
 
 ## Testing
 
@@ -621,13 +693,19 @@ npx playwright install chromium
 npm run test:browser
 ```
 
-PHP tests use a protected in-memory database configuration and perform no database operations. Frontend tests compile and mount Vue, React, and Svelte, execute Blade/Livewire timers, and exercise updates, replacement, broadcasting, animations, and cleanup. Chromium tests cover all nine SPA/CSS combinations, a Tailwind build with explicit package sources, and Bootstrap theme isolation.
+PHP tests use a protected in-memory SQLite configuration that fails the run if any other database is configured. Only the opt-in settings feature reads and writes a table, and its tests do so in that in-memory database. Frontend tests compile and mount Vue, React, and Svelte, execute Blade/Livewire timers, and exercise updates, replacement, broadcasting, animations, and cleanup. Chromium tests cover all nine SPA/CSS combinations, a Tailwind build with explicit package sources, and Bootstrap theme isolation.
 
 Run PHP tests that do not require Livewire with:
 
 ```bash
 ./vendor/bin/pest --ci --exclude-group livewire
 ```
+
+## Documentation
+
+| Guide | Covers |
+|-------|--------|
+| [docs/settings.md](docs/settings.md) | The notification settings page: enabling it, authorization, every frontend, install and update flags, configuration, routes, request format, how colors are applied, and security notes |
 
 ## File Tree
 
@@ -639,37 +717,48 @@ laravel-toast/
 ├── art/
 │   ├── banner-dark.svg
 │   ├── banner-light.svg
-│   └── screenshots/                 # Light and dark previews for each CSS framework
+│   └── screenshots/                 # Toast previews and settings page captures
 ├── config/toast.php                 # Package defaults and environment settings
+├── database/migrations/             # Opt-in settings table migration stub
+├── docs/settings.md                 # Notification settings guide
 ├── resources/
 │   ├── css/
 │   │   ├── toast-animations.css
 │   │   ├── toast-components.css
+│   │   ├── toast-settings.css
 │   │   └── toast-themes.css
 │   ├── js/
-│   │   ├── react/pages/ToastContainer.jsx
-│   │   ├── svelte/pages/ToastContainer.svelte
-│   │   ├── vue/pages/ToastContainer.vue
-│   │   └── toast-options.js         # Shared options and Echo subscriptions
+│   │   ├── react/pages/{ToastContainer,ToastSettings}.jsx
+│   │   ├── svelte/pages/{ToastContainer,ToastSettings}.svelte
+│   │   ├── vue/pages/{ToastContainer,ToastSettings}.vue
+│   │   ├── toast-colors.js          # Color stylesheet generator shared with PHP
+│   │   ├── toast-options.js         # Shared options and Echo subscriptions
+│   │   ├── toast-settings-panel.js  # Blade settings panel script
+│   │   └── toast-settings-shared.js # Shared logic for the JavaScript settings components
 │   ├── lang/                       # Translations grouped by locale
 │   └── views/
-│       ├── bootstrap4/blade/toasts.blade.php
-│       ├── bootstrap5/blade/toasts.blade.php
+│       ├── bootstrap4/blade/          # toasts, settings, settings-page, layout
+│       ├── bootstrap5/blade/          # toasts, settings, settings-page, layout
 │       ├── livewire/
-│       │   ├── bootstrap4/toast-container.blade.php
-│       │   ├── bootstrap5/toast-container.blade.php
+│       │   ├── bootstrap4/            # toast-container, toast-settings
+│       │   ├── bootstrap5/            # toast-container, toast-settings
 │       │   ├── partials/timer-script.blade.php
-│       │   └── toast-container.blade.php
-│       └── tailwind/blade/toasts.blade.php
+│       │   ├── toast-container.blade.php
+│       │   └── toast-settings.blade.php
+│       ├── shared/settings-script.blade.php
+│       └── tailwind/blade/            # toasts, settings, settings-page, layout
+├── routes/web.php                   # Settings routes, registered only when enabled
 ├── scripts/capture-screenshots.mjs
 ├── src/
 │   ├── Console/                    # Install, update, and switch commands
 │   ├── Events/ToastBroadcast.php
 │   ├── Facades/Toast.php
-│   ├── Livewire/ToastContainer.php
+│   ├── Http/                       # Settings controller, form request, middleware
+│   ├── Livewire/{ToastContainer,ToastSettings}.php
+│   ├── Models/ToastSetting.php
 │   ├── Providers/ToastServiceProvider.php
 │   ├── Services/ToastManager.php
-│   ├── Support/ToastAnimations.php
+│   ├── Support/                    # ToastAnimations, ToastColors, ToastSettings
 │   ├── Traits/HasToasts.php
 │   └── helpers.php
 ├── tests/

@@ -10,8 +10,10 @@ use Jeremykenedy\LaravelToast\Console\InstallCommand;
 use Jeremykenedy\LaravelToast\Console\SwitchCommand;
 use Jeremykenedy\LaravelToast\Console\UpdateCommand;
 use Jeremykenedy\LaravelToast\Livewire\ToastContainer;
+use Jeremykenedy\LaravelToast\Livewire\ToastSettings as ToastSettingsComponent;
 use Jeremykenedy\LaravelToast\Services\ToastManager;
 use Jeremykenedy\LaravelToast\Support\ToastAnimations;
+use Jeremykenedy\LaravelToast\Support\ToastSettings;
 use Livewire\Livewire;
 
 class ToastServiceProvider extends ServiceProvider
@@ -44,6 +46,7 @@ class ToastServiceProvider extends ServiceProvider
         $this->registerTranslations();
         $this->registerBladeDirectives();
         $this->registerLivewireComponents();
+        $this->registerSettings();
     }
 
     /**
@@ -84,6 +87,14 @@ class ToastServiceProvider extends ServiceProvider
             ], 'toast-lang');
 
             $this->publishes([
+                __DIR__.'/../../database/migrations/create_toast_settings_table.php.stub' => database_path('migrations/'.date('Y_m_d_His').'_create_toast_settings_table.php'),
+            ], 'toast-settings-migrations');
+
+            $this->publishes([
+                __DIR__.'/../../resources/views/'.static::cssFramework().'/blade/settings-page.blade.php' => resource_path('views/toast/settings.blade.php'),
+            ], 'toast-settings-page');
+
+            $this->publishes([
                 ToastAnimations::path()                             => resource_path('css/vendor/toast/toast-animations.css'),
                 __DIR__.'/../../resources/css/toast-themes.css'     => resource_path('css/vendor/toast/toast-themes.css'),
                 __DIR__.'/../../resources/css/toast-components.css' => resource_path('css/vendor/toast/toast-components.css'),
@@ -113,6 +124,8 @@ class ToastServiceProvider extends ServiceProvider
         }
 
         $this->loadViewsFrom($this->withPublishedOverride($bladePath, $css.'/blade'), 'toast');
+
+        $this->loadViewsFrom(__DIR__.'/../../resources/views/shared', 'toast-shared');
 
         $livewirePath = __DIR__.'/../../resources/views/livewire';
         if (is_dir($livewirePath)) {
@@ -192,6 +205,24 @@ class ToastServiceProvider extends ServiceProvider
         // registering a component in that state throws on livewire.finder.
         if (class_exists(Livewire::class) && $this->app->bound('livewire')) {
             Livewire::component('toast-container', ToastContainer::class);
+            Livewire::component('toast-settings', ToastSettingsComponent::class);
         }
+    }
+
+    protected function registerSettings(): void
+    {
+        Blade::directive('toastSettings', function () {
+            return "<?php echo view('toast::settings')->render(); ?>";
+        });
+
+        if (!ToastSettings::enabled()) {
+            return;
+        }
+
+        $this->loadRoutesFrom(__DIR__.'/../../routes/web.php');
+
+        // Saved values read the database, which may not exist yet while
+        // migrating or installing, so wait until the application has booted.
+        $this->app->booted(fn () => ToastSettings::apply());
     }
 }

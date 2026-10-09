@@ -1,5 +1,5 @@
 import React, { StrictMode } from 'react'
-import { describe, it, expect, vi } from 'vitest'
+import { describe, it, expect, vi, afterEach } from 'vitest'
 import { render as renderReact, act, fireEvent as reactEvent } from '@testing-library/react'
 import { mount } from '@vue/test-utils'
 import { nextTick } from 'vue'
@@ -168,6 +168,30 @@ for (const [name, create] of Object.entries(adapters)) {
                 expect(echo.private).toHaveBeenCalledWith('toast.42')
             } finally { ui.close() }
             expect(subscription.stopListening).toHaveBeenCalledWith('.toast', expect.any(Function))
+        })
+    })
+}
+
+for (const [name, create] of Object.entries(adapters)) {
+    describe(`${name} colors`, () => {
+        afterEach(() => document.getElementById('toast-colors')?.remove())
+
+        it('injects the colors_css carried by a toast', async () => {
+            const ui = await create({ initialToasts: [] })
+            try {
+                expect(document.getElementById('toast-colors')).toBeNull()
+                await ui.update({ initialToasts: [toast('colored', { colors_css: '[data-toast-type="success"]{color:#123456!important}' })] })
+                expect(document.getElementById('toast-colors').textContent).toBe('[data-toast-type="success"]{color:#123456!important}')
+                expect(ui.element.querySelector('[data-laravel-toast="component"][data-toast-type="success"]')).not.toBeNull()
+            } finally { ui.close() }
+        })
+
+        it('leaves the page alone when a toast has no colors_css', async () => {
+            const ui = await create({ initialToasts: [] })
+            try {
+                await ui.update({ initialToasts: [toast('plain')] })
+                expect(ui.element.textContent).toContain('plain')
+            } finally { ui.close() }
         })
     })
 }

@@ -8,6 +8,7 @@ use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Session;
 use Jeremykenedy\LaravelToast\Events\ToastBroadcast;
 use Jeremykenedy\LaravelToast\Providers\ToastServiceProvider;
+use Jeremykenedy\LaravelToast\Support\ToastColors;
 
 class ToastManager
 {
@@ -130,6 +131,7 @@ class ToastManager
             'exit_animation'     => $options['exit_animation'] ?? config('toast.exit_animation', 'none'),
             'exit_duration'      => $options['exit_duration'] ?? (float) config('toast.exit_duration', 0.5),
             'max_visible'        => $options['max_visible'] ?? (int) config('toast.max_visible', 5),
+            'colors_css'         => ToastColors::css(config('toast.colors')),
             'timestamp'          => now()->toISOString(),
         ];
     }

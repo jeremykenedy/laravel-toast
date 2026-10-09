@@ -1,0 +1,41 @@
+---
+exclude_paths:
+  - "vendor/**"
+  - "node_modules/**"
+  - "test-results/**"
+  - "package-lock.json"
+  - "composer.lock"
+  - "art/**"
+  - "tests/Browser/**"
+  - "tests/fixtures/**"
+  - "scripts/**"
+  - "SECURITY.md"
+engines:
+  phpmd:
+    exclude_paths:
+      - "resources/views/**"
+  phpcs:
+    exclude_paths:
+      - "resources/views/**"
+  # Lizard does not parse PHP traits and attributes the whole file to the
+  # first method, so the Console concerns report a single huge function.
+  lizard:
+    exclude_paths:
+      - "resources/views/**"
+      - "src/Console/Concerns/**"
+      - "tests/**"
+  # PMD's JavaScript rules flag the braces of named imports in tests.
+  pmd:
+    exclude_paths:
+      - "tests/**"
+      - "*.config.js"
+  eslint:
+    exclude_paths:
+      - "**/*.vue"
+      - "**/*.svelte"
+      - "tests/**"
+  eslint-8:
+    exclude_paths:
+      - "**/*.vue"
+      - "**/*.svelte"
+      - "tests/**"

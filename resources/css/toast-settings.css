@@ -1,0 +1,87 @@
+[data-toast-settings-root] {
+    --ts-fg: #111827; --ts-muted: #6b7280; --ts-surface: #ffffff; --ts-surface-alt: #f3f4f6;
+    --ts-border: #d1d5db; --ts-accent: #2563eb; --ts-accent-fg: #ffffff; --ts-warn-bg: #fffbeb; --ts-warn-fg: #92400e; --ts-warn-border: #fde68a;
+    color: var(--ts-fg); font-size: .875rem; line-height: 1.5; max-width: 64rem; width: 100%;
+}
+:where(.dark, [data-bs-theme="dark"]) [data-toast-settings-root] {
+    --ts-fg: #f3f4f6; --ts-muted: #9ca3af; --ts-surface: #111827; --ts-surface-alt: #1f2937;
+    --ts-border: #374151; --ts-accent: #3b82f6; --ts-warn-bg: #451a03; --ts-warn-fg: #fde68a; --ts-warn-border: #92400e;
+}
+[data-toast-settings-root] h2, [data-toast-settings-root] h3, [data-toast-settings-root] h4, [data-toast-settings-root] p { margin: 0; }
+[data-toast-settings-root] h2 { font-size: 1.25rem; font-weight: 600; letter-spacing: -.01em; }
+[data-toast-settings-root] h3 { font-size: 1rem; font-weight: 600; }
+[data-toast-settings-root] h4 { font-size: .875rem; font-weight: 600; margin-bottom: .75rem; }
+[data-toast-settings-root] .ts-muted { color: var(--ts-muted); }
+[data-toast-settings-root] .ts-header { margin-bottom: 1.5rem; }
+[data-toast-settings-root] .ts-section { background: var(--ts-surface); border: 1px solid var(--ts-border); border-radius: .75rem; padding: 1.5rem; margin-bottom: 1.5rem; }
+[data-toast-settings-root] .ts-section > p { margin-top: .25rem; }
+[data-toast-settings-root] .ts-type { border: 1px solid var(--ts-border); border-radius: .5rem; padding: 1rem; margin-top: 1rem; }
+[data-toast-settings-root] .ts-grid { display: grid; gap: 1.5rem; grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr)); }
+[data-toast-settings-root] .ts-fields { display: grid; gap: 1rem; grid-template-columns: repeat(auto-fit, minmax(14rem, 1fr)); margin-top: 1rem; }
+[data-toast-settings-root] .ts-mode { font-size: .75rem; font-weight: 500; letter-spacing: .05em; text-transform: uppercase; color: var(--ts-muted); margin-bottom: .5rem; }
+[data-toast-settings-root] .ts-row { display: flex; align-items: center; gap: .75rem; margin-bottom: .5rem; }
+[data-toast-settings-root] .ts-row-label { width: 8rem; flex-shrink: 0; }
+[data-toast-settings-root] .ts-hex { width: 5rem; font-family: ui-monospace, SFMono-Regular, Menlo, monospace; font-size: .75rem; color: var(--ts-muted); }
+[data-toast-settings-root] input[type="color"] { width: 2.5rem; height: 2rem; padding: .125rem; border: 1px solid var(--ts-border); border-radius: .25rem; background: var(--ts-surface); cursor: pointer; }
+[data-toast-settings-root] .ts-field { display: block; }
+[data-toast-settings-root] .ts-field > span { display: block; margin-bottom: .25rem; }
+[data-toast-settings-root] .ts-check { display: flex; align-items: center; gap: .5rem; }
+[data-toast-settings-root] select, [data-toast-settings-root] input[type="number"] { width: 100%; box-sizing: border-box; padding: .5rem .75rem; border: 1px solid var(--ts-border); border-radius: .375rem; background: var(--ts-surface); color: var(--ts-fg); font: inherit; }
+[data-toast-settings-root] button { font: inherit; cursor: pointer; }
+[data-toast-settings-root] button:disabled { cursor: not-allowed; opacity: .5; }
+[data-toast-settings-root] .ts-link { background: none; border: 0; padding: 0; color: var(--ts-muted); text-decoration: underline; font-size: .75rem; }
+[data-toast-settings-root] .ts-primary { background: var(--ts-accent); color: var(--ts-accent-fg); border: 0; border-radius: .375rem; padding: .5rem 1rem; font-weight: 500; }
+[data-toast-settings-root] .ts-secondary { background: transparent; color: var(--ts-fg); border: 1px solid var(--ts-border); border-radius: .375rem; padding: .5rem 1rem; font-weight: 500; }
+[data-toast-settings-root] .ts-actions { display: flex; flex-wrap: wrap; align-items: center; gap: .75rem; }
+[data-toast-settings-root] .ts-notice { background: var(--ts-warn-bg); color: var(--ts-warn-fg); border: 1px solid var(--ts-warn-border); border-radius: .5rem; padding: 1rem; margin-bottom: 1.5rem; }
+[data-toast-settings-root] .ts-status { color: var(--ts-muted); }
+[data-toast-settings-root] .ts-status[data-status="error"] { color: #b91c1c; }
+:where(.dark, [data-bs-theme="dark"]) [data-toast-settings-root] .ts-status[data-status="error"] { color: #fca5a5; }
+
+[data-toast-settings-root] [data-toast-preview] { border-radius: .5rem; padding: 1rem; --ts-toast-fg: #111827; }
+[data-toast-settings-root] [data-toast-preview="light"] { background: #f3f4f6; color: #374151; }
+[data-toast-settings-root] [data-toast-preview="dark"] { background: #111827; color: #d1d5db; }
+[data-toast-settings-root] [data-toast-preview] .ts-mode { color: inherit; opacity: .75; }
+[data-toast-settings-root] [data-laravel-toast="preview"] { overflow: hidden; border-radius: .75rem; border: 1px solid transparent; box-shadow: 0 8px 24px rgb(0 0 0 / .12); margin-bottom: .75rem; }
+[data-toast-settings-root] [data-laravel-toast="preview"] .ts-track { height: .25rem; width: 100%; }
+[data-toast-settings-root] [data-laravel-toast="preview"] .ts-bar { height: 100%; width: 66%; }
+[data-toast-settings-root] [data-laravel-toast="preview"] .ts-body { display: flex; align-items: flex-start; gap: .75rem; padding: 1rem; }
+[data-toast-settings-root] [data-laravel-toast="preview"] .ts-icon { flex-shrink: 0; margin-top: .125rem; }
+[data-toast-settings-root] [data-laravel-toast="preview"] .ts-icon svg { width: 1.25rem; height: 1.25rem; display: block; }
+[data-toast-settings-root] [data-laravel-toast="preview"] .ts-content { flex: 1; min-width: 0; }
+[data-toast-settings-root] [data-laravel-toast="preview"] .ts-title { font-weight: 600; letter-spacing: -.01em; }
+[data-toast-settings-root] [data-laravel-toast="preview"] .ts-close { flex-shrink: 0; opacity: .6; line-height: 1; font-size: 1.25rem; }
+
+[data-toast-settings-root] [data-toast-preview="light"] [data-toast-type="success"] { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
+[data-toast-settings-root] [data-toast-preview="light"] [data-toast-type="success"] .ts-icon { color: #22c55e; }
+[data-toast-settings-root] [data-toast-preview="light"] [data-toast-type="success"] .ts-track { background: #bbf7d0; }
+[data-toast-settings-root] [data-toast-preview="light"] [data-toast-type="success"] .ts-bar { background: #22c55e; }
+[data-toast-settings-root] [data-toast-preview="light"] [data-toast-type="error"] { background: #fef2f2; color: #991b1b; border-color: #fecaca; }
+[data-toast-settings-root] [data-toast-preview="light"] [data-toast-type="error"] .ts-icon { color: #ef4444; }
+[data-toast-settings-root] [data-toast-preview="light"] [data-toast-type="error"] .ts-track { background: #fecaca; }
+[data-toast-settings-root] [data-toast-preview="light"] [data-toast-type="error"] .ts-bar { background: #ef4444; }
+[data-toast-settings-root] [data-toast-preview="light"] [data-toast-type="warning"] { background: #fffbeb; color: #92400e; border-color: #fde68a; }
+[data-toast-settings-root] [data-toast-preview="light"] [data-toast-type="warning"] .ts-icon { color: #f59e0b; }
+[data-toast-settings-root] [data-toast-preview="light"] [data-toast-type="warning"] .ts-track { background: #fde68a; }
+[data-toast-settings-root] [data-toast-preview="light"] [data-toast-type="warning"] .ts-bar { background: #f59e0b; }
+[data-toast-settings-root] [data-toast-preview="light"] [data-toast-type="info"] { background: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
+[data-toast-settings-root] [data-toast-preview="light"] [data-toast-type="info"] .ts-icon { color: #3b82f6; }
+[data-toast-settings-root] [data-toast-preview="light"] [data-toast-type="info"] .ts-track { background: #bfdbfe; }
+[data-toast-settings-root] [data-toast-preview="light"] [data-toast-type="info"] .ts-bar { background: #3b82f6; }
+
+[data-toast-settings-root] [data-toast-preview="dark"] [data-toast-type="success"] { background: #052e16; color: #bbf7d0; border-color: #166534; }
+[data-toast-settings-root] [data-toast-preview="dark"] [data-toast-type="success"] .ts-icon { color: #4ade80; }
+[data-toast-settings-root] [data-toast-preview="dark"] [data-toast-type="success"] .ts-track { background: #14532d; }
+[data-toast-settings-root] [data-toast-preview="dark"] [data-toast-type="success"] .ts-bar { background: #4ade80; }
+[data-toast-settings-root] [data-toast-preview="dark"] [data-toast-type="error"] { background: #450a0a; color: #fecaca; border-color: #991b1b; }
+[data-toast-settings-root] [data-toast-preview="dark"] [data-toast-type="error"] .ts-icon { color: #f87171; }
+[data-toast-settings-root] [data-toast-preview="dark"] [data-toast-type="error"] .ts-track { background: #7f1d1d; }
+[data-toast-settings-root] [data-toast-preview="dark"] [data-toast-type="error"] .ts-bar { background: #f87171; }
+[data-toast-settings-root] [data-toast-preview="dark"] [data-toast-type="warning"] { background: #451a03; color: #fde68a; border-color: #92400e; }
+[data-toast-settings-root] [data-toast-preview="dark"] [data-toast-type="warning"] .ts-icon { color: #fbbf24; }
+[data-toast-settings-root] [data-toast-preview="dark"] [data-toast-type="warning"] .ts-track { background: #78350f; }
+[data-toast-settings-root] [data-toast-preview="dark"] [data-toast-type="warning"] .ts-bar { background: #fbbf24; }
+[data-toast-settings-root] [data-toast-preview="dark"] [data-toast-type="info"] { background: #172554; color: #bfdbfe; border-color: #1e40af; }
+[data-toast-settings-root] [data-toast-preview="dark"] [data-toast-type="info"] .ts-icon { color: #60a5fa; }
+[data-toast-settings-root] [data-toast-preview="dark"] [data-toast-type="info"] .ts-track { background: #1e3a8a; }
+[data-toast-settings-root] [data-toast-preview="dark"] [data-toast-type="info"] .ts-bar { background: #60a5fa; }

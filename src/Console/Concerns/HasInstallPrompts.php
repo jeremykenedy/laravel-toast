@@ -88,15 +88,7 @@ trait HasInstallPrompts
 
         // Validated up front so a single invalid flag cannot slip through the
         // non interactive path and be written to .env as a success.
-        if ($css && !in_array($css, ToastServiceProvider::CSS_FRAMEWORKS)) {
-            $this->error("Invalid CSS framework: {$css}. Use: ".implode(', ', ToastServiceProvider::CSS_FRAMEWORKS));
-
-            return false;
-        }
-
-        if ($frontend && !in_array($frontend, ToastServiceProvider::FRONTENDS)) {
-            $this->error("Invalid frontend: {$frontend}. Use: ".implode(', ', ToastServiceProvider::FRONTENDS));
-
+        if (!$this->frameworkFlagsAreValid($css, $frontend)) {
             return false;
         }
 
@@ -111,6 +103,31 @@ trait HasInstallPrompts
             ];
         }
 
+        return $this->runFrameworkWizard();
+    }
+
+    protected function frameworkFlagsAreValid(?string $css, ?string $frontend): bool
+    {
+        if ($css && !in_array($css, ToastServiceProvider::CSS_FRAMEWORKS)) {
+            $this->error("Invalid CSS framework: {$css}. Use: ".implode(', ', ToastServiceProvider::CSS_FRAMEWORKS));
+
+            return false;
+        }
+
+        if ($frontend && !in_array($frontend, ToastServiceProvider::FRONTENDS)) {
+            $this->error("Invalid frontend: {$frontend}. Use: ".implode(', ', ToastServiceProvider::FRONTENDS));
+
+            return false;
+        }
+
+        return true;
+    }
+
+    /**
+     * @return array{css: string, frontend: string}|false
+     */
+    protected function runFrameworkWizard(): array|false
+    {
         while (true) {
             $cssResult = $this->promptCssFramework();
             if ($cssResult === false) {

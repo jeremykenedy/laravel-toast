@@ -33,7 +33,9 @@ class ToastContainer extends Component
 
     public function getListeners(): array
     {
-        if (!config('toast.broadcast.enabled', false) || ($userId = Auth::id()) === null) {
+        $userId = Auth::id();
+
+        if (!config('toast.broadcast.enabled', false) || $userId === null) {
             return [];
         }
 
@@ -102,7 +104,7 @@ class ToastContainer extends Component
     {
         $this->toasts = array_values(array_filter(
             $this->toasts,
-            fn (array $t) => $t['id'] !== $id
+            fn (array $toast) => $toast['id'] !== $id
         ));
     }
 

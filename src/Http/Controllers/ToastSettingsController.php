@@ -4,11 +4,11 @@ declare(strict_types=1);
 
 namespace Jeremykenedy\LaravelToast\Http\Controllers;
 
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
-use Illuminate\Contracts\View\View;
 use Jeremykenedy\LaravelToast\Facades\Toast;
 use Jeremykenedy\LaravelToast\Http\Requests\UpdateToastSettingsRequest;
 use Jeremykenedy\LaravelToast\Support\ToastSettings;

@@ -1,3 +1,4 @@
+/* global toastColorsCss, PREVIEW_SCOPES */
 // Progressive enhancement for the Blade settings panel. The form posts without
 // it; this adds the live preview and the per-color reset.
 (function (root) {

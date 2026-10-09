@@ -54,37 +54,35 @@ trait HandlesFrameworkSetup
 
         $pattern = '/^'.preg_quote($key, '/').'=.*$/m';
 
-        if (preg_match($pattern, $content)) {
-            $content = preg_replace($pattern, "{$key}={$value}", $content);
-        } else {
-            $content = rtrim($content, "\r\n")."\n{$key}={$value}\n";
+        if (!preg_match($pattern, $content)) {
+            file_put_contents($path, rtrim($content, "\r\n")."\n{$key}={$value}\n");
+
+            return;
         }
 
-        file_put_contents($path, $content);
+        file_put_contents($path, preg_replace($pattern, "{$key}={$value}", $content));
     }
 
     protected function setCssFramework(string $css): void
     {
-        if ($this->uiKitIsInstalled() && !config('toast.css_framework')) {
-            $this->updateEnvValue('UI_KIT_CSS', $css);
-            config(['ui-kit.css_framework' => $css]);
-        } else {
-            $this->updateEnvValue('TOAST_CSS', $css);
-            config(['toast.css_framework' => $css]);
-        }
-
-        $this->clearCaches();
+        $this->assignFramework('css_framework', 'UI_KIT_CSS', 'TOAST_CSS', $css);
     }
 
     protected function setFrontendFramework(string $frontend): void
     {
-        if ($this->uiKitIsInstalled() && !config('toast.frontend')) {
-            $this->updateEnvValue('UI_KIT_FRONTEND', $frontend);
-            config(['ui-kit.frontend' => $frontend]);
-        } else {
-            $this->updateEnvValue('TOAST_FRONTEND', $frontend);
-            config(['toast.frontend' => $frontend]);
-        }
+        $this->assignFramework('frontend', 'UI_KIT_FRONTEND', 'TOAST_FRONTEND', $frontend);
+    }
+
+    /**
+     * Follows ui-kit unless toast carries its own override, so the command
+     * changes the setting that actually controls toast.
+     */
+    private function assignFramework(string $configKey, string $uiKitEnv, string $toastEnv, string $value): void
+    {
+        $followsKit = $this->uiKitIsInstalled() && !config("toast.{$configKey}");
+
+        $this->updateEnvValue($followsKit ? $uiKitEnv : $toastEnv, $value);
+        config([($followsKit ? "ui-kit.{$configKey}" : "toast.{$configKey}") => $value]);
 
         $this->clearCaches();
     }

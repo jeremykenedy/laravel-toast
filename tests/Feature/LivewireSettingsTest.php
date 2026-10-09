@@ -5,10 +5,10 @@ declare(strict_types=1);
 use Illuminate\Foundation\Auth\User;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Schema;
 use Jeremykenedy\LaravelToast\Livewire\ToastSettings;
 use Jeremykenedy\LaravelToast\Models\ToastSetting;
 use Livewire\Livewire;
-use Illuminate\Support\Facades\Schema;
 
 function livewireAdmin(int $id = 1): User
 {

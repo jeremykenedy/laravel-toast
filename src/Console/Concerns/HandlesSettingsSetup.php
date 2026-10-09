@@ -61,7 +61,8 @@ trait HandlesSettingsSetup
     }
 
     /**
-     * @param  array<string, mixed>  $settings
+     * @param array<string, mixed> $settings
+     *
      * @return array<string, mixed>|false
      */
     protected function validateSettings(array $settings): array|false
@@ -90,7 +91,7 @@ trait HandlesSettingsSetup
     }
 
     /**
-     * @param  array<string, mixed>  $settings
+     * @param array<string, mixed> $settings
      */
     protected function applySettings(array $settings): void
     {
@@ -137,7 +138,7 @@ trait HandlesSettingsSetup
     }
 
     /**
-     * @param  array<string, mixed>  $settings
+     * @param array<string, mixed> $settings
      */
     protected function showSettingsSummary(array $settings): void
     {
@@ -149,13 +150,25 @@ trait HandlesSettingsSetup
         $this->line("     \033[33mGate::define('{$settings['gate']}', fn (\$user) => \$user->isAdmin());\033[0m");
         $this->line('     An undefined gate denies everyone.');
 
-        if ($settings['page']) {
-            $this->line('  3. Open '."\033[33m/toast/settings\033[0m".' (middleware: '.$settings['middleware'].')');
-            $this->line('     Page view published to resources/views/toast/settings.blade.php');
-        } else {
-            $this->line('  3. Add '."\033[33m@toastSettings\033[0m".' (or '."\033[33m<livewire:toast-settings />\033[0m".') where you want the panel.');
+        foreach ($this->settingsPlacementHint($settings) as $line) {
+            $this->line($line);
         }
 
         $this->newLine();
+    }
+
+    /**
+     * @param  array<string, mixed>  $settings
+     * @return list<string>
+     */
+    private function settingsPlacementHint(array $settings): array
+    {
+        $pageHint = [
+            '  3. Open '."\033[33m/toast/settings\033[0m".' (middleware: '.$settings['middleware'].')',
+            '     Page view published to resources/views/toast/settings.blade.php',
+        ];
+        $includeHint = ['  3. Add '."\033[33m@toastSettings\033[0m".' (or '."\033[33m<livewire:toast-settings />\033[0m".') where you want the panel.'];
+
+        return $settings['page'] ? $pageHint : $includeHint;
     }
 }

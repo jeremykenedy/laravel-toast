@@ -66,7 +66,8 @@ final class ToastColors
      * Keep only known types, modes and parts, and only valid hex colors.
      * Output is written straight into a stylesheet, so nothing else passes.
      *
-     * @param  array<string, mixed>|null  $colors
+     * @param array<string, mixed>|null $colors
+     *
      * @return array<string, array<string, array<string, string>>>
      */
     public static function normalize(?array $colors): array
@@ -89,7 +90,7 @@ final class ToastColors
     }
 
     /**
-     * @param  array<string, array<string, array<string, string>>>  $normalized
+     * @param array<string, array<string, array<string, string>>> $normalized
      */
     private static function sets(array $normalized, string $part): bool
     {
@@ -121,8 +122,8 @@ final class ToastColors
      * Scope prefixes per mode. The settings preview swaps these for its own
      * light and dark containers so both render regardless of the page theme.
      *
-     * @param  array<string, mixed>|null  $colors
-     * @param  array{light?: string, dark?: string}  $scopes
+     * @param array<string, mixed>|null            $colors
+     * @param array{light?: string, dark?: string} $scopes
      */
     public static function css(?array $colors, array $scopes = []): string
     {
@@ -161,7 +162,7 @@ final class ToastColors
     }
 
     /**
-     * @param  array<string, mixed>|null  $colors
+     * @param array<string, mixed>|null $colors
      */
     public static function styleTag(?array $colors): string
     {

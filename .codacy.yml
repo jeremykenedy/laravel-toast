@@ -1,0 +1,28 @@
+---
+exclude_paths:
+  - "vendor/**"
+  - "node_modules/**"
+  - "test-results/**"
+  - "package-lock.json"
+  - "composer.lock"
+  - "art/**"
+  - "tests/Browser/**"
+  - "tests/fixtures/**"
+  - "scripts/**"
+  - "SECURITY.md"
+engines:
+  phpmd:
+    exclude_paths:
+      - "resources/views/**"
+  phpcs:
+    exclude_paths:
+      - "resources/views/**"
+  lizard:
+    exclude_paths:
+      - "resources/views/**"
+      - "tests/**"
+  eslint:
+    exclude_paths:
+      - "**/*.vue"
+      - "**/*.svelte"
+      - "tests/**"

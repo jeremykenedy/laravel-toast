@@ -12,6 +12,11 @@ class ToastSetting extends Model
 
     protected $fillable = ['key', 'value'];
 
+    /**
+     * @var array<string, string>
+     */
+    protected $casts = ['value' => 'array'];
+
     public function getTable(): string
     {
         return (string) config('toast.settings.table', 'toast_settings');
@@ -20,10 +25,5 @@ class ToastSetting extends Model
     public function getConnectionName(): ?string
     {
         return config('toast.settings.connection');
-    }
-
-    protected function casts(): array
-    {
-        return ['value' => 'array'];
     }
 }

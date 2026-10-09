@@ -163,7 +163,7 @@ class ToastSettings
     {
         $saved = static::saved();
 
-        foreach (self::fields() as $key => $field) {
+        foreach (array_keys(self::fields()) as $key) {
             if (array_key_exists($key, $saved['options'] ?? [])) {
                 config(['toast.'.$key => $saved['options'][$key]]);
             }
@@ -175,7 +175,8 @@ class ToastSettings
     }
 
     /**
-     * @param  array<string, mixed>  $input
+     * @param array<string, mixed> $input
+     *
      * @return array{options: array<string, mixed>, colors: array<string, mixed>}
      */
     public static function save(array $input): array
@@ -214,7 +215,7 @@ class ToastSettings
     }
 
     /**
-     * @param  array<string, mixed>  $field
+     * @param array<string, mixed> $field
      */
     private static function cast(array $field, string $key, mixed $value): mixed
     {

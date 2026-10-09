@@ -11,6 +11,9 @@ use Orchestra\Testbench\TestCase as OrchestraTestCase;
 
 abstract class TestCase extends OrchestraTestCase
 {
+    /**
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
     protected function getPackageProviders($app): array
     {
         $providers = [];
@@ -24,6 +27,9 @@ abstract class TestCase extends OrchestraTestCase
         return $providers;
     }
 
+    /**
+     * @SuppressWarnings(PHPMD.UnusedFormalParameter)
+     */
     protected function getPackageAliases($app): array
     {
         return [

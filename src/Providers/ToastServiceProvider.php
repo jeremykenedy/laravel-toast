@@ -10,9 +10,9 @@ use Jeremykenedy\LaravelToast\Console\InstallCommand;
 use Jeremykenedy\LaravelToast\Console\SwitchCommand;
 use Jeremykenedy\LaravelToast\Console\UpdateCommand;
 use Jeremykenedy\LaravelToast\Livewire\ToastContainer;
+use Jeremykenedy\LaravelToast\Livewire\ToastSettings as ToastSettingsComponent;
 use Jeremykenedy\LaravelToast\Services\ToastManager;
 use Jeremykenedy\LaravelToast\Support\ToastAnimations;
-use Jeremykenedy\LaravelToast\Livewire\ToastSettings as ToastSettingsComponent;
 use Jeremykenedy\LaravelToast\Support\ToastSettings;
 use Livewire\Livewire;
 
